@@ -63,10 +63,19 @@ export interface ShoppingList {
 // Available ingredients
 const ingredients = {
   protein: [
-    { name: "Lean Ground Turkey", caloriesPerGram: 2.13 },
-    { name: "Ground Pork", caloriesPerGram: 2.97 },
-    { name: "Ground Beef 93", caloriesPerGram: 2.10 },
+    { name: "Beef (ground, 85% lean)", caloriesPerGram: 2.50 },
+    { name: "Beef (sirloin steak)", caloriesPerGram: 2.71 },
+    { name: "Turkey (ground, 85% lean)", caloriesPerGram: 2.03 },
+    { name: "Turkey (breast, skinless)", caloriesPerGram: 1.35 },
+    { name: "Duck (meat without skin)", caloriesPerGram: 2.01 },
+    { name: "Pork (lean cuts)", caloriesPerGram: 2.42 },
+    { name: "Rabbit", caloriesPerGram: 1.73 },
+    { name: "Venison", caloriesPerGram: 1.58 },
+    { name: "Buffalo/Bison", caloriesPerGram: 1.46 },
+    { name: "Tuna (canned in water)", caloriesPerGram: 1.16 },
     { name: "Tilapia", caloriesPerGram: 1.29 },
+    { name: "Trout", caloriesPerGram: 1.90 },
+    { name: "Mackerel", caloriesPerGram: 2.05 }
   ],
   
   organs: [
@@ -81,22 +90,28 @@ const ingredients = {
 
   fruits: [
     { name: "Apple", caloriesPerGram: 0.52 },
-    { name: "Mango", caloriesPerGram: 0.60 },
-    { name: "Pear", caloriesPerGram: 0.57 },
-    { name: "Raspberry", caloriesPerGram: 0.50 },
-    { name: "Blackberry", caloriesPerGram: 0.43 },
     { name: "Blueberry", caloriesPerGram: 0.56 },
+    { name: "Strawberries", caloriesPerGram: 0.32 },
+    { name: "Watermelon", caloriesPerGram: 0.30 },
   ],
 
   veggies: [
-    { name: "Carrots", caloriesPerGram: 0.35 },
-    { name: "Green Beans", caloriesPerGram: 0.35 },
+    { name: "Broccoli", caloriesPerGram: 0.34 },
+    { name: "Brussels Sprouts", caloriesPerGram: 0.43 },
+    { name: "Cabbage", caloriesPerGram: 0.25 },
+    { name: "Carrots", caloriesPerGram: 0.41 },
+    { name: "Cauliflower", caloriesPerGram: 0.25 },
+    { name: "Celery", caloriesPerGram: 0.14 },
+    { name: "Collard Greens", caloriesPerGram: 0.32 },
+    { name: "Cucumber", caloriesPerGram: 0.16 },
+    { name: "Green Beans", caloriesPerGram: 0.31 },
+    { name: "Green Peas", caloriesPerGram: 0.81 },
+    { name: "Kale", caloriesPerGram: 0.49 },
     { name: "Spinach", caloriesPerGram: 0.23 },
-    { name: "Zucchini", caloriesPerGram: 0.15 },
-    { name: "Broccoli", caloriesPerGram: 0.35 },
-    { name: "Pumpkin", caloriesPerGram: 0.20 },
-    { name: "Cabbage", caloriesPerGram: 0.22 },
-    { name: "Bok Choy", caloriesPerGram: 0.12 }
+    { name: "Zucchini", caloriesPerGram: 0.17 },
+    { name: "Summer Squash", caloriesPerGram: 0.16 },
+    { name: "Winter Squash", caloriesPerGram: 0.39 },
+    { name: "Bok Choy", caloriesPerGram: 0.13 },
   ],
   
   fats: [
