@@ -350,6 +350,11 @@ export default function Home() {
             <p className="text-black">Fill in your dog information and click "Generate Recipe" to create a healthy meal plan.</p>
           </div>
         )}
+
+        {/* Footer */}
+        <footer className="mt-16 pt-8 print:hidden">
+          <p className="text-center text-gray-500 text-sm">Created by - Your Husband</p>
+        </footer>
       </div>
     </div>
   );
