@@ -15,6 +15,15 @@ export interface IngredientPercentages {
   fats: number;
 }
 
+export interface IngredientCounts {
+  protein: number;
+  organs: number;
+  fruits: number;
+  veggies: number;
+  carbs: number;
+  fats: number;
+}
+
 export interface Ingredient {
   name: string;
   caloriesPerGram: number;
@@ -31,12 +40,12 @@ export interface RecipeIngredient {
 
 export interface Recipe {
   ingredients: {
-    protein: RecipeIngredient;
-    organs: RecipeIngredient;
-    fruits: RecipeIngredient;
-    veggies: RecipeIngredient;
-    carbs: RecipeIngredient;
-    fats: RecipeIngredient;
+    protein: RecipeIngredient[];
+    organs: RecipeIngredient[];
+    fruits: RecipeIngredient[];
+    veggies: RecipeIngredient[];
+    carbs: RecipeIngredient[];
+    fats: RecipeIngredient[];
     supplements: RecipeIngredient[];
   };
   totalCalories: number;
@@ -66,10 +75,8 @@ const ingredients = {
   ],
   
   carbs: [
-    { name: "Brown Rice", caloriesPerGram: 1.11 },
     { name: "White Rice", caloriesPerGram: 1.30 },    
-    { name: "Quinoa", caloriesPerGram: 1.19 },
-    { name: "Sweet Potato", caloriesPerGram: 0.90 }  
+    { name: "Quinoa", caloriesPerGram: 1.19 }
   ],
 
   fruits: [
@@ -143,16 +150,25 @@ function selectRandomIngredient(ingredientArray: Ingredient[]): Ingredient {
   return ingredientArray[randomIndex];
 }
 
+// Helper function to select multiple random ingredients from an array without duplicates
+function selectRandomIngredients(ingredientArray: Ingredient[], count: number): Ingredient[] {
+  if (count <= 0) return [];
+  if (count >= ingredientArray.length) return [...ingredientArray];
+  
+  const shuffled = [...ingredientArray].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
+
 // Create a random balanced recipe 
-export function createRecipe(totalMER: number, dogs: Dog[], ingredientPercentages: IngredientPercentages): Recipe {
+export function createRecipe(totalMER: number, dogs: Dog[], ingredientPercentages: IngredientPercentages, ingredientCounts: IngredientCounts): Recipe {
   const recipe: Recipe = {
     ingredients: {
-      protein: { name: "", grams: 0, calories: 0 },
-      organs: { name: "", grams: 0, calories: 0 },
-      fruits: { name: "", grams: 0, calories: 0 },
-      veggies: { name: "", grams: 0, calories: 0 },
-      carbs: { name: "", grams: 0, calories: 0 },
-      fats: { name: "", grams: 0, calories: 0 },
+      protein: [],
+      organs: [],
+      fruits: [],
+      veggies: [],
+      carbs: [],
+      fats: [],
       supplements: []
     },
     totalCalories: 0
@@ -192,27 +208,28 @@ export function createRecipe(totalMER: number, dogs: Dog[], ingredientPercentage
   let mainIngredientsCalories = 0;
   for (const category of ['protein', 'organs', 'fruits', 'veggies', 'carbs', 'fats'] as const) {
     const availableIngredients = ingredients[category];
+    const ingredientCount = ingredientCounts[category];
     
-    // Skip ingredients with 0% allocation
-    if (calorieTargets[category] === 0 || ingredientPercentages[category] === 0) {
-      recipe.ingredients[category] = {
-        name: "None",
-        grams: 0,
-        calories: 0
-      };
+    // Skip ingredients with 0% allocation or 0 count
+    if (calorieTargets[category] === 0 || ingredientPercentages[category] === 0 || ingredientCount === 0) {
+      recipe.ingredients[category] = [];
       continue;
     }
     
-    const selectedIngredient = selectRandomIngredient(availableIngredients);
-    const gramsNeeded = calorieTargets[category] / selectedIngredient.caloriesPerGram;
-    const actualCalories = Math.round(gramsNeeded * selectedIngredient.caloriesPerGram * 100) / 100;
+    const selectedIngredients = selectRandomIngredients(availableIngredients, ingredientCount);
+    const caloriesPerIngredient = calorieTargets[category] / selectedIngredients.length;
     
-    recipe.ingredients[category] = {
-      name: selectedIngredient.name,
-      grams: Math.round(gramsNeeded * 100) / 100,
-      calories: actualCalories
-    };
-    mainIngredientsCalories += actualCalories;
+    for (const selectedIngredient of selectedIngredients) {
+      const gramsNeeded = caloriesPerIngredient / selectedIngredient.caloriesPerGram;
+      const actualCalories = Math.round(gramsNeeded * selectedIngredient.caloriesPerGram * 100) / 100;
+      
+      recipe.ingredients[category].push({
+        name: selectedIngredient.name,
+        grams: Math.round(gramsNeeded * 100) / 100,
+        calories: actualCalories
+      });
+      mainIngredientsCalories += actualCalories;
+    }
   }
 
   // Calculate actual total calories by summing all ingredients
@@ -227,14 +244,23 @@ export function calculateShoppingList(recipe: Recipe, numberOfDays: number): Sho
   
   // Calculate amounts for main ingredients
   for (const category of ['protein', 'organs', 'fruits', 'veggies', 'carbs', 'fats'] as const) {
-    const ingredient = recipe.ingredients[category];
-    const totalGrams = ingredient.grams * numberOfDays;
-    const totalPounds = Math.round(totalGrams / 453.592 * 100) / 100;
-    
-    shoppingList[ingredient.name] = {
-      grams: totalGrams,
-      pounds: totalPounds
-    };
+    const ingredients = recipe.ingredients[category];
+    for (const ingredient of ingredients) {
+      const totalGrams = ingredient.grams * numberOfDays;
+      const totalPounds = Math.round(totalGrams / 453.592 * 100) / 100;
+      
+      if (shoppingList[ingredient.name]) {
+        shoppingList[ingredient.name].grams += totalGrams;
+        if (shoppingList[ingredient.name].pounds) {
+          shoppingList[ingredient.name].pounds! += totalPounds;
+        }
+      } else {
+        shoppingList[ingredient.name] = {
+          grams: totalGrams,
+          pounds: totalPounds
+        };
+      }
+    }
   }
   
   // Calculate amounts for supplements
@@ -261,9 +287,11 @@ export function calculateMealPortions(recipe: Recipe, dogs: Dog[]) {
     
     // Add main ingredients
     for (const category of ['protein', 'organs', 'fruits', 'veggies', 'carbs', 'fats'] as const) {
-      const ingredient = recipe.ingredients[category];
-      const dailyPortion = ingredient.grams * dogPercentage;
-      totalDailyGrams += dailyPortion;
+      const ingredients = recipe.ingredients[category];
+      for (const ingredient of ingredients) {
+        const dailyPortion = ingredient.grams * dogPercentage;
+        totalDailyGrams += dailyPortion;
+      }
     }
     
     // Add supplements

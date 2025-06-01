@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { 
   Dog, 
-  IngredientPercentages, 
+  IngredientPercentages,
+  IngredientCounts, 
   Recipe, 
   RecipeIngredient,
   calculateDailyCalories, 
@@ -30,6 +31,15 @@ export default function Home() {
     fats: 0.075
   });
 
+  const [ingredientCounts, setIngredientCounts] = useState<IngredientCounts>({
+    protein: 1,
+    organs: 1,
+    fruits: 1,
+    veggies: 1,
+    carbs: 1,
+    fats: 1
+  });
+
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -54,6 +64,10 @@ export default function Home() {
     setIngredientPercentages(prev => ({ ...prev, [field]: value }));
   };
 
+  const updateCount = (field: keyof IngredientCounts, value: number) => {
+    setIngredientCounts(prev => ({ ...prev, [field]: value }));
+  };
+
   const generateRecipe = () => {
     setIsGenerating(true);
     
@@ -64,7 +78,7 @@ export default function Home() {
     }));
     
     const totalMER = getTotalMER(dogsWithMER);
-    const newRecipe = createRecipe(totalMER, dogsWithMER, ingredientPercentages);
+    const newRecipe = createRecipe(totalMER, dogsWithMER, ingredientPercentages, ingredientCounts);
     
     setRecipe(newRecipe);
     setIsGenerating(false);
@@ -157,8 +171,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Shopping Duration and Ingredient Ratios */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          {/* Shopping Duration, Ingredient Ratios, and Ingredient Counts */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Days Section */}
             <div>
               <h2 className="text-2xl font-semibold text-black mb-8">Shopping Duration</h2>
@@ -178,7 +192,7 @@ export default function Home() {
             {/* Ingredient Percentages Section */}
             <div>
               <h2 className="text-2xl font-semibold text-black mb-8">Ingredient Ratios</h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
                 {Object.entries(ingredientPercentages).map(([key, value]) => (
                   <div key={key}>
                     <label className="block text-sm font-medium text-black mb-2 capitalize">
@@ -200,6 +214,29 @@ export default function Home() {
                 <span className="font-medium text-black">
                   Total: {Math.round(percentageSum * 100)}% {!isPercentageValid && '(Should be 100%)'}
                 </span>
+              </div>
+            </div>
+
+            {/* Ingredient Counts Section */}
+            <div>
+              <h2 className="text-2xl font-semibold text-black mb-8">Ingredients per Category</h2>
+              <div className="space-y-4">
+                {Object.entries(ingredientCounts).map(([key, value]) => (
+                  <div key={key}>
+                    <label className="block text-sm font-medium text-black mb-2 capitalize">
+                      {key} ({value} ingredient{value !== 1 ? 's' : ''})
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="4"
+                      step="1"
+                      value={value}
+                      onChange={(e) => updateCount(key as keyof IngredientCounts, parseInt(e.target.value))}
+                      className="w-full accent-black"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -263,19 +300,23 @@ export default function Home() {
                 <h2 className="text-2xl font-semibold text-black mb-8 print:text-xl print:mb-4">Daily Recipe</h2>
                 
                 <div className="space-y-4 print:space-y-2">
-                  {Object.entries(recipe.ingredients).map(([category, ingredient]) => {
+                  {Object.entries(recipe.ingredients).map(([category, ingredients]) => {
                     if (category === 'supplements') return null;
-                    const singleIngredient = ingredient as RecipeIngredient;
+                    const ingredientArray = ingredients as RecipeIngredient[];
+                    if (ingredientArray.length === 0) return null;
+                    
                     return (
-                      <div key={category} className="flex justify-between items-center py-2 print:py-1">
-                        <div>
-                          <span className="font-semibold text-black capitalize">{category}:</span>
-                          <span className="text-black ml-2">{singleIngredient.name}</span>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-medium text-black">{singleIngredient.grams}g</div>
-                          <div className="text-sm text-black">{Math.round(singleIngredient.calories)} cal</div>
-                        </div>
+                      <div key={category} className="space-y-2 print:space-y-1">
+                        <h3 className="font-semibold text-black capitalize text-lg print:text-base">{category}:</h3>
+                        {ingredientArray.map((ingredient, index) => (
+                          <div key={index} className="flex justify-between items-center py-1 pl-4">
+                            <span className="text-black">{ingredient.name}</span>
+                            <div className="text-right">
+                              <div className="font-medium text-black">{ingredient.grams}g</div>
+                              <div className="text-sm text-black">{Math.round(ingredient.calories)} cal</div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     );
                   })}
