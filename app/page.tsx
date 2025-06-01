@@ -93,10 +93,10 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white print:min-h-0">
-      <div className="max-w-4xl mx-auto px-8 py-12 print:px-4 print:py-6 print:max-w-none">
+      <div className="max-w-4xl mx-auto px-8 py-12 print:px-2 print:py-2 print:max-w-none">
         {/* Header */}
-        <div className="mb-16 print:mb-8">
-          <h1 className="text-5xl font-bold text-black mb-4 print:text-3xl print:mb-2">Healthy Dog Recipe Builder</h1>
+        <div className="mb-16 print:mb-3">
+          <h1 className="text-5xl font-bold text-black mb-4 print:text-2xl print:mb-1">Healthy Dog Recipe Builder</h1>
           <p className="text-xl text-black font-light print:text-base print:hidden">Create balanced, nutritious meals for your furry friends</p>
         </div>
 
@@ -264,26 +264,26 @@ export default function Home() {
 
         {/* Print-only summary of settings */}
         {recipe && (
-          <div className="hidden print:block mb-8 text-sm">
-            <div className="grid grid-cols-2 gap-8">
+          <div className="hidden print:block mb-2 text-xs">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <h3 className="font-semibold mb-2">Dogs:</h3>
+                <h3 className="font-semibold mb-1">Dogs:</h3>
                 {dogs.map((dog, index) => (
-                  <div key={index} className="mb-1">
-                    {dog.name} - {dog.weight} lbs - Activity Level: {dog.activityMultiplier}
+                  <div key={index} className="mb-0.5">
+                    {dog.name} - {dog.weight} lbs - Activity: {dog.activityMultiplier}
                   </div>
                 ))}
               </div>
               <div>
-                <h3 className="font-semibold mb-2">Settings:</h3>
-                <div>Shopping Duration: {numberOfDays} days</div>
-                <div className="mt-2">
-                  Ratios: Protein {Math.round(ingredientPercentages.protein * 100)}%, 
-                  Organs {Math.round(ingredientPercentages.organs * 100)}%, 
-                  Fruits {Math.round(ingredientPercentages.fruits * 100)}%, 
-                  Veggies {Math.round(ingredientPercentages.veggies * 100)}%, 
-                  Carbs {Math.round(ingredientPercentages.carbs * 100)}%, 
-                  Fats {Math.round(ingredientPercentages.fats * 100)}%
+                <h3 className="font-semibold mb-1">Settings:</h3>
+                <div>Duration: {numberOfDays} days</div>
+                <div className="mt-1">
+                  Ratios: P{Math.round(ingredientPercentages.protein * 100)}%, 
+                  O{Math.round(ingredientPercentages.organs * 100)}%, 
+                  F{Math.round(ingredientPercentages.fruits * 100)}%, 
+                  V{Math.round(ingredientPercentages.veggies * 100)}%, 
+                  C{Math.round(ingredientPercentages.carbs * 100)}%, 
+                  Fat{Math.round(ingredientPercentages.fats * 100)}%
                 </div>
               </div>
             </div>
@@ -292,28 +292,28 @@ export default function Home() {
 
         {/* Results Section */}
         {recipe ? (
-          <div className="space-y-12 print:space-y-6">
+          <div className="space-y-6 print:space-y-2">
             {/* Daily Recipe and Shopping List Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 print:grid-cols-2 print:gap-8 print:page-break-inside-avoid">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 print:grid-cols-2 print:gap-4">
               {/* Daily Recipe */}
               <div>
-                <h2 className="text-2xl font-semibold text-black mb-8 print:text-xl print:mb-4">Daily Recipe</h2>
+                <h2 className="text-2xl font-semibold text-black mb-8 print:text-lg print:mb-2">Daily Recipe</h2>
                 
-                <div className="space-y-4 print:space-y-2">
+                <div className="space-y-4 print:space-y-1">
                   {Object.entries(recipe.ingredients).map(([category, ingredients]) => {
                     if (category === 'supplements') return null;
                     const ingredientArray = ingredients as RecipeIngredient[];
                     if (ingredientArray.length === 0) return null;
                     
                     return (
-                      <div key={category} className="space-y-2 print:space-y-1">
-                        <h3 className="font-semibold text-black capitalize text-lg print:text-base">{category}:</h3>
+                      <div key={category} className="space-y-2 print:space-y-0.5">
+                        <h3 className="font-semibold text-black capitalize text-lg print:text-sm print:font-bold">{category}:</h3>
                         {ingredientArray.map((ingredient, index) => (
-                          <div key={index} className="flex justify-between items-center py-1 pl-4">
-                            <span className="text-black">{ingredient.name}</span>
+                          <div key={index} className="flex justify-between items-center py-1 pl-4 print:py-0 print:pl-2">
+                            <span className="text-black print:text-xs">{ingredient.name}</span>
                             <div className="text-right">
-                              <div className="font-medium text-black">{ingredient.grams}g</div>
-                              <div className="text-sm text-black">{Math.round(ingredient.calories)} cal</div>
+                              <div className="font-medium text-black print:text-xs">{ingredient.grams}g</div>
+                              <div className="text-sm text-black print:text-xs print:hidden">{Math.round(ingredient.calories)} cal</div>
                             </div>
                           </div>
                         ))}
@@ -322,40 +322,40 @@ export default function Home() {
                   })}
                 </div>
 
-                <div className="mt-8 print:mt-4">
-                  <h3 className="font-semibold text-black mb-4 print:mb-2">Supplements</h3>
-                  <div className="space-y-2 print:space-y-1">
+                <div className="mt-8 print:mt-2">
+                  <h3 className="font-semibold text-black mb-4 print:mb-1 print:text-sm">Supplements</h3>
+                  <div className="space-y-2 print:space-y-0.5">
                     {recipe.ingredients.supplements.map((supplement, index) => (
-                      <div key={index} className="flex justify-between items-center py-1">
-                        <span className="text-black">{supplement.name}</span>
+                      <div key={index} className="flex justify-between items-center py-1 print:py-0">
+                        <span className="text-black print:text-xs">{supplement.name}</span>
                         <div className="text-right">
-                          <div className="text-sm text-black">{supplement.grams}g {supplement.gramsPerScoop && `(${Math.round(supplement.grams / supplement.gramsPerScoop * 10) / 10} scoops)`}</div>
-                          <div className="text-xs text-black">{supplement.calories} cal</div>
+                          <div className="text-sm text-black print:text-xs">{supplement.grams}g {supplement.gramsPerScoop && `(${Math.round(supplement.grams / supplement.gramsPerScoop * 10) / 10} scoops)`}</div>
+                          <div className="text-xs text-black print:hidden">{supplement.calories} cal</div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-black print:mt-4 print:pt-3">
+                <div className="mt-8 pt-6 border-t border-black print:mt-2 print:pt-1">
                   <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold text-black print:text-base">Total Daily Calories:</span>
-                    <span className="text-lg font-bold text-black print:text-base">{Math.round(recipe.totalCalories)}</span>
+                    <span className="text-lg font-bold text-black print:text-sm">Total Daily Calories:</span>
+                    <span className="text-lg font-bold text-black print:text-sm">{Math.round(recipe.totalCalories)}</span>
                   </div>
                 </div>
               </div>
 
               {/* Shopping List */}
               <div>
-                <h2 className="text-2xl font-semibold text-black mb-8 print:text-xl print:mb-4">Shopping List ({numberOfDays} days)</h2>
+                <h2 className="text-2xl font-semibold text-black mb-8 print:text-lg print:mb-2">Shopping List ({numberOfDays} days)</h2>
                 
-                <div className="space-y-3 print:space-y-1">
+                <div className="space-y-3 print:space-y-0.5">
                   {Object.entries(calculateShoppingList(recipe, numberOfDays)).map(([name, amounts]) => (
-                    <div key={name} className="flex justify-between items-center py-1">
-                      <span className="font-medium text-black">{name}</span>
+                    <div key={name} className="flex justify-between items-center py-1 print:py-0">
+                      <span className="font-medium text-black print:text-xs print:font-normal">{name}</span>
                       <div className="text-right">
-                        <div className="text-black">{Math.round(amounts.grams)}g</div>
-                        {amounts.pounds && <div className="text-sm text-black">({amounts.pounds} lbs)</div>}
+                        <div className="text-black print:text-xs">{Math.round(amounts.grams)}g</div>
+                        {amounts.pounds && <div className="text-sm text-black print:text-xs print:hidden">({amounts.pounds} lbs)</div>}
                       </div>
                     </div>
                   ))}
@@ -364,19 +364,19 @@ export default function Home() {
             </div>
 
             {/* Meal Portions - Full Width */}
-            <div className="print:page-break-inside-avoid">
-              <h2 className="text-2xl font-semibold text-black mb-8 print:text-xl print:mb-4">Meal Portions</h2>
+            <div>
+              <h2 className="text-2xl font-semibold text-black mb-8 print:text-lg print:mb-1">Meal Portions</h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print:grid-cols-2 print:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print:grid-cols-4 print:gap-2">
                 {Object.entries(calculateMealPortions(recipe, dogs.map(dog => ({ ...dog, MER: calculateDailyCalories(dog) })))).map(([dogName, portions]) => (
                   <div key={dogName}>
-                    <h3 className="font-semibold text-black mb-3 print:mb-2">{dogName} ({portions.percentage}% of total food)</h3>
-                    <div className="space-y-2 print:space-y-1">
-                      <div>
-                        <span className="text-black">Daily portion:</span>
+                    <h3 className="font-semibold text-black mb-3 print:mb-1 print:text-sm">{dogName} ({portions.percentage}%)</h3>
+                    <div className="space-y-2 print:space-y-0.5">
+                      <div className="print:text-xs">
+                        <span className="text-black">Daily:</span>
                         <span className="ml-2 font-medium text-black">{portions.dailyPortion}g</span>
                       </div>
-                      <div>
+                      <div className="print:text-xs">
                         <span className="text-black">Per meal:</span>
                         <span className="ml-2 font-medium text-black">{portions.mealPortion}g</span>
                       </div>
