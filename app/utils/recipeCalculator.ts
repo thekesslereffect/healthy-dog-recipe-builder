@@ -69,7 +69,6 @@ const ingredients = {
     { name: "Turkey (breast, skinless)", caloriesPerGram: 1.35 },
     { name: "Duck (meat without skin)", caloriesPerGram: 2.01 },
     { name: "Pork (lean cuts)", caloriesPerGram: 2.42 },
-    { name: "Rabbit", caloriesPerGram: 1.73 },
     { name: "Venison", caloriesPerGram: 1.58 },
     { name: "Buffalo/Bison", caloriesPerGram: 1.46 },
     { name: "Tuna (canned in water)", caloriesPerGram: 1.16 },
@@ -79,8 +78,11 @@ const ingredients = {
   ],
   
   organs: [
-    { name: "Heart", caloriesPerGram: 1.87 },
-    { name: "Gizzard", caloriesPerGram: 1.53 }
+    { name: "Pork Heart", caloriesPerGram: 1.35 },
+    { name: "Pork Liver", caloriesPerGram: 1.34 },
+    { name: "Pork Kidneys", caloriesPerGram: 2.33 },
+    { name: "Beef Liver", caloriesPerGram: 1.35 },
+    { name: "Beef Kidneys", caloriesPerGram: 0.99 },
   ],
   
   carbs: [
