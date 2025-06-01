@@ -192,6 +192,17 @@ export function createRecipe(totalMER: number, dogs: Dog[], ingredientPercentage
   let mainIngredientsCalories = 0;
   for (const category of ['protein', 'organs', 'fruits', 'veggies', 'carbs', 'fats'] as const) {
     const availableIngredients = ingredients[category];
+    
+    // Skip ingredients with 0% allocation
+    if (calorieTargets[category] === 0 || ingredientPercentages[category] === 0) {
+      recipe.ingredients[category] = {
+        name: "None",
+        grams: 0,
+        calories: 0
+      };
+      continue;
+    }
+    
     const selectedIngredient = selectRandomIngredient(availableIngredients);
     const gramsNeeded = calorieTargets[category] / selectedIngredient.caloriesPerGram;
     const actualCalories = Math.round(gramsNeeded * selectedIngredient.caloriesPerGram * 100) / 100;

@@ -75,6 +75,7 @@ export default function Home() {
   };
 
   const percentageSum = Object.values(ingredientPercentages).reduce((sum, val) => sum + val, 0);
+  const isPercentageValid = Math.abs(percentageSum - 1) < 0.001; // Allow small floating point errors
 
   return (
     <div className="min-h-screen bg-white print:min-h-0">
@@ -197,7 +198,7 @@ export default function Home() {
               </div>
               <div className="mt-6 text-sm">
                 <span className="font-medium text-black">
-                  Total: {Math.round(percentageSum * 100)}% {percentageSum !== 1 && '(Should be 100%)'}
+                  Total: {Math.round(percentageSum * 100)}% {!isPercentageValid && '(Should be 100%)'}
                 </span>
               </div>
             </div>
@@ -207,7 +208,7 @@ export default function Home() {
           <div className="flex gap-6 pt-8">
             <button
               onClick={generateRecipe}
-              disabled={isGenerating || percentageSum !== 1 || dogs.some(d => !d.name || d.weight <= 0)}
+              disabled={isGenerating || !isPercentageValid || dogs.some(d => !d.name || d.weight <= 0)}
               className="px-8 py-3 bg-black text-white font-semibold hover:bg-gray-800 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors rounded-lg"
             >
               {isGenerating ? 'Generating...' : 'Generate Recipe'}
