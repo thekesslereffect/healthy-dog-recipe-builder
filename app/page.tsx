@@ -329,7 +329,19 @@ export default function Home() {
                       <div key={index} className="flex justify-between items-center py-1 print:py-0">
                         <span className="text-black print:text-xs">{supplement.name}</span>
                         <div className="text-right">
-                          <div className="text-sm text-black print:text-xs">{supplement.grams}g {supplement.gramsPerScoop && `(${Math.round(supplement.grams / supplement.gramsPerScoop * 10) / 10} scoops)`}</div>
+                          <div className="text-sm text-black print:text-xs">
+                            {supplement.grams}g
+                            {supplement.gramsPerScoop && supplement.name === "Eggshell Powder (Calcium)" && (
+                              <span className="text-xs text-gray-600 ml-2">
+                                ({Math.round(supplement.grams / supplement.gramsPerScoop * 10) / 10} scoops @ 650mg calcium per scoop)
+                              </span>
+                            )}
+                            {supplement.gramsPerScoop && supplement.name !== "Eggshell Powder (Calcium)" && (
+                              <span className="text-xs text-gray-600 ml-2">
+                                ({Math.round(supplement.grams / supplement.gramsPerScoop * 10) / 10} scoops)
+                              </span>
+                            )}
+                          </div>
                           <div className="text-xs text-black print:hidden">{supplement.calories} cal</div>
                         </div>
                       </div>

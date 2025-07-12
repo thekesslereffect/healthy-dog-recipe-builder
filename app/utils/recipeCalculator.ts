@@ -29,6 +29,7 @@ export interface Ingredient {
   caloriesPerGram: number;
   gramsPerPoundPerDay?: number;
   gramsPerScoop?: number;
+  calciumMgPerGram?: number;
 }
 
 export interface RecipeIngredient {
@@ -142,9 +143,25 @@ const ingredients = {
       name: "Ginger",
       caloriesPerGram: 4.00,
       gramsPerPoundPerDay: 0.015,
+    },
+    {
+      name: "Eggshell Powder (Calcium)",
+      caloriesPerGram: 0.00, // Eggshell powder has negligible calories
+      gramsPerPoundPerDay: 0.0, // Will be calculated based on calcium needs
+      gramsPerScoop: 1.9, // 1/3 teaspoon = 1.9g per scoop
+      calciumMgPerGram: 360, // 650mg calcium per 1.9g (1/3 tsp), so ~360mg per gram
     }
   ]
 };
+
+// Calculate daily calcium needs for dogs based on weight
+function calculateCalciumNeeds(totalDogWeight: number): number {
+  // Based on veterinary nutrition guidelines: 50mg per kg of body weight
+  // Converting pounds to kg: weight in lbs / 2.2046
+  const totalWeightKg = totalDogWeight / 2.2046;
+  const calciumNeeds = totalWeightKg * 50; // mg per day
+  return Math.round(calciumNeeds);
+}
 
 // Calculate the daily calorie requirements for each dog
 export function calculateDailyCalories(dog: Dog): number {
@@ -191,21 +208,39 @@ export function createRecipe(totalMER: number, dogs: Dog[], ingredientPercentage
     totalCalories: 0
   };
 
-  // First calculate supplements (based on total dog weight, not calories)
+  // Calculate total dog weight for calcium needs
   const totalDogWeight = dogs.reduce((sum, dog) => sum + dog.weight, 0);
+  
+  // First calculate supplements (based on total dog weight, not calories)
   let totalSupplementCalories = 0;
   
+  // Add regular supplements
   for (const supplement of ingredients.supplements) {
-    const gramsPerDay = totalDogWeight * supplement.gramsPerPoundPerDay!;
-    const calories = gramsPerDay * supplement.caloriesPerGram;
-    
-    recipe.ingredients.supplements.push({
-      name: supplement.name,
-      grams: Math.round(gramsPerDay * 100) / 100,
-      calories: Math.round(calories * 100) / 100,
-      gramsPerScoop: supplement.gramsPerScoop || null
-    });
-    totalSupplementCalories += Math.round(calories * 100) / 100;
+    if (supplement.name === "Eggshell Powder (Calcium)") {
+      // Calculate calcium needs and convert to eggshell powder
+      const calciumNeeds = calculateCalciumNeeds(totalDogWeight);
+      const eggshellGrams = calciumNeeds / (supplement.calciumMgPerGram || 360);
+      
+      recipe.ingredients.supplements.push({
+        name: supplement.name,
+        grams: Math.round(eggshellGrams * 100) / 100,
+        calories: Math.round(eggshellGrams * supplement.caloriesPerGram * 100) / 100,
+        gramsPerScoop: supplement.gramsPerScoop || null
+      });
+      totalSupplementCalories += Math.round(eggshellGrams * supplement.caloriesPerGram * 100) / 100;
+    } else {
+      // Regular supplement calculation
+      const gramsPerDay = totalDogWeight * supplement.gramsPerPoundPerDay!;
+      const calories = gramsPerDay * supplement.caloriesPerGram;
+      
+      recipe.ingredients.supplements.push({
+        name: supplement.name,
+        grams: Math.round(gramsPerDay * 100) / 100,
+        calories: Math.round(calories * 100) / 100,
+        gramsPerScoop: supplement.gramsPerScoop || null
+      });
+      totalSupplementCalories += Math.round(calories * 100) / 100;
+    }
   }
 
   // Subtract supplement calories from total MER to get remaining calories for main ingredients
