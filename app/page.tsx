@@ -16,8 +16,8 @@ import {
 
 export default function Home() {
   const [dogs, setDogs] = useState<Dog[]>([
-    { name: 'Jackson', weight: 35, activityMultiplier: 1.3 },
-    { name: 'Joey', weight: 17, activityMultiplier: 1.0 }
+    { name: 'Jackson', weight: 30, activityMultiplier: 1.3 },
+    { name: 'Joey', weight: 12, activityMultiplier: 1.0 }
   ]);
   
   const [numberOfDays, setNumberOfDays] = useState(7);
@@ -90,6 +90,9 @@ export default function Home() {
 
   const percentageSum = Object.values(ingredientPercentages).reduce((sum, val) => sum + val, 0);
   const isPercentageValid = Math.abs(percentageSum - 1) < 0.001; // Allow small floating point errors
+
+  // Compute daily calories (MER) per dog for display and meal portions
+  const dogsWithMER = dogs.map(dog => ({ ...dog, MER: calculateDailyCalories(dog) }));
 
   return (
     <div className="min-h-screen bg-white print:min-h-0">
@@ -380,9 +383,10 @@ export default function Home() {
               <h2 className="text-2xl font-semibold text-black mb-8 print:text-lg print:mb-1">Meal Portions</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print:grid-cols-4 print:gap-2">
-                {Object.entries(calculateMealPortions(recipe, dogs.map(dog => ({ ...dog, MER: calculateDailyCalories(dog) })))).map(([dogName, portions]) => (
+                {Object.entries(calculateMealPortions(recipe, dogsWithMER)).map(([dogName, portions]) => (
                   <div key={dogName}>
-                    <h3 className="font-semibold text-black mb-3 print:mb-1 print:text-sm">{dogName} ({portions.percentage}%)</h3>
+                    <h3 className="font-semibold text-black mb-1 print:mb-1 print:text-sm">{dogName} ({portions.percentage}%)</h3>
+                    <div className="text-xs text-gray-700 mb-2 print:mb-1">{Math.round((dogsWithMER.find(d => d.name === dogName)?.MER || 0))} cal/day</div>
                     <div className="space-y-2 print:space-y-0.5">
                       <div className="print:text-xs">
                         <span className="text-black">Daily:</span>

@@ -26,7 +26,7 @@ export interface IngredientCounts {
 
 export interface Ingredient {
   name: string;
-  caloriesPerGram: number;
+  caloriesPer100g: number;
   gramsPerPoundPerDay?: number;
   gramsPerScoop?: number;
   calciumMgPerGram?: number;
@@ -64,92 +64,92 @@ export interface ShoppingList {
 // Available ingredients
 const ingredients = {
   protein: [
-    { name: "Beef (ground, 85% lean)", caloriesPerGram: 2.50 },
-    { name: "Beef (sirloin steak)", caloriesPerGram: 2.71 },
-    { name: "Turkey (ground, 85% lean)", caloriesPerGram: 2.03 },
-    { name: "Turkey (breast, skinless)", caloriesPerGram: 1.35 },
-    { name: "Duck (meat without skin)", caloriesPerGram: 2.01 },
-    { name: "Pork (lean cuts)", caloriesPerGram: 2.42 },
-    { name: "Venison", caloriesPerGram: 1.58 },
-    { name: "Buffalo/Bison", caloriesPerGram: 1.46 },
-    { name: "Tuna (canned in water)", caloriesPerGram: 1.16 },
-    { name: "Tilapia", caloriesPerGram: 1.29 },
-    { name: "Trout", caloriesPerGram: 1.90 },
-    { name: "Mackerel", caloriesPerGram: 2.05 }
+    { name: "Beef (ground, 85% lean)", caloriesPer100g: 250 },
+    { name: "Beef (sirloin steak)", caloriesPer100g: 206 },
+    { name: "Turkey (ground, 85% lean)", caloriesPer100g: 212 },
+    { name: "Turkey (breast, skinless)", caloriesPer100g: 135 },
+    { name: "Duck (meat without skin)", caloriesPer100g: 201 },
+    { name: "Pork (lean cuts)", caloriesPer100g: 242 },
+    { name: "Venison", caloriesPer100g: 158 },
+    { name: "Buffalo/Bison", caloriesPer100g: 146 },
+    { name: "Tuna (canned in water)", caloriesPer100g: 116 },
+    { name: "Tilapia", caloriesPer100g: 129 },
+    { name: "Trout", caloriesPer100g: 190 },
+    { name: "Mackerel", caloriesPer100g: 262 }
   ],
   
   organs: [
-    { name: "Pork Heart", caloriesPerGram: 1.35 },
-    { name: "Pork Liver", caloriesPerGram: 1.34 },
-    { name: "Pork Kidneys", caloriesPerGram: 2.33 },
-    { name: "Beef Liver", caloriesPerGram: 1.35 },
-    { name: "Beef Kidneys", caloriesPerGram: 0.99 },
+    { name: "Pork Heart", caloriesPer100g: 179 },
+    { name: "Pork Liver", caloriesPer100g: 165 },
+    { name: "Pork Kidneys", caloriesPer100g: 105 },
+    { name: "Beef Liver", caloriesPer100g: 175 },
+    { name: "Beef Kidneys", caloriesPer100g: 103 },
   ],
   
   carbs: [
-    { name: "White Rice", caloriesPerGram: 1.30 },    
-    { name: "Quinoa", caloriesPerGram: 1.19 }
+    { name: "White Rice", caloriesPer100g: 130 },    
+    { name: "Quinoa", caloriesPer100g: 119 }
   ],
 
   fruits: [
-    { name: "Apple", caloriesPerGram: 0.52 },
-    { name: "Blueberry", caloriesPerGram: 0.56 },
-    { name: "Strawberries", caloriesPerGram: 0.32 },
-    { name: "Watermelon", caloriesPerGram: 0.30 },
+    { name: "Apple", caloriesPer100g: 52 },
+    { name: "Blueberry", caloriesPer100g: 57 },
+    { name: "Strawberries", caloriesPer100g: 32 },
+    { name: "Watermelon", caloriesPer100g: 30 },
   ],
 
   veggies: [
-    { name: "Broccoli", caloriesPerGram: 0.34 },
-    { name: "Brussels Sprouts", caloriesPerGram: 0.43 },
-    { name: "Cabbage", caloriesPerGram: 0.25 },
-    { name: "Carrots", caloriesPerGram: 0.41 },
-    { name: "Cauliflower", caloriesPerGram: 0.25 },
-    { name: "Celery", caloriesPerGram: 0.14 },
-    { name: "Collard Greens", caloriesPerGram: 0.32 },
-    { name: "Cucumber", caloriesPerGram: 0.16 },
-    { name: "Green Beans", caloriesPerGram: 0.31 },
-    { name: "Green Peas", caloriesPerGram: 0.81 },
-    { name: "Kale", caloriesPerGram: 0.49 },
-    { name: "Spinach", caloriesPerGram: 0.23 },
-    { name: "Zucchini", caloriesPerGram: 0.17 },
-    { name: "Summer Squash", caloriesPerGram: 0.16 },
-    { name: "Winter Squash", caloriesPerGram: 0.39 },
-    { name: "Bok Choy", caloriesPerGram: 0.13 },
+    { name: "Broccoli", caloriesPer100g: 34 },
+    { name: "Brussels Sprouts", caloriesPer100g: 43 },
+    { name: "Cabbage", caloriesPer100g: 25 },
+    { name: "Carrots", caloriesPer100g: 41 },
+    { name: "Cauliflower", caloriesPer100g: 25 },
+    { name: "Celery", caloriesPer100g: 14 },
+    { name: "Collard Greens", caloriesPer100g: 32 },
+    { name: "Cucumber", caloriesPer100g: 16 },
+    { name: "Green Beans", caloriesPer100g: 31 },
+    { name: "Green Peas", caloriesPer100g: 81 },
+    { name: "Kale", caloriesPer100g: 49 },
+    { name: "Spinach", caloriesPer100g: 23 },
+    { name: "Zucchini", caloriesPer100g: 17 },
+    { name: "Summer Squash", caloriesPer100g: 16 },
+    { name: "Winter Squash", caloriesPer100g: 39 },
+    { name: "Bok Choy", caloriesPer100g: 13 },
   ],
   
   fats: [
-    { name: "Olive Oil", caloriesPerGram: 8.50 },
-    { name: "Coconut Oil", caloriesPerGram: 8.65 }
+    { name: "Olive Oil", caloriesPer100g: 884 },
+    { name: "Coconut Oil", caloriesPer100g: 865 }
   ],
 
   supplements: [
     {
       name: "Rx Essentials",
-      caloriesPerGram: 5.00,
+      caloriesPer100g: 500,
       gramsPerPoundPerDay: 0.1,
       gramsPerScoop: 5,
     },
     {
       name: "Hemp Seed Oil",
-      caloriesPerGram: 8.86,
+      caloriesPer100g: 886,
       gramsPerPoundPerDay: 0.15,
     },
     {
       name: "Turmeric",
-      caloriesPerGram: 5.72,
+      caloriesPer100g: 354,
       gramsPerPoundPerDay: 0.015,
     },
     {
       name: "Ginger",
-      caloriesPerGram: 4.00,
+      caloriesPer100g: 335,
       gramsPerPoundPerDay: 0.015,
     },
     {
       name: "Eggshell Powder (Calcium)",
-      caloriesPerGram: 0.00, // Eggshell powder has negligible calories
+      caloriesPer100g: 0.00, // Eggshell powder has negligible calories
       gramsPerPoundPerDay: 0.0, // Will be calculated based on calcium needs
       gramsPerScoop: 1.9, // 1/3 teaspoon = 1.9g per scoop
-      calciumMgPerGram: 360, // 650mg calcium per 1.9g (1/3 tsp), so ~360mg per gram
+      calciumMgPerGram: 342.1, // 650mg calcium per 1.9g (1/3 tsp) => ~342.1 mg per gram
     }
   ]
 };
@@ -176,12 +176,6 @@ export function calculateDailyCalories(dog: Dog): number {
 // Get total MER for all dogs combined per day
 export function getTotalMER(dogs: Dog[]): number {
   return dogs.reduce((total, dog) => total + (dog.MER || 0), 0);
-}
-
-// Helper function to select a random ingredient from an array
-function selectRandomIngredient(ingredientArray: Ingredient[]): Ingredient {
-  const randomIndex = Math.floor(Math.random() * ingredientArray.length);
-  return ingredientArray[randomIndex];
 }
 
 // Helper function to select multiple random ingredients from an array without duplicates
@@ -224,14 +218,14 @@ export function createRecipe(totalMER: number, dogs: Dog[], ingredientPercentage
       recipe.ingredients.supplements.push({
         name: supplement.name,
         grams: Math.round(eggshellGrams * 100) / 100,
-        calories: Math.round(eggshellGrams * supplement.caloriesPerGram * 100) / 100,
+        calories: Math.round(eggshellGrams * (supplement.caloriesPer100g || 0) / 100 * 100) / 100,
         gramsPerScoop: supplement.gramsPerScoop || null
       });
-      totalSupplementCalories += Math.round(eggshellGrams * supplement.caloriesPerGram * 100) / 100;
+      totalSupplementCalories += Math.round(eggshellGrams * (supplement.caloriesPer100g || 0) / 100 * 100) / 100;
     } else {
       // Regular supplement calculation
       const gramsPerDay = totalDogWeight * supplement.gramsPerPoundPerDay!;
-      const calories = gramsPerDay * supplement.caloriesPerGram;
+      const calories = gramsPerDay * (supplement.caloriesPer100g || 0) / 100;
       
       recipe.ingredients.supplements.push({
         name: supplement.name,
@@ -272,8 +266,8 @@ export function createRecipe(totalMER: number, dogs: Dog[], ingredientPercentage
     const caloriesPerIngredient = calorieTargets[category] / selectedIngredients.length;
     
     for (const selectedIngredient of selectedIngredients) {
-      const gramsNeeded = caloriesPerIngredient / selectedIngredient.caloriesPerGram;
-      const actualCalories = Math.round(gramsNeeded * selectedIngredient.caloriesPerGram * 100) / 100;
+      const gramsNeeded = (caloriesPerIngredient / (selectedIngredient.caloriesPer100g || 0)) * 100;
+      const actualCalories = Math.round(gramsNeeded * (selectedIngredient.caloriesPer100g || 0) / 100 * 100) / 100;
       
       recipe.ingredients[category].push({
         name: selectedIngredient.name,
@@ -329,10 +323,12 @@ export function calculateShoppingList(recipe: Recipe, numberOfDays: number): Sho
 // Calculate per-meal portions for each dog
 export function calculateMealPortions(recipe: Recipe, dogs: Dog[]) {
   const totalMER = getTotalMER(dogs);
+  const totalWeightLbs = dogs.reduce((sum, dog) => sum + (dog.weight || 0), 0);
   const portions: { [dogName: string]: { dailyPortion: number; mealPortion: number; percentage: number } } = {};
   
   for (const dog of dogs) {
-    const dogPercentage = (dog.MER || 0) / totalMER;
+    const dogEnergyShare = totalMER > 0 ? (dog.MER || 0) / totalMER : 0;
+    const dogWeightShare = totalWeightLbs > 0 ? (dog.weight || 0) / totalWeightLbs : 0;
     
     // Calculate total daily grams for this dog (all ingredients combined)
     let totalDailyGrams = 0;
@@ -341,14 +337,14 @@ export function calculateMealPortions(recipe: Recipe, dogs: Dog[]) {
     for (const category of ['protein', 'organs', 'fruits', 'veggies', 'carbs', 'fats'] as const) {
       const ingredients = recipe.ingredients[category];
       for (const ingredient of ingredients) {
-        const dailyPortion = ingredient.grams * dogPercentage;
+        const dailyPortion = ingredient.grams * dogEnergyShare;
         totalDailyGrams += dailyPortion;
       }
     }
     
     // Add supplements
     for (const supplement of recipe.ingredients.supplements) {
-      const dailyPortion = supplement.grams * dogPercentage;
+      const dailyPortion = supplement.grams * dogWeightShare; // dose supplements by body weight
       totalDailyGrams += dailyPortion;
     }
     
@@ -357,7 +353,7 @@ export function calculateMealPortions(recipe: Recipe, dogs: Dog[]) {
     portions[dog.name] = {
       dailyPortion: Math.round(totalDailyGrams * 100) / 100,
       mealPortion: Math.round(mealPortion * 100) / 100,
-      percentage: Math.round(dogPercentage * 100)
+      percentage: Math.round(dogEnergyShare * 100)
     };
   }
   
