@@ -213,7 +213,9 @@ export function createRecipe(totalMER: number, dogs: Dog[], ingredientPercentage
     if (supplement.name === "Eggshell Powder (Calcium)") {
       // Calculate calcium needs and convert to eggshell powder
       const calciumNeeds = calculateCalciumNeeds(totalDogWeight);
-      const eggshellGrams = calciumNeeds / (supplement.calciumMgPerGram || 360);
+      const eggshellGrams = supplement.calciumMgPerGram
+        ? calciumNeeds / supplement.calciumMgPerGram
+        : 0;
       
       recipe.ingredients.supplements.push({
         name: supplement.name,
@@ -293,7 +295,7 @@ export function calculateShoppingList(recipe: Recipe, numberOfDays: number): Sho
     const ingredients = recipe.ingredients[category];
     for (const ingredient of ingredients) {
       const totalGrams = ingredient.grams * numberOfDays;
-      const totalPounds = Math.round(totalGrams / 453.592 * 100) / 100;
+      const totalPounds = Math.round(totalGrams / 453.592 * 1000) / 1000;
       
       if (shoppingList[ingredient.name]) {
         shoppingList[ingredient.name].grams += totalGrams;
