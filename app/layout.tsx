@@ -12,10 +12,19 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Healthy Dog Recipe Builder",
   description:
     "Build balanced, vet-informed homemade meals for your dogs — calorie, portion and shopping calculations included.",
+  openGraph: {
+    title: "Healthy Dog Recipe Builder",
+    description:
+      "Balanced meals, portions & shopping lists for your dogs.",
+    type: "website",
+  },
 };
 
 export const viewport = {
