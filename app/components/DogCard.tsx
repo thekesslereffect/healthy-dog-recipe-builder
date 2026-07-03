@@ -1,4 +1,5 @@
 import { ACTIVITY_LEVELS } from '../utils/constants';
+import { ALL_FOOD_NAMES } from '../data/ingredients';
 import type { Dog } from '../utils/recipeCalculator';
 import {
   fromDisplayWeight,
@@ -7,6 +8,7 @@ import {
   type WeightUnit,
 } from '../utils/format';
 import { fieldLabel, inputBase } from './ui';
+import { AllergyInput } from './AllergyInput';
 
 interface DogCardProps {
   dog: Dog;
@@ -14,7 +16,7 @@ interface DogCardProps {
   unit: WeightUnit;
   dailyCalories: number;
   canRemove: boolean;
-  onChange: (field: keyof Dog, value: string | number) => void;
+  onChange: (field: keyof Dog, value: string | number | string[]) => void;
   onRemove: () => void;
 }
 
@@ -28,9 +30,18 @@ export function DogCard({
   onRemove,
 }: DogCardProps) {
   const displayWeight = dog.weight > 0 ? toDisplayWeight(dog.weight, unit) : '';
+  const allergies = dog.allergies ?? [];
+
+  const addAllergy = (name: string) => {
+    if (allergies.includes(name)) return;
+    onChange('allergies', [...allergies, name]);
+  };
+  const removeAllergy = (name: string) => {
+    onChange('allergies', allergies.filter((a) => a !== name));
+  };
 
   return (
-    <div className="rounded-xl border border-zinc-200 p-4 sm:p-5">
+    <div className="rounded-2xl border border-zinc-200 p-4 sm:p-5">
       <div className="mb-4 flex items-center justify-between">
         <span className="text-sm font-semibold text-black">
           {dog.name?.trim() ? dog.name : `Dog ${index + 1}`}
@@ -103,6 +114,19 @@ export function DogCard({
               </option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <span className={fieldLabel}>Allergies / avoid</span>
+          <AllergyInput
+            value={allergies}
+            suggestions={ALL_FOOD_NAMES}
+            onAdd={addAllergy}
+            onRemove={removeAllergy}
+          />
+          <p className="mt-1.5 text-xs text-zinc-400">
+            Excluded from recipes for all dogs.
+          </p>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import type { Category } from '../utils/constants';
+import { CATEGORIES, type Category } from '../utils/constants';
 
 export interface Ingredient {
   name: string;
@@ -118,3 +118,9 @@ export const ingredients: IngredientDatabase = {
     },
   ],
 };
+
+// All selectable food ingredient names (excludes supplements), sorted, for the
+// per-dog allergy typeahead.
+export const ALL_FOOD_NAMES: string[] = Array.from(
+  new Set(CATEGORIES.flatMap((category) => ingredients[category].map((i) => i.name))),
+).sort((a, b) => a.localeCompare(b));

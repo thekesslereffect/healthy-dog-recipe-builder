@@ -26,3 +26,34 @@ export function bulkUnitLabel(unit: WeightUnit): string {
 export function weightUnitLabel(unit: WeightUnit): string {
   return unit === 'kg' ? 'kg' : 'lbs';
 }
+
+// Per-item shopping-list mass units the user can switch between.
+export type MassUnit = 'g' | 'oz' | 'lb' | 'kg';
+
+export const MASS_UNITS: MassUnit[] = ['g', 'oz', 'lb', 'kg'];
+
+const GRAMS_PER_OZ = 28.349523125;
+
+/** Convert grams into the chosen mass unit, rounded for display. */
+export function convertMass(grams: number, unit: MassUnit): number {
+  switch (unit) {
+    case 'oz':
+      return Math.round((grams / GRAMS_PER_OZ) * 10) / 10;
+    case 'lb':
+      return Math.round((grams / GRAMS_PER_LB) * 100) / 100;
+    case 'kg':
+      return Math.round((grams / 1000) * 1000) / 1000;
+    case 'g':
+    default:
+      return Math.round(grams);
+  }
+}
+
+export function massUnitLabel(unit: MassUnit): string {
+  return unit;
+}
+
+/** Sensible default display unit for the shopping list given the user's system. */
+export function defaultMassUnit(unit: WeightUnit): MassUnit {
+  return unit === 'kg' ? 'kg' : 'lb';
+}

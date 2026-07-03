@@ -49,14 +49,19 @@ export const DEFAULT_COUNTS: CategoryCounts = {
   fats: 1,
 };
 
-// Maintenance Energy Requirement multipliers (× RER). These are conservative
-// pet-dog activity levels; working/sport dogs can range far higher (2–8×).
-// Sources: NRC 2006, WSAVA / Pet Nutrition Alliance MER factors.
+// Maintenance Energy Requirement multipliers (× RER), aligned with the canine
+// life-stage factors in the AAHA 2021 Nutrition & Weight Management Guidelines
+// and the Pet Nutrition Alliance MER table:
+//   weight loss/inactive 1.0 · neutered adult 1.4–1.6 · intact adult 1.6–1.8 ·
+//   light work 1.6–2.0 · moderate work 2.0–5.0 · heavy work 5.0–11.0.
+// These estimates can be off by ±30% for any individual dog, so adjust to keep
+// a healthy body condition score. Hard-working/sport dogs exceed this list.
 export const ACTIVITY_LEVELS = [
-  { value: 1.0, label: 'No exercise (1.0×)' },
-  { value: 1.3, label: 'Light exercise (1.3×)' },
-  { value: 1.6, label: 'Moderate exercise (1.6×)' },
-  { value: 1.8, label: 'Heavy exercise (1.8×)' },
+  { value: 1.0, label: 'Inactive / weight loss (1.0×)' },
+  { value: 1.3, label: 'Low activity (1.3×)' },
+  { value: 1.6, label: 'Typical · neutered adult (1.6×)' },
+  { value: 1.8, label: 'Active · intact adult (1.8×)' },
+  { value: 2.0, label: 'Very active / light work (2.0×)' },
 ] as const;
 
 // Nutrition science constants.

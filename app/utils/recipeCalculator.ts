@@ -14,6 +14,8 @@ export interface Dog {
   /** Body weight in pounds (internal unit). */
   weight: number;
   activityMultiplier: number;
+  /** Ingredient names this dog is allergic to / should avoid. */
+  allergies?: string[];
   MER?: number;
 }
 
