@@ -29,7 +29,7 @@ import { RecipeResults } from './components/RecipeResults';
 import { SavedRecipes } from './components/SavedRecipes';
 import { TopTabs, BottomTabs, type TabDef, type TabId } from './components/TabBar';
 import { btnPrimary, card, fieldLabel, inputBase, sectionTitle } from './components/ui';
-import { PawIcon, SlidersIcon, BowlIcon, PlusIcon, BookmarkIcon } from './components/icons';
+import { PawIcon, SlidersIcon, BowlIcon, PlusIcon, BookmarkIcon, InfoIcon } from './components/icons';
 
 const DEFAULT_DOGS: Dog[] = [
   { name: 'Jackson', weight: 30, activityMultiplier: 1.3, allergies: [] },
@@ -62,6 +62,7 @@ export default function Home() {
     {},
   );
   const [activeTab, setActiveTab] = useState<TabId>('dogs');
+  const [showInfo, setShowInfo] = useState(false);
   const [copied, setCopied] = useState(false);
   const [saveName, setSaveName] = useState('');
   const [justSaved, setJustSaved] = useState(false);
@@ -254,23 +255,31 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white text-black print:min-h-0">
-      <div className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:px-6 sm:pb-12 sm:pt-10 lg:px-8 print:px-2 print:py-2 print:max-w-none print:pb-2">
+      <div className="mx-auto w-full max-w-5xl px-3 pb-28 pt-4 sm:px-6 sm:pb-12 sm:pt-10 lg:px-8 print:px-2 print:py-2 print:max-w-none print:pb-2">
         {/* Header */}
-        <header className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between print:mb-3">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-black sm:text-3xl lg:text-4xl print:text-2xl">
+        <header className="mb-4 flex items-center justify-between gap-3 sm:mb-8 print:mb-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <h1 className="truncate text-xl font-bold tracking-tight text-black sm:text-3xl lg:text-4xl print:text-2xl">
               Healthy Dog Recipe Builder
             </h1>
-            <p className="mt-1 text-sm text-zinc-500 sm:text-base print:hidden">
-              Balanced, nutritious meals for your dogs.
-            </p>
+            <button
+              type="button"
+              onClick={() => setShowInfo((v) => !v)}
+              aria-label="About this tool"
+              aria-expanded={showInfo}
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-black print:hidden"
+            >
+              <InfoIcon width={18} height={18} />
+            </button>
           </div>
           <TopTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
         </header>
 
-        <div className="mb-6 print:mb-2">
-          <Disclaimer />
-        </div>
+        {showInfo && (
+          <div className="mb-4 sm:mb-6 print:hidden">
+            <Disclaimer />
+          </div>
+        )}
 
         {/* ---------------- Dogs ---------------- */}
         {activeTab === 'dogs' && (

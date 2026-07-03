@@ -2,7 +2,7 @@ export function Disclaimer() {
   return (
     <div
       role="note"
-      className="mb-8 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm leading-relaxed text-zinc-600 sm:mb-10 print:mb-2 print:border-0 print:bg-white print:px-0 print:text-xs"
+      className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm leading-relaxed text-zinc-600 print:border-0 print:bg-white print:px-0 print:text-xs"
     >
       <span className="font-semibold text-black">Please note:</span> this is a
       calorie &amp; portion planner — it balances daily energy and calcium, but

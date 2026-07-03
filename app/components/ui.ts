@@ -1,7 +1,9 @@
 // Shared Tailwind class tokens so the minimal black/white/zinc look stays
 // consistent across components.
+// Edge-to-edge on mobile (no chrome, max content width); a bordered card on
+// larger screens. Keeps the app feeling native on phones.
 export const card =
-  'rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6 print:border-0 print:p-0 print:rounded-none';
+  'bg-white py-4 sm:rounded-2xl sm:border sm:border-zinc-200 sm:p-6 print:border-0 print:p-0 print:py-0 print:rounded-none';
 
 export const sectionTitle =
   'text-lg sm:text-xl font-semibold tracking-tight text-black';
