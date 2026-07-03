@@ -1,14 +1,28 @@
+import { useState } from 'react';
 import { formatSavedAt, type SavedRecipe } from '../utils/savedRecipes';
-import { card, sectionTitle } from './ui';
+import { card, inputBase, sectionTitle } from './ui';
 import { BookmarkIcon, PencilIcon, TrashIcon } from './icons';
 
 interface SavedRecipesProps {
   saved: SavedRecipe[];
   onLoad: (id: string) => void;
   onDelete: (id: string) => void;
+  onRename: (id: string, name: string) => void;
 }
 
-export function SavedRecipes({ saved, onLoad, onDelete }: SavedRecipesProps) {
+export function SavedRecipes({ saved, onLoad, onDelete, onRename }: SavedRecipesProps) {
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState('');
+
+  const startRename = (item: SavedRecipe) => {
+    setRenamingId(item.id);
+    setDraft(item.name);
+  };
+  const commitRename = (id: string) => {
+    const name = draft.trim();
+    if (name) onRename(id, name);
+    setRenamingId(null);
+  };
   if (saved.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-zinc-200 px-6 py-16 text-center">
@@ -34,7 +48,33 @@ export function SavedRecipes({ saved, onLoad, onDelete }: SavedRecipesProps) {
               className="flex flex-col gap-3 rounded-xl border border-zinc-200 p-4 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="min-w-0">
-                <h3 className="truncate font-semibold text-black">{item.name}</h3>
+                {renamingId === item.id ? (
+                  <input
+                    type="text"
+                    value={draft}
+                    autoFocus
+                    onChange={(e) => setDraft(e.target.value)}
+                    onBlur={() => commitRename(item.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') commitRename(item.id);
+                      else if (e.key === 'Escape') setRenamingId(null);
+                    }}
+                    aria-label="Recipe name"
+                    className={`${inputBase} font-semibold`}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => startRename(item)}
+                    title="Rename"
+                    className="flex max-w-full items-center gap-1.5 text-left font-semibold text-black"
+                  >
+                    <span className="truncate decoration-zinc-300 decoration-dotted underline-offset-2 hover:underline">
+                      {item.name}
+                    </span>
+                    <PencilIcon width={13} height={13} className="shrink-0 text-zinc-400" />
+                  </button>
+                )}
                 <p className="mt-0.5 text-xs text-zinc-400">Saved {formatSavedAt(item.savedAt)}</p>
                 <p className="mt-1 truncate text-sm text-zinc-500">
                   {item.dogs.length} {item.dogs.length === 1 ? 'dog' : 'dogs'}

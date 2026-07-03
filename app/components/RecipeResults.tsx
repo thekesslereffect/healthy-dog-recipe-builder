@@ -29,9 +29,13 @@ interface RecipeResultsProps {
   locked: Partial<Record<Category, string[]>>;
   excluded: string[];
   copied: boolean;
+  shoppingUnits: Record<string, MassUnit>;
+  portionUnits: Record<string, MassUnit>;
   onToggleLock: (category: Category, name: string) => void;
   onSwap: (category: Category, oldName: string, newName: string) => void;
   onMealsChange: (meals: number) => void;
+  onShoppingUnitsChange: (next: Record<string, MassUnit>) => void;
+  onPortionUnitsChange: (next: Record<string, MassUnit>) => void;
   onCopy: () => void;
   onExportCsv: () => void;
 }
@@ -46,22 +50,24 @@ export function RecipeResults({
   locked,
   excluded,
   copied,
+  shoppingUnits,
+  portionUnits,
   onToggleLock,
   onSwap,
   onMealsChange,
+  onShoppingUnitsChange,
+  onPortionUnitsChange,
   onCopy,
   onExportCsv,
 }: RecipeResultsProps) {
   const [editing, setEditing] = useState<string | null>(null);
-  const [itemUnits, setItemUnits] = useState<Record<string, MassUnit>>({});
-  const [portionUnits, setPortionUnits] = useState<Record<string, MassUnit>>({});
   const fallbackUnit = defaultMassUnit(unit);
-  const unitFor = (name: string): MassUnit => itemUnits[name] ?? fallbackUnit;
+  const unitFor = (name: string): MassUnit => shoppingUnits[name] ?? fallbackUnit;
   const setUnitFor = (name: string, u: MassUnit) =>
-    setItemUnits((prev) => ({ ...prev, [name]: u }));
+    onShoppingUnitsChange({ ...shoppingUnits, [name]: u });
   const portionUnitFor = (name: string): MassUnit => portionUnits[name] ?? 'g';
   const setPortionUnitFor = (name: string, u: MassUnit) =>
-    setPortionUnits((prev) => ({ ...prev, [name]: u }));
+    onPortionUnitsChange({ ...portionUnits, [name]: u });
   const shoppingList = calculateShoppingList(recipe, numberOfDays);
   const portions = calculateMealPortions(recipe, dogsWithMER, mealsPerDay);
 
@@ -248,9 +254,9 @@ export function RecipeResults({
                 onChange={(e) => {
                   const u = e.target.value as MassUnit;
                   if (!u) return;
-                  const next: Record<string, MassUnit> = {};
+                  const next: Record<string, MassUnit> = { ...shoppingUnits };
                   for (const name of Object.keys(shoppingList)) next[name] = u;
-                  setItemUnits(next);
+                  onShoppingUnitsChange(next);
                 }}
                 className="rounded-lg bg-zinc-50 px-2.5 py-1.5 text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-300"
                 aria-label="Set units for all items"
@@ -319,9 +325,9 @@ export function RecipeResults({
                 onChange={(e) => {
                   const u = e.target.value as MassUnit;
                   if (!u) return;
-                  const next: Record<string, MassUnit> = {};
+                  const next: Record<string, MassUnit> = { ...portionUnits };
                   for (const name of Object.keys(portions)) next[name] = u;
-                  setPortionUnits(next);
+                  onPortionUnitsChange(next);
                 }}
                 className="rounded-lg bg-zinc-50 px-2.5 py-1.5 text-sm text-black focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-300"
                 aria-label="Set units for all portions"
