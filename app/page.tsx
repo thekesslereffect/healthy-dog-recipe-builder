@@ -19,15 +19,17 @@ import {
 import { ingredients } from './data/ingredients';
 import { recipeToText, shoppingListToCsv, downloadTextFile } from './utils/export';
 import { weightUnitLabel, type WeightUnit } from './utils/format';
+import { createId, type SavedRecipe } from './utils/savedRecipes';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { Disclaimer } from './components/Disclaimer';
 import { DogCard } from './components/DogCard';
 import { RatioControls } from './components/RatioControls';
 import { CountControls } from './components/CountControls';
 import { RecipeResults } from './components/RecipeResults';
+import { SavedRecipes } from './components/SavedRecipes';
 import { TopTabs, BottomTabs, type TabDef, type TabId } from './components/TabBar';
 import { btnPrimary, card, fieldLabel, inputBase, sectionTitle } from './components/ui';
-import { PawIcon, SlidersIcon, BowlIcon, PlusIcon } from './components/icons';
+import { PawIcon, SlidersIcon, BowlIcon, PlusIcon, BookmarkIcon } from './components/icons';
 
 const DEFAULT_DOGS: Dog[] = [
   { name: 'Jackson', weight: 30, activityMultiplier: 1.3, allergies: [] },
@@ -38,6 +40,7 @@ const TABS: TabDef[] = [
   { id: 'dogs', label: 'Dogs', icon: PawIcon },
   { id: 'build', label: 'Build', icon: SlidersIcon },
   { id: 'recipe', label: 'Recipe', icon: BowlIcon },
+  { id: 'saved', label: 'Saved', icon: BookmarkIcon },
 ];
 
 export default function Home() {
@@ -49,8 +52,11 @@ export default function Home() {
   const [counts, setCounts] = useLocalStorage<CategoryCounts>('hdrb.counts', DEFAULT_COUNTS);
   const [locked, setLocked] = useLocalStorage<Partial<Record<Category, string[]>>>('hdrb.locked', {});
   const [recipe, setRecipe] = useLocalStorage<Recipe | null>('hdrb.recipe', null);
+  const [saved, setSaved] = useLocalStorage<SavedRecipe[]>('hdrb.saved', []);
   const [activeTab, setActiveTab] = useState<TabId>('dogs');
   const [copied, setCopied] = useState(false);
+  const [saveName, setSaveName] = useState('');
+  const [justSaved, setJustSaved] = useState(false);
 
   const percentageSum = CATEGORIES.reduce((sum, c) => sum + ratios[c], 0);
   const isPercentageValid = Math.abs(percentageSum - 1) < 0.001;
@@ -174,6 +180,44 @@ export default function Home() {
   const exportCsv = () => {
     if (!recipe) return;
     downloadTextFile('dog-shopping-list.csv', shoppingListToCsv(recipe, numberOfDays), 'text/csv');
+  };
+
+  const saveCurrentRecipe = () => {
+    if (!recipe) return;
+    const name = saveName.trim() || `Recipe ${new Date().toLocaleDateString()}`;
+    const entry: SavedRecipe = {
+      id: createId(),
+      name,
+      savedAt: Date.now(),
+      dogs,
+      ratios,
+      counts,
+      numberOfDays,
+      mealsPerDay,
+      locked,
+      recipe,
+    };
+    setSaved([entry, ...saved]);
+    setSaveName('');
+    setJustSaved(true);
+    setTimeout(() => setJustSaved(false), 2000);
+  };
+
+  const loadSavedRecipe = (id: string) => {
+    const entry = saved.find((s) => s.id === id);
+    if (!entry) return;
+    setDogs(entry.dogs);
+    setRatios(entry.ratios);
+    setCounts(entry.counts);
+    setNumberOfDays(entry.numberOfDays);
+    setMealsPerDay(entry.mealsPerDay);
+    setLocked(entry.locked);
+    setRecipe(entry.recipe);
+    setActiveTab('recipe');
+  };
+
+  const deleteSavedRecipe = (id: string) => {
+    setSaved(saved.filter((s) => s.id !== id));
   };
 
   return (
@@ -335,6 +379,30 @@ export default function Home() {
                     : 'Finish setting up your dogs first (see Dogs).'}
                 </p>
               )}
+
+              {recipe && (
+                <div className="mt-4 flex flex-col gap-2 border-t border-zinc-200 pt-4 sm:flex-row sm:items-center">
+                  <input
+                    type="text"
+                    value={saveName}
+                    onChange={(e) => setSaveName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') saveCurrentRecipe();
+                    }}
+                    placeholder="Name this recipe…"
+                    aria-label="Recipe name"
+                    className={`${inputBase} sm:max-w-xs`}
+                  />
+                  <button
+                    type="button"
+                    onClick={saveCurrentRecipe}
+                    className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-zinc-100 px-4 py-2.5 text-sm font-medium text-black transition-colors hover:bg-zinc-200"
+                  >
+                    <BookmarkIcon width={16} height={16} />
+                    {justSaved ? 'Saved' : 'Save recipe'}
+                  </button>
+                </div>
+              )}
             </section>
 
             {recipe ? (
@@ -389,6 +457,13 @@ export default function Home() {
                 </p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ---------------- Saved ---------------- */}
+        {activeTab === 'saved' && (
+          <div className="print:hidden">
+            <SavedRecipes saved={saved} onLoad={loadSavedRecipe} onDelete={deleteSavedRecipe} />
           </div>
         )}
 

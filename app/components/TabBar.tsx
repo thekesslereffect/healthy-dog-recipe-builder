@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react';
 
-export type TabId = 'dogs' | 'build' | 'recipe';
+export type TabId = 'dogs' | 'build' | 'recipe' | 'saved';
 
 export interface TabDef {
   id: TabId;
