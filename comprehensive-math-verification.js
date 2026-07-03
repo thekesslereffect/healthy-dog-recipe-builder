@@ -15,10 +15,10 @@ function getTotalMER(dogs) {
   return dogs.reduce((total, dog) => total + (dog.MER || 0), 0);
 }
 
-function calculateCalciumNeeds(totalDogWeight) {
-  const totalWeightKg = totalDogWeight / 2.2046;
-  const calciumNeeds = totalWeightKg * 50;
-  return Math.round(calciumNeeds);
+// Calcium is tied to calories (NRC 1.0 mg/kcal, AAFCO 2016 minimum 1.25 mg/kcal).
+const CALCIUM_MG_PER_KCAL = 1.25;
+function calculateCalciumNeeds(totalDailyCalories) {
+  return Math.round(totalDailyCalories * CALCIUM_MG_PER_KCAL);
 }
 
 // Ingredient data for testing
@@ -29,7 +29,7 @@ const ingredients = {
       caloriesPer100g: 0.00,
       gramsPerPoundPerDay: 0.0,
       gramsPerScoop: 1.9,
-      calciumMgPerGram: 342.1,
+      calciumMgPerGram: 380,
     }
   ]
 };
@@ -93,16 +93,18 @@ function testCalciumCalculations() {
   console.log('TESTING CALCIUM CALCULATIONS');
   console.log('='.repeat(60));
 
-  // Test the calcium needs calculation: 50mg per kg body weight
-  const totalWeight = 35 + 17; // Jackson + Joey
-  const totalWeightKg = totalWeight / 2.2046;
-  const expectedCalcium = totalWeightKg * 50;
+  // Calcium is based on total daily calories, not body weight.
+  const dogs = [
+    { name: 'Jackson', weight: 35, activityMultiplier: 1.3 },
+    { name: 'Joey', weight: 17, activityMultiplier: 1.0 },
+  ];
+  const totalCalories = dogs.reduce((sum, d) => sum + calculateDailyCalories(d), 0);
+  const expectedCalcium = totalCalories * CALCIUM_MG_PER_KCAL;
 
-  console.log(`Total dog weight: ${totalWeight} lbs (${totalWeightKg.toFixed(2)} kg)`);
-  console.log(`Expected calcium: ${expectedCalcium.toFixed(0)} mg/day`);
+  console.log(`Total daily calories: ${totalCalories.toFixed(0)} kcal`);
+  console.log(`Expected calcium (@ ${CALCIUM_MG_PER_KCAL} mg/kcal): ${expectedCalcium.toFixed(0)} mg/day`);
 
-  // Verify the function matches our calculation
-  const calculatedCalcium = Math.round(expectedCalcium);
+  const calculatedCalcium = calculateCalciumNeeds(totalCalories);
   console.log(`Function result: ${calculatedCalcium} mg/day`);
 
   const calciumTest = assert(Math.abs(expectedCalcium - calculatedCalcium) < 1,
@@ -117,14 +119,13 @@ function testEggshellPowderMath() {
   console.log('TESTING EGGSHELL POWDER CALCULATIONS');
   console.log('='.repeat(60));
 
-  // Given values from the supplement data
-  const calciumPerScoop = 650; // mg calcium per 1/3 teaspoon
+  // Eggshell is ~38% elemental calcium => ~380 mg Ca per gram.
+  const calciumMgPerGram = 380;
   const gramsPerScoop = 1.9; // grams per 1/3 teaspoon
-  const calciumMgPerGram = calciumPerScoop / gramsPerScoop; // Should be 342.105...
+  const calciumPerScoop = calciumMgPerGram * gramsPerScoop; // ~722 mg per scoop
 
-  console.log(`Given: 1/3 teaspoon provides ${calciumPerScoop}mg calcium`);
-  console.log(`Given: 1/3 teaspoon weighs ${gramsPerScoop}g`);
-  console.log(`Calculated calcium per gram: ${calciumMgPerGram.toFixed(2)} mg/g`);
+  console.log(`Eggshell calcium density: ${calciumMgPerGram} mg/g (~38% calcium)`);
+  console.log(`1/3 teaspoon weighs ${gramsPerScoop}g => ~${Math.round(calciumPerScoop)}mg calcium per scoop`);
 
   // Test with example calcium need
   const calciumNeeded = 1179; // From earlier example

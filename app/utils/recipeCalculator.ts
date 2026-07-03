@@ -62,33 +62,38 @@ export interface ShoppingList {
 }
 
 // Available ingredients
+//
+// Calorie values are kcal per 100g. Meats, organs, fish, produce and oils use
+// USDA FoodData Central RAW values (you buy and weigh these raw), so the whole
+// database is on a consistent basis. Grains are the exception and use COOKED
+// values (dogs eat them cooked), so they are labelled "(cooked)".
 const ingredients = {
   protein: [
-    { name: "Beef (ground, 85% lean)", caloriesPer100g: 250 },
-    { name: "Beef (sirloin steak)", caloriesPer100g: 206 },
-    { name: "Turkey (ground, 85% lean)", caloriesPer100g: 212 },
-    { name: "Turkey (breast, skinless)", caloriesPer100g: 135 },
-    { name: "Duck (meat without skin)", caloriesPer100g: 201 },
-    { name: "Pork (lean cuts)", caloriesPer100g: 242 },
+    { name: "Beef (ground, 85% lean)", caloriesPer100g: 215 },
+    { name: "Beef (sirloin steak)", caloriesPer100g: 201 },
+    { name: "Turkey (ground, 85% lean)", caloriesPer100g: 213 },
+    { name: "Turkey (breast, skinless)", caloriesPer100g: 114 },
+    { name: "Duck (meat without skin)", caloriesPer100g: 185 },
+    { name: "Pork (lean cuts)", caloriesPer100g: 143 },
     { name: "Venison", caloriesPer100g: 158 },
     { name: "Buffalo/Bison", caloriesPer100g: 146 },
     { name: "Tuna (canned in water)", caloriesPer100g: 116 },
-    { name: "Tilapia", caloriesPer100g: 129 },
-    { name: "Trout", caloriesPer100g: 190 },
-    { name: "Mackerel", caloriesPer100g: 262 }
+    { name: "Tilapia", caloriesPer100g: 96 },
+    { name: "Trout", caloriesPer100g: 141 },
+    { name: "Mackerel", caloriesPer100g: 205 }
   ],
   
   organs: [
-    { name: "Pork Heart", caloriesPer100g: 179 },
-    { name: "Pork Liver", caloriesPer100g: 165 },
-    { name: "Pork Kidneys", caloriesPer100g: 105 },
-    { name: "Beef Liver", caloriesPer100g: 175 },
-    { name: "Beef Kidneys", caloriesPer100g: 103 },
+    { name: "Pork Heart", caloriesPer100g: 118 },
+    { name: "Pork Liver", caloriesPer100g: 134 },
+    { name: "Pork Kidneys", caloriesPer100g: 100 },
+    { name: "Beef Liver", caloriesPer100g: 135 },
+    { name: "Beef Kidneys", caloriesPer100g: 99 },
   ],
   
   carbs: [
-    { name: "White Rice", caloriesPer100g: 130 },    
-    { name: "Quinoa", caloriesPer100g: 119 }
+    { name: "White Rice (cooked)", caloriesPer100g: 130 },    
+    { name: "Quinoa (cooked)", caloriesPer100g: 120 }
   ],
 
   fruits: [
@@ -148,18 +153,26 @@ const ingredients = {
       name: "Eggshell Powder (Calcium)",
       caloriesPer100g: 0.00, // Eggshell powder has negligible calories
       gramsPerPoundPerDay: 0.0, // Will be calculated based on calcium needs
-      gramsPerScoop: 1.9, // 1/3 teaspoon = 1.9g per scoop
-      calciumMgPerGram: 342.1, // 650mg calcium per 1.9g (1/3 tsp) => ~342.1 mg per gram
+      gramsPerScoop: 1.9, // 1/3 teaspoon ~= 1.9g per scoop
+      calciumMgPerGram: 380, // Eggshell is ~38% elemental calcium => ~380 mg Ca per gram (USDA / vet nutrition sources)
     }
   ]
 };
 
-// Calculate daily calcium needs for dogs based on weight
-function calculateCalciumNeeds(totalDogWeight: number): number {
-  // Based on veterinary nutrition guidelines: 50mg per kg of body weight
-  // Converting pounds to kg: weight in lbs / 2.2046
-  const totalWeightKg = totalDogWeight / 2.2046;
-  const calciumNeeds = totalWeightKg * 50; // mg per day
+// Calcium density of the diet, in mg of calcium per kcal of food.
+// The NRC (2006) recommended allowance for adult dogs at maintenance is
+// 1.0 mg Ca/kcal; AAFCO (2016) sets the adult maintenance minimum at
+// 1.25 mg Ca/kcal. We use 1.25 mg/kcal so the recipe meets the AAFCO minimum.
+const CALCIUM_MG_PER_KCAL = 1.25;
+
+// Calculate daily calcium needs based on the dog's total daily calories.
+//
+// Calcium requirements are tied to energy intake (per 1,000 kcal), NOT to body
+// weight directly, because dogs eat to meet their energy needs and calcium must
+// be balanced against the phosphorus in that food. Basing it on calories keeps
+// the calcium-to-calorie ratio correct for dogs of any size or activity level.
+function calculateCalciumNeeds(totalDailyCalories: number): number {
+  const calciumNeeds = totalDailyCalories * CALCIUM_MG_PER_KCAL; // mg per day
   return Math.round(calciumNeeds);
 }
 
@@ -211,8 +224,9 @@ export function createRecipe(totalMER: number, dogs: Dog[], ingredientPercentage
   // Add regular supplements
   for (const supplement of ingredients.supplements) {
     if (supplement.name === "Eggshell Powder (Calcium)") {
-      // Calculate calcium needs and convert to eggshell powder
-      const calciumNeeds = calculateCalciumNeeds(totalDogWeight);
+      // Calcium is scaled to the total daily calories of the diet (mg per kcal),
+      // which is the veterinary-correct basis, rather than raw body weight.
+      const calciumNeeds = calculateCalciumNeeds(totalMER);
       const eggshellGrams = supplement.calciumMgPerGram
         ? calciumNeeds / supplement.calciumMgPerGram
         : 0;

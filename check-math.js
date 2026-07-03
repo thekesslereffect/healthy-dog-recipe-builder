@@ -1,52 +1,42 @@
-// Check the eggshell powder math
-console.log("Checking eggshell powder calcium calculations:");
+// Check the eggshell powder + calcium math against veterinary guidelines
+console.log("Checking eggshell powder + calcium calculations:");
 console.log("=".repeat(60));
 
-// Given information:
-const calciumPerScoop = 650; // mg calcium per 1/3 teaspoon
-const gramsPerScoop = 1.9; // grams per 1/3 teaspoon (your updated value)
-const currentCalciumMgPerGram = 360; // what's currently in the code
+// Eggshell powder is ~38% elemental calcium by weight.
+// Vet nutrition / USDA sources put finely ground eggshell at ~380 mg Ca per gram.
+const calciumMgPerGram = 380;
+const gramsPerScoop = 1.9; // 1/3 teaspoon ~= 1.9g per scoop
+const calciumPerScoop = calciumMgPerGram * gramsPerScoop; // ~722 mg per scoop
 
-console.log(`Given: 1/3 teaspoon provides ${calciumPerScoop}mg calcium`);
-console.log(`Given: 1/3 teaspoon weighs ${gramsPerScoop}g`);
-console.log(`Current calciumMgPerGram in code: ${currentCalciumMgPerGram}`);
+console.log(`Eggshell calcium density: ${calciumMgPerGram} mg/g (~38% calcium)`);
+console.log(`1/3 tsp scoop (${gramsPerScoop}g) provides ~${Math.round(calciumPerScoop)}mg calcium`);
 
-// Calculate what calciumMgPerGram should actually be
-const correctCalciumMgPerGram = calciumPerScoop / gramsPerScoop;
-console.log(`\nCalculated calciumMgPerGram should be: ${correctCalciumMgPerGram.toFixed(1)} mg/g`);
+// Calcium requirement is tied to CALORIES, not body weight.
+// NRC (2006) recommended allowance: 1.0 mg Ca/kcal.
+// AAFCO (2016) adult maintenance minimum: 1.25 mg Ca/kcal (what the app uses).
+const CALCIUM_MG_PER_KCAL = 1.25;
 
-// Check what the current code would calculate
-const calciumFromCurrentCode = gramsPerScoop * currentCalciumMgPerGram;
-console.log(`With current code (${currentCalciumMgPerGram} mg/g), 1/3 tsp would provide: ${calciumFromCurrentCode}mg calcium`);
-
-// Show the difference
-const difference = calciumFromCurrentCode - calciumPerScoop;
-console.log(`Difference from expected: ${difference > 0 ? '+' : ''}${difference}mg`);
-
-console.log("\n" + "=".repeat(60));
-console.log("RECOMMENDATION:");
-if (Math.abs(difference) > 10) {
-    console.log(`Update calciumMgPerGram to ${correctCalciumMgPerGram.toFixed(0)} for accurate calculations`);
-} else {
-    console.log("Current calculations are close enough (within 10mg)");
+function calculateDailyCalories(dog) {
+  const weightKg = dog.weight / 2.2046;
+  const RER = 70 * Math.pow(weightKg, 0.75);
+  return RER * dog.activityMultiplier;
 }
 
-// Test with example dogs
 console.log("\n" + "=".repeat(60));
-console.log("Example calculation with Jackson (35 lbs) + Joey (17 lbs):");
+console.log("Example: Jackson (30 lbs, 1.3x) + Joey (12 lbs, 1.0x)");
 
-function calculateCalciumNeeds(totalDogWeight) {
-    const totalWeightKg = totalDogWeight / 2.2046;
-    const calciumNeeds = totalWeightKg * 50; // mg per day
-    return Math.round(calciumNeeds);
-}
+const dogs = [
+  { name: "Jackson", weight: 30, activityMultiplier: 1.3 },
+  { name: "Joey", weight: 12, activityMultiplier: 1.0 },
+];
 
-const totalWeight = 35 + 17;
-const calciumNeeds = calculateCalciumNeeds(totalWeight);
-const eggshellGramsNeeded = calciumNeeds / correctCalciumMgPerGram;
+const totalCalories = dogs.reduce((sum, d) => sum + calculateDailyCalories(d), 0);
+const calciumNeeds = Math.round(totalCalories * CALCIUM_MG_PER_KCAL);
+const eggshellGramsNeeded = calciumNeeds / calciumMgPerGram;
 const scoopsNeeded = eggshellGramsNeeded / gramsPerScoop;
 
-console.log(`Total calcium needed: ${calciumNeeds}mg`);
+console.log(`Total daily calories (MER): ${totalCalories.toFixed(0)} kcal`);
+console.log(`Calcium needed (@ ${CALCIUM_MG_PER_KCAL} mg/kcal): ${calciumNeeds}mg`);
 console.log(`Eggshell powder needed: ${eggshellGramsNeeded.toFixed(2)}g`);
 console.log(`Scoops needed: ${scoopsNeeded.toFixed(2)} scoops (1/3 tsp each)`);
-console.log(`Actual calcium provided: ${Math.round(eggshellGramsNeeded * correctCalciumMgPerGram)}mg`); 
+console.log(`Actual calcium provided: ${Math.round(eggshellGramsNeeded * calciumMgPerGram)}mg`);
