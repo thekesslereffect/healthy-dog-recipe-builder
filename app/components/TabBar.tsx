@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react';
 
-export type TabId = 'dogs' | 'build' | 'recipe' | 'saved';
+export type TabId = 'home' | 'build' | 'saved' | 'profile';
 
 export interface TabDef {
   id: TabId;
@@ -19,7 +19,7 @@ export function TopTabs({ tabs, active, onChange }: TabBarProps) {
   return (
     <nav
       aria-label="Sections"
-      className="hidden sm:inline-flex rounded-xl border border-zinc-200 p-1 print:hidden"
+      className="hidden sm:inline-flex rounded-2xl border border-zinc-200 bg-white p-1 shadow-sm print:hidden"
     >
       {tabs.map((tab) => {
         const Icon = tab.icon;
@@ -30,7 +30,7 @@ export function TopTabs({ tabs, active, onChange }: TabBarProps) {
             type="button"
             aria-current={isActive ? 'page' : undefined}
             onClick={() => onChange(tab.id)}
-            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
               isActive ? 'bg-black text-white' : 'text-zinc-500 hover:text-black'
             }`}
           >
@@ -48,10 +48,10 @@ export function BottomTabs({ tabs, active, onChange }: TabBarProps) {
   return (
     <nav
       aria-label="Sections"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-zinc-200 bg-white/95 backdrop-blur sm:hidden print:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-zinc-200/80 bg-white/90 backdrop-blur-lg sm:hidden print:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="mx-auto flex max-w-5xl">
+      <div className="mx-auto flex max-w-lg">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = tab.id === active;
@@ -61,11 +61,17 @@ export function BottomTabs({ tabs, active, onChange }: TabBarProps) {
               type="button"
               aria-current={isActive ? 'page' : undefined}
               onClick={() => onChange(tab.id)}
-              className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors ${
+              className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition-colors ${
                 isActive ? 'text-black' : 'text-zinc-400'
               }`}
             >
-              <Icon width={22} height={22} strokeWidth={isActive ? 2.4 : 2} />
+              <span
+                className={`flex h-8 w-8 items-center justify-center rounded-xl ${
+                  isActive ? 'bg-zinc-100' : ''
+                }`}
+              >
+                <Icon width={20} height={20} strokeWidth={isActive ? 2.4 : 2} />
+              </span>
               {tab.label}
             </button>
           );

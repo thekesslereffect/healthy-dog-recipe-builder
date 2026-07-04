@@ -1,26 +1,30 @@
-// Shared Tailwind class tokens so the minimal black/white/zinc look stays
-// consistent across components.
-// Edge-to-edge on mobile (no chrome, max content width); a bordered card on
-// larger screens. Keeps the app feeling native on phones.
+// Shared Tailwind class tokens for a clean, modern app shell.
+// Soft page background + elevated white surfaces on all breakpoints.
+
 export const card =
-  'bg-white py-4 sm:rounded-2xl sm:border sm:border-zinc-200 sm:p-6 print:border-0 print:p-0 print:py-0 print:rounded-none';
+  'rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm sm:p-6 print:border-0 print:p-0 print:shadow-none print:rounded-none';
 
 export const sectionTitle =
   'text-lg sm:text-xl font-semibold tracking-tight text-black';
 
+export const pageTitle =
+  'text-2xl font-bold tracking-tight text-black sm:text-3xl';
+
+export const pageSubtitle = 'mt-1 text-sm text-zinc-500';
+
 export const fieldLabel = 'block text-sm font-medium text-zinc-600 mb-1.5';
 
 export const inputBase =
-  'w-full px-3.5 py-2.5 text-black bg-zinc-50 rounded-lg border border-transparent focus:outline-none focus:border-zinc-300 focus:bg-white transition-colors';
+  'w-full px-3.5 py-2.5 text-black bg-zinc-50 rounded-xl border border-transparent focus:outline-none focus:border-zinc-300 focus:bg-white focus:ring-2 focus:ring-zinc-200 transition-colors';
 
 export const groupLabel =
   'text-[11px] font-semibold uppercase tracking-wider text-zinc-500';
 
 export const btnPrimary =
-  'rounded-lg bg-black px-6 py-3 font-semibold text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400';
+  'rounded-xl bg-black px-5 py-3 font-semibold text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400';
 
 export const btnSecondary =
-  'rounded-lg bg-zinc-100 px-6 py-3 font-medium text-black transition-colors hover:bg-zinc-200';
+  'rounded-xl bg-zinc-100 px-5 py-3 font-medium text-black transition-colors hover:bg-zinc-200';
 
 export const iconBtn =
-  'inline-flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-black focus:outline-none focus:ring-2 focus:ring-zinc-300';
+  'inline-flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-black focus:outline-none focus:ring-2 focus:ring-zinc-300';

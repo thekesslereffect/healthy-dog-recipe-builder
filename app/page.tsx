@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   CATEGORIES,
   DEFAULT_COUNTS,
@@ -18,30 +18,64 @@ import {
 } from './utils/recipeCalculator';
 import { ingredients } from './data/ingredients';
 import { recipeToText, shoppingListToCsv, downloadTextFile } from './utils/export';
-import { weightUnitLabel, type MassUnit, type WeightUnit } from './utils/format';
+import { type MassUnit, type WeightUnit } from './utils/format';
 import { createId, type SavedRecipe } from './utils/savedRecipes';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { Disclaimer } from './components/Disclaimer';
-import { DogCard } from './components/DogCard';
+import { HomePlan } from './components/HomePlan';
+import { ProfileScreen } from './components/ProfileScreen';
 import { RatioControls } from './components/RatioControls';
 import { CountControls } from './components/CountControls';
-import { RecipeResults } from './components/RecipeResults';
+import { DailyRecipePanel } from './components/DailyRecipePanel';
 import { SavedRecipes } from './components/SavedRecipes';
 import { TopTabs, BottomTabs, type TabDef, type TabId } from './components/TabBar';
-import { btnPrimary, card, fieldLabel, inputBase, sectionTitle } from './components/ui';
-import { PawIcon, SlidersIcon, BowlIcon, PlusIcon, BookmarkIcon, InfoIcon } from './components/icons';
+import {
+  btnPrimary,
+  btnSecondary,
+  card,
+  fieldLabel,
+  inputBase,
+  pageSubtitle,
+  pageTitle,
+  sectionTitle,
+} from './components/ui';
+import {
+  CartIcon,
+  SlidersIcon,
+  BookmarkIcon,
+  UserIcon,
+  ShuffleIcon,
+} from './components/icons';
 
 const DEFAULT_DOGS: Dog[] = [
-  { name: 'Jackson', weight: 30, activityMultiplier: 1.3, allergies: [] },
-  { name: 'Joey', weight: 12, activityMultiplier: 1.0, allergies: [] },
+  { id: 'default-jackson', name: 'Jackson', weight: 30, activityMultiplier: 1.3, allergies: [] },
+  { id: 'default-joey', name: 'Joey', weight: 12, activityMultiplier: 1.0, allergies: [] },
 ];
 
 const TABS: TabDef[] = [
-  { id: 'dogs', label: 'Dogs', icon: PawIcon },
+  { id: 'home', label: 'Plan', icon: CartIcon },
   { id: 'build', label: 'Build', icon: SlidersIcon },
-  { id: 'recipe', label: 'Recipe', icon: BowlIcon },
   { id: 'saved', label: 'Saved', icon: BookmarkIcon },
+  { id: 'profile', label: 'Profile', icon: UserIcon },
 ];
+
+const PAGE_META: Record<TabId, { title: string; subtitle: string }> = {
+  home: {
+    title: 'Plan',
+    subtitle: 'Shopping list and feeding for your pack',
+  },
+  build: {
+    title: 'Build',
+    subtitle: 'Reroll until it looks right, then name and confirm',
+  },
+  saved: {
+    title: 'Saved',
+    subtitle: 'Plans you can reopen and edit',
+  },
+  profile: {
+    title: 'Profile',
+    subtitle: 'Dogs, allergies, and preferences',
+  },
+};
 
 export default function Home() {
   const [unit, setUnit] = useLocalStorage<WeightUnit>('hdrb.unit', 'lb');
@@ -51,7 +85,10 @@ export default function Home() {
   const [ratios, setRatios] = useLocalStorage<CategoryRatios>('hdrb.ratios', RECOMMENDED_RATIOS);
   const [counts, setCounts] = useLocalStorage<CategoryCounts>('hdrb.counts', DEFAULT_COUNTS);
   const [locked, setLocked] = useLocalStorage<Partial<Record<Category, string[]>>>('hdrb.locked', {});
+  // Active plan shown on Plan tab (only set after confirm, or when opening a saved plan).
   const [recipe, setRecipe] = useLocalStorage<Recipe | null>('hdrb.recipe', null);
+  // Working draft on Build — regenerate freely without touching the active plan.
+  const [draftRecipe, setDraftRecipe] = useLocalStorage<Recipe | null>('hdrb.draft', null);
   const [saved, setSaved] = useLocalStorage<SavedRecipe[]>('hdrb.saved', []);
   const [shoppingUnits, setShoppingUnits] = useLocalStorage<Record<string, MassUnit>>(
     'hdrb.shoppingUnits',
@@ -61,13 +98,21 @@ export default function Home() {
     'hdrb.portionUnits',
     {},
   );
-  const [activeTab, setActiveTab] = useState<TabId>('dogs');
+  const [activeTab, setActiveTab] = useState<TabId>('home');
   const [showInfo, setShowInfo] = useState(false);
   const [copied, setCopied] = useState(false);
   const [saveName, setSaveName] = useState('');
+  const [draftName, setDraftName] = useState('');
   const [justSaved, setJustSaved] = useState(false);
   const [justUpdated, setJustUpdated] = useState(false);
   const [currentSavedId, setCurrentSavedId] = useState<string | null>(null);
+
+  // Migrate older saved dogs that predate stable ids.
+  useEffect(() => {
+    if (dogs.some((d) => !d.id)) {
+      setDogs(dogs.map((d) => (d.id ? d : { ...d, id: createId() })));
+    }
+  }, [dogs, setDogs]);
 
   const percentageSum = CATEGORIES.reduce((sum, c) => sum + ratios[c], 0);
   const isPercentageValid = Math.abs(percentageSum - 1) < 0.001;
@@ -87,45 +132,60 @@ export default function Home() {
     return createRecipe(totalMER, withMER, ratios, counts, { excluded, locked: lockedState });
   };
 
-  const generate = () => {
+  // Generate / reroll only updates the Build draft — Plan stays unchanged until confirm.
+  const generateDraft = () => {
     if (!canGenerate) return;
-    setRecipe(computeRecipe(dogs));
+    setDraftRecipe(computeRecipe(dogs));
   };
 
   const addDog = () =>
-    setDogs([...dogs, { name: '', weight: 0, activityMultiplier: 1.6, allergies: [] }]);
+    setDogs([
+      ...dogs,
+      { id: createId(), name: '', weight: 0, activityMultiplier: 1.6, allergies: [] },
+    ]);
 
   const removeDog = (index: number) => {
     if (dogs.length > 1) setDogs(dogs.filter((_, i) => i !== index));
   };
 
-  const updateDog = (index: number, field: keyof Dog, value: string | number | string[]) => {
-    const nextDogs = dogs.map((dog, i) => (i === index ? { ...dog, [field]: value } : dog));
+  const updateDog = (
+    index: number,
+    field: keyof Dog,
+    value: string | number | string[] | undefined,
+  ) => {
+    const nextDogs = dogs.map((dog, i) => {
+      if (i !== index) return dog;
+      if (field === 'avatar' && value === undefined) {
+        const { avatar: _removed, ...rest } = dog;
+        return rest;
+      }
+      return { ...dog, [field]: value };
+    });
     setDogs(nextDogs);
-    // Keep an already-generated recipe consistent when allergies change.
-    if (field === 'allergies' && recipe) {
-      setRecipe(computeRecipe(nextDogs));
+    // Allergies affect ingredient pools — refresh draft and active plan if present.
+    if (field === 'allergies') {
+      if (draftRecipe) setDraftRecipe(computeRecipe(nextDogs));
+      if (recipe) setRecipe(computeRecipe(nextDogs));
     }
   };
 
-  // Changing the ingredient mix invalidates a previously generated recipe.
-  const clearRecipe = () => {
-    if (recipe) setRecipe(null);
+  const clearDraft = () => {
+    if (draftRecipe) setDraftRecipe(null);
   };
 
   const updateRatio = (category: Category, value: number) => {
     setRatios({ ...ratios, [category]: value });
-    clearRecipe();
+    clearDraft();
   };
 
   const updateCount = (category: Category, value: number) => {
     setCounts({ ...counts, [category]: value });
-    clearRecipe();
+    clearDraft();
   };
 
   const applyRecommendedRatios = () => {
     setRatios({ ...RECOMMENDED_RATIOS });
-    clearRecipe();
+    clearDraft();
   };
 
   const toggleLock = (category: Category, name: string) => {
@@ -138,24 +198,22 @@ export default function Home() {
     });
   };
 
-  // Swap a single ingredient in the current recipe, keeping the same calorie
-  // target for that slot (recomputing grams for the new ingredient).
   const swapIngredient = (category: Category, oldName: string, newName: string) => {
-    if (!recipe || oldName === newName) return;
+    if (!draftRecipe || oldName === newName) return;
     const data = ingredients[category].find((i) => i.name === newName);
     if (!data) return;
     const round2 = (n: number) => Math.round(n * 100) / 100;
     const cpg = data.caloriesPer100g || 0;
 
-    const nextCategoryItems = recipe.ingredients[category].map((row) => {
+    const nextCategoryItems = draftRecipe.ingredients[category].map((row) => {
       if (row.name !== oldName) return row;
       const grams = cpg > 0 ? round2((row.calories / cpg) * 100) : 0;
       return { name: newName, grams, calories: round2((grams * cpg) / 100) };
     });
 
     const nextRecipe: Recipe = {
-      ...recipe,
-      ingredients: { ...recipe.ingredients, [category]: nextCategoryItems },
+      ...draftRecipe,
+      ingredients: { ...draftRecipe.ingredients, [category]: nextCategoryItems },
     };
 
     let total = 0;
@@ -165,14 +223,43 @@ export default function Home() {
     for (const supplement of nextRecipe.ingredients.supplements) total += supplement.calories;
     nextRecipe.totalCalories = round2(total);
 
-    setRecipe(nextRecipe);
+    setDraftRecipe(nextRecipe);
 
-    // Keep lock state pointing at the ingredient that is actually in the recipe.
     setLocked((prev) => {
       const current = prev[category] ?? [];
       if (!current.includes(oldName)) return prev;
       return { ...prev, [category]: current.map((n) => (n === oldName ? newName : n)) };
     });
+  };
+
+  // Name + confirm commits the draft as the active Plan and saves it.
+  const confirmDraft = () => {
+    if (!draftRecipe) return;
+    const name = draftName.trim() || `Plan ${new Date().toLocaleDateString()}`;
+    const entry: SavedRecipe = {
+      id: createId(),
+      name,
+      savedAt: Date.now(),
+      dogs,
+      ratios,
+      counts,
+      numberOfDays,
+      mealsPerDay,
+      locked,
+      recipe: draftRecipe,
+    };
+    setRecipe(draftRecipe);
+    setSaved([entry, ...saved]);
+    setCurrentSavedId(entry.id);
+    setDraftRecipe(null);
+    setDraftName('');
+    setActiveTab('home');
+  };
+
+  const startAdjustingPlan = () => {
+    // Seed Build from the active plan only when there isn't already a draft.
+    if (recipe && !draftRecipe) setDraftRecipe(recipe);
+    setActiveTab('build');
   };
 
   const copyRecipe = async () => {
@@ -222,7 +309,17 @@ export default function Home() {
     setSaved(
       saved.map((s) =>
         s.id === currentSavedId
-          ? { ...s, savedAt: Date.now(), dogs, ratios, counts, numberOfDays, mealsPerDay, locked, recipe }
+          ? {
+              ...s,
+              savedAt: Date.now(),
+              dogs,
+              ratios,
+              counts,
+              numberOfDays,
+              mealsPerDay,
+              locked,
+              recipe,
+            }
           : s,
       ),
     );
@@ -237,15 +334,17 @@ export default function Home() {
   const loadSavedRecipe = (id: string) => {
     const entry = saved.find((s) => s.id === id);
     if (!entry) return;
-    setDogs(entry.dogs);
+    setDogs(entry.dogs.map((d) => (d.id ? d : { ...d, id: createId() })));
     setRatios(entry.ratios);
     setCounts(entry.counts);
     setNumberOfDays(entry.numberOfDays);
     setMealsPerDay(entry.mealsPerDay);
     setLocked(entry.locked);
     setRecipe(entry.recipe);
+    setDraftRecipe(null);
+    setDraftName('');
     setCurrentSavedId(entry.id);
-    setActiveTab('recipe');
+    setActiveTab('home');
   };
 
   const deleteSavedRecipe = (id: string) => {
@@ -253,107 +352,59 @@ export default function Home() {
     if (id === currentSavedId) setCurrentSavedId(null);
   };
 
+  const meta = PAGE_META[activeTab];
+
   return (
-    <div className="min-h-screen bg-white text-black print:min-h-0">
-      <div className="mx-auto w-full max-w-5xl px-3 pb-28 pt-4 sm:px-6 sm:pb-12 sm:pt-10 lg:px-8 print:px-2 print:py-2 print:max-w-none print:pb-2">
-        {/* Header */}
-        <header className="mb-4 flex items-center justify-between gap-3 sm:mb-8 print:mb-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <h1 className="truncate text-xl font-bold tracking-tight text-black sm:text-3xl lg:text-4xl print:text-2xl">
+    <div className="min-h-screen bg-zinc-50 text-black print:min-h-0 print:bg-white">
+      <div className="mx-auto w-full max-w-5xl px-3 pb-28 pt-4 sm:px-6 sm:pb-12 sm:pt-8 lg:px-8 print:px-2 print:py-2 print:max-w-none print:pb-2">
+        <header className="mb-5 flex items-start justify-between gap-3 sm:mb-8 print:mb-3">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 print:hidden">
               Healthy Dog Recipe Builder
-            </h1>
-            <button
-              type="button"
-              onClick={() => setShowInfo((v) => !v)}
-              aria-label="About this tool"
-              aria-expanded={showInfo}
-              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-black print:hidden"
-            >
-              <InfoIcon width={18} height={18} />
-            </button>
+            </p>
+            <h1 className={`${pageTitle} print:text-2xl`}>{meta.title}</h1>
+            <p className={`${pageSubtitle} print:hidden`}>{meta.subtitle}</p>
           </div>
           <TopTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
         </header>
 
-        {showInfo && (
-          <div className="mb-4 sm:mb-6 print:hidden">
-            <Disclaimer />
-          </div>
-        )}
-
-        {/* ---------------- Dogs ---------------- */}
-        {activeTab === 'dogs' && (
-          <div className="space-y-6 print:hidden">
-            <section className={card}>
-              <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                <h2 className={sectionTitle}>Your Dogs</h2>
-                <div className="flex items-center gap-2">
-                  <div
-                    className="inline-flex rounded-lg border border-zinc-200 p-0.5"
-                    role="group"
-                    aria-label="Weight units"
-                  >
-                    {(['lb', 'kg'] as const).map((u) => (
-                      <button
-                        key={u}
-                        type="button"
-                        onClick={() => setUnit(u)}
-                        aria-pressed={unit === u}
-                        className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                          unit === u ? 'bg-black text-white' : 'text-zinc-500 hover:text-black'
-                        }`}
-                      >
-                        {weightUnitLabel(u)}
-                      </button>
-                    ))}
-                  </div>
-                  <button
-                    onClick={addDog}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-zinc-100 px-3.5 py-2 text-sm font-medium text-black transition-colors hover:bg-zinc-200"
-                  >
-                    <PlusIcon width={15} height={15} />
-                    Add Dog
-                  </button>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {dogs.map((dog, index) => (
-                  <DogCard
-                    key={index}
-                    dog={dog}
-                    index={index}
-                    unit={unit}
-                    dailyCalories={calculateDailyCalories(dog)}
-                    canRemove={dogs.length > 1}
-                    onChange={(field, value) => updateDog(index, field, value)}
-                    onRemove={() => removeDog(index)}
-                  />
-                ))}
-              </div>
-            </section>
-
-            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-              <button
-                type="button"
-                onClick={() => setActiveTab('build')}
-                disabled={hasInvalidDog}
-                className={`${btnPrimary} w-full sm:w-auto`}
-              >
-                Continue to Build
-              </button>
-              {hasInvalidDog && (
-                <span className="text-sm text-zinc-500">
-                  Add a name and weight for each dog to continue.
-                </span>
-              )}
-            </div>
-          </div>
+        {/* ---------------- Plan (home) ---------------- */}
+        {activeTab === 'home' && (
+          <HomePlan
+            recipe={recipe}
+            hasDraft={!!draftRecipe}
+            dogsWithMER={dogsWithMER}
+            numberOfDays={numberOfDays}
+            mealsPerDay={mealsPerDay}
+            unit={unit}
+            shoppingUnits={shoppingUnits}
+            portionUnits={portionUnits}
+            copied={copied}
+            saveName={saveName}
+            justSaved={justSaved}
+            justUpdated={justUpdated}
+            currentSavedName={currentSaved?.name}
+            canGenerate={canGenerate}
+            hasInvalidDog={hasInvalidDog}
+            onDaysChange={setNumberOfDays}
+            onMealsChange={setMealsPerDay}
+            onShoppingUnitsChange={setShoppingUnits}
+            onPortionUnitsChange={setPortionUnits}
+            onCopy={copyRecipe}
+            onExportCsv={exportCsv}
+            onSaveNameChange={setSaveName}
+            onSave={saveCurrentRecipe}
+            onUpdate={updateSavedRecipe}
+            onGoBuild={startAdjustingPlan}
+            onGoProfile={() => setActiveTab('profile')}
+            onGoSaved={() => setActiveTab('saved')}
+          />
         )}
 
         {/* ---------------- Build ---------------- */}
         {activeTab === 'build' && (
-          <div className="space-y-6 print:hidden">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="space-y-5 print:hidden">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <RatioControls
                 ratios={ratios}
                 onChange={updateRatio}
@@ -362,157 +413,94 @@ export default function Home() {
               <CountControls counts={counts} onChange={updateCount} />
             </div>
 
-            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-              <button
-                type="button"
-                onClick={() => setActiveTab('recipe')}
-                disabled={!isPercentageValid}
-                className={`${btnPrimary} w-full sm:w-auto`}
-              >
-                Continue to Recipe
-              </button>
-              {!isPercentageValid && (
-                <span className="text-sm text-zinc-500">Ingredient ratios must total 100%.</span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ---------------- Recipe ---------------- */}
-        {activeTab === 'recipe' && (
-          <div className="space-y-6 print:space-y-2">
-            {/* Generation controls */}
-            <section className={`${card} print:hidden`}>
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                <div className="w-full max-w-[10rem]">
-                  <label className={fieldLabel} htmlFor="days">
-                    Shopping duration (days)
-                  </label>
-                  <input
-                    id="days"
-                    type="number"
-                    inputMode="numeric"
-                    value={numberOfDays}
-                    onChange={(e) => setNumberOfDays(Math.max(1, parseInt(e.target.value) || 1))}
-                    className={inputBase}
-                    min="1"
-                    max="30"
-                  />
+            <section className={card}>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className={sectionTitle}>Draft</h2>
+                  <p className="mt-1 text-sm text-zinc-500">
+                    Reroll as much as you like. Your active Plan stays put until you confirm.
+                  </p>
+                  {allergyList.length > 0 && (
+                    <p className="mt-2 text-sm text-zinc-500">
+                      Avoiding: <span className="text-zinc-700">{allergyList.join(', ')}</span>
+                    </p>
+                  )}
+                  {recipe && !draftRecipe && (
+                    <p className="mt-2 text-sm text-zinc-500">
+                      You already have an active plan. Generate a draft to try a new mix.
+                    </p>
+                  )}
                 </div>
                 <button
-                  onClick={generate}
+                  type="button"
+                  onClick={generateDraft}
                   disabled={!canGenerate}
-                  className={`${btnPrimary} w-full sm:w-auto`}
+                  className={`${btnPrimary} inline-flex w-full items-center justify-center gap-2 sm:w-auto`}
                 >
-                  {recipe ? 'Regenerate Recipe' : 'Generate Recipe'}
+                  <ShuffleIcon width={16} height={16} />
+                  {draftRecipe ? 'Reroll' : 'Generate draft'}
                 </button>
               </div>
-              {allergyList.length > 0 && (
-                <p className="mt-3 text-sm text-zinc-500">
-                  Avoiding for all dogs:{' '}
-                  <span className="text-zinc-700">{allergyList.join(', ')}</span>
-                </p>
-              )}
               {!canGenerate && (
                 <p className="mt-3 text-sm text-zinc-500">
                   {!isPercentageValid
-                    ? 'Ingredient ratios must total 100% (see Build).'
-                    : 'Finish setting up your dogs first (see Dogs).'}
+                    ? 'Ingredient ratios must total 100%.'
+                    : 'Finish setting up your dogs in Profile first.'}
                 </p>
-              )}
-
-              {recipe && (
-                <div className="mt-4 space-y-2 border-t border-zinc-200 pt-4">
-                  {currentSaved && (
-                    <button
-                      type="button"
-                      onClick={updateSavedRecipe}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-black px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 sm:w-auto"
-                    >
-                      <BookmarkIcon width={16} height={16} />
-                      {justUpdated ? 'Updated' : `Update “${currentSaved.name}”`}
-                    </button>
-                  )}
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <input
-                      type="text"
-                      value={saveName}
-                      onChange={(e) => setSaveName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') saveCurrentRecipe();
-                      }}
-                      placeholder="Name this recipe…"
-                      aria-label="Recipe name"
-                      className={`${inputBase} sm:max-w-xs`}
-                    />
-                    <button
-                      type="button"
-                      onClick={saveCurrentRecipe}
-                      className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-zinc-100 px-4 py-2.5 text-sm font-medium text-black transition-colors hover:bg-zinc-200"
-                    >
-                      <BookmarkIcon width={16} height={16} />
-                      {justSaved ? 'Saved' : currentSaved ? 'Save as new' : 'Save recipe'}
-                    </button>
-                  </div>
-                </div>
               )}
             </section>
 
-            {recipe ? (
+            {draftRecipe && (
               <>
-                {/* Print-only summary of settings */}
-                <div className="hidden print:mb-2 print:block print:text-xs">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h3 className="mb-1 font-semibold">Dogs:</h3>
-                      {dogs.map((dog, index) => (
-                        <div key={index} className="mb-0.5">
-                          {dog.name} - {dog.weight} lbs - Activity: {dog.activityMultiplier}
-                        </div>
-                      ))}
-                    </div>
-                    <div>
-                      <h3 className="mb-1 font-semibold">Settings:</h3>
-                      <div>
-                        Duration: {numberOfDays} days · {mealsPerDay} meals/day
-                      </div>
-                      <div className="mt-1">
-                        Ratios:{' '}
-                        {CATEGORIES.map(
-                          (c) => `${c[0].toUpperCase()}${Math.round(ratios[c] * 100)}`,
-                        ).join(' ')}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <RecipeResults
-                  recipe={recipe}
+                <DailyRecipePanel
+                  recipe={draftRecipe}
                   ratios={ratios}
-                  numberOfDays={numberOfDays}
-                  mealsPerDay={mealsPerDay}
-                  dogsWithMER={dogsWithMER}
-                  unit={unit}
                   locked={locked}
                   excluded={allergyList}
-                  copied={copied}
-                  shoppingUnits={shoppingUnits}
-                  portionUnits={portionUnits}
                   onToggleLock={toggleLock}
                   onSwap={swapIngredient}
-                  onMealsChange={setMealsPerDay}
-                  onShoppingUnitsChange={setShoppingUnits}
-                  onPortionUnitsChange={setPortionUnits}
-                  onCopy={copyRecipe}
-                  onExportCsv={exportCsv}
                 />
+
+                <section className={`${card} sticky bottom-20 z-10 border-zinc-200 shadow-md sm:static sm:shadow-sm`}>
+                  <h2 className={sectionTitle}>Confirm plan</h2>
+                  <p className="mt-1 text-sm text-zinc-500">
+                    Name it and send it to Plan — shopping list and feeding will update.
+                  </p>
+                  <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end">
+                    <div className="min-w-0 flex-1">
+                      <label className={fieldLabel} htmlFor="draft-name">
+                        Plan name
+                      </label>
+                      <input
+                        id="draft-name"
+                        type="text"
+                        value={draftName}
+                        onChange={(e) => setDraftName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') confirmDraft();
+                        }}
+                        placeholder="e.g. Weekly chicken mix"
+                        className={inputBase}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={generateDraft}
+                      className={`${btnSecondary} inline-flex items-center justify-center gap-2`}
+                    >
+                      <ShuffleIcon width={16} height={16} />
+                      Reroll
+                    </button>
+                    <button
+                      type="button"
+                      onClick={confirmDraft}
+                      className={`${btnPrimary} inline-flex items-center justify-center`}
+                    >
+                      Use this plan
+                    </button>
+                  </div>
+                </section>
               </>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-zinc-200 px-6 py-12 text-center print:hidden">
-                <p className="mx-auto max-w-sm text-sm text-zinc-500">
-                  Press “Generate Recipe” above to create a balanced meal plan for your dogs.
-                </p>
-              </div>
             )}
           </div>
         )}
@@ -529,14 +517,19 @@ export default function Home() {
           </div>
         )}
 
-        {/* Footer */}
-        <footer className="mt-12 border-t border-zinc-200 pt-6 text-center print:hidden">
-          <p className="text-xs leading-relaxed text-zinc-400">
-            Calories: RER = 70 × kg<sup>0.75</sup> × activity factor. Calcium: 1.25 mg/kcal (AAFCO 2016).
-            Food values from USDA FoodData Central.
-          </p>
-          <p className="mt-2 text-sm text-zinc-400">Created by - Your Husband</p>
-        </footer>
+        {/* ---------------- Profile ---------------- */}
+        {activeTab === 'profile' && (
+          <ProfileScreen
+            dogs={dogs}
+            unit={unit}
+            showInfo={showInfo}
+            onToggleInfo={() => setShowInfo((v) => !v)}
+            onUnitChange={setUnit}
+            onAddDog={addDog}
+            onRemoveDog={removeDog}
+            onUpdateDog={updateDog}
+          />
+        )}
       </div>
 
       <BottomTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
