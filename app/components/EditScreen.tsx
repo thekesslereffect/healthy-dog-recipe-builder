@@ -15,6 +15,7 @@ interface EditScreenProps {
   onSwap: (category: Category, oldName: string, newName: string) => void;
   onSave: () => void;
   onCancel: () => void;
+  onBalance?: () => void;
 }
 
 /** Edit an existing plan — swap ingredients, then Save. No reroll. */
@@ -29,6 +30,7 @@ export function EditScreen({
   onSwap,
   onSave,
   onCancel,
+  onBalance,
 }: EditScreenProps) {
   return (
     <div className="flex h-full min-h-0 flex-col gap-2">
@@ -44,7 +46,11 @@ export function EditScreen({
         />
       </div>
 
-      <NutritionSnapshot recipe={editRecipe} dogsWithMER={dogsWithMER} />
+      <NutritionSnapshot
+        recipe={editRecipe}
+        dogsWithMER={dogsWithMER}
+        onBalance={onBalance}
+      />
 
       <div className="shrink-0 space-y-2 rounded-2xl border border-zinc-100 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
         <input

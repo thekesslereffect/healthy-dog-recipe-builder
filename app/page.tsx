@@ -18,6 +18,7 @@ import {
 } from './utils/recipeCalculator';
 import { ingredients } from './data/ingredients';
 import { recipeToText } from './utils/export';
+import { balanceRecipeMix } from './utils/rebalance';
 import { type MassUnit, type WeightUnit } from './utils/format';
 import { createId, type SavedRecipe } from './utils/savedRecipes';
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -159,8 +160,29 @@ export default function Home() {
   };
 
   const generateDraft = () => {
-    if (!canGenerate) return;
-    setDraftRecipe(computeRecipe(dogs));
+    const nextRatios = { ...RECOMMENDED_RATIOS };
+    const sum = CATEGORIES.reduce((s, c) => s + nextRatios[c], 0);
+    const ratiosOk = Math.abs(sum - 1) < 0.001;
+    const dogsOk = !dogs.some((d) => !d.name?.trim() || d.weight <= 0);
+    if (!ratiosOk || !dogsOk) return;
+    setRatios(nextRatios);
+    setDraftRecipe(computeRecipe(dogs, locked, nextRatios, counts));
+  };
+
+  const balanceDraft = () => {
+    if (!draftRecipe) return;
+    const result = balanceRecipeMix(draftRecipe, dogs);
+    if (!result) return;
+    setRatios(result.ratios);
+    setDraftRecipe(result.recipe);
+  };
+
+  const balanceEdit = () => {
+    if (!editRecipe) return;
+    const result = balanceRecipeMix(editRecipe, dogs);
+    if (!result) return;
+    setRatios(result.ratios);
+    setEditRecipe(result.recipe);
   };
 
   /** Keep an existing draft when the mix changes (preserve locks). */
@@ -535,6 +557,7 @@ export default function Home() {
             onDraftNameChange={setDraftName}
             onToggleLock={toggleLock}
             onSwap={swapDraftIngredient}
+            onBalance={balanceDraft}
           />
         )}
 
@@ -550,6 +573,7 @@ export default function Home() {
             onSwap={swapEditIngredient}
             onSave={saveEdit}
             onCancel={cancelEdit}
+            onBalance={balanceEdit}
           />
         )}
 

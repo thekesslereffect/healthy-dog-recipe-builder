@@ -14,6 +14,7 @@ import {
   type Dog,
 } from './recipeCalculator';
 import { seededRandom } from './random';
+import { sumRecipeNutrients } from './nutrition';
 
 const withMER = (dog: Dog): Dog => ({ ...dog, MER: calculateDailyCalories(dog) });
 
@@ -42,7 +43,7 @@ describe('createRecipe', () => {
   ];
   const totalMER = getTotalMER(dogs);
 
-  it('bases eggshell calcium on total calories (1.25 mg/kcal), not body weight', () => {
+  it('doses eggshell so total calcium meets the AAFCO minimum (1.25 mg/kcal)', () => {
     const recipe = createRecipe(totalMER, dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
       random: seededRandom(1),
     });
@@ -50,9 +51,9 @@ describe('createRecipe', () => {
       s.name.startsWith('Eggshell'),
     );
     expect(eggshell).toBeDefined();
-    const expectedCalciumMg = Math.round(totalMER * CALCIUM_MG_PER_KCAL);
-    // 380 mg calcium per gram of eggshell powder.
-    expect(eggshell!.grams).toBeCloseTo(expectedCalciumMg / 380, 1);
+    const totals = sumRecipeNutrients(recipe);
+    const minCalciumMg = Math.round(totalMER * CALCIUM_MG_PER_KCAL);
+    expect(totals.calciumMg).toBeGreaterThanOrEqual(minCalciumMg - 2);
   });
 
   it('total calories are approximately the target MER', () => {

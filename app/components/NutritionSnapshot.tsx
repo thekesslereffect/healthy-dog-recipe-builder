@@ -4,6 +4,9 @@ import type { Dog, Recipe } from '../utils/recipeCalculator';
 interface NutritionSnapshotProps {
   recipe: Recipe;
   dogsWithMER: Dog[];
+  /** When set, shows a control to auto-adjust mix toward AAFCO targets. */
+  onBalance?: () => void;
+  balancing?: boolean;
 }
 
 function statusTone(status: NutrientStatus): string {
@@ -38,7 +41,12 @@ function shortLabel(id: string): string {
  * Compact AAFCO screening strip for Build / Edit.
  * Shows actual / recommended without dominating the screen.
  */
-export function NutritionSnapshot({ recipe, dogsWithMER }: NutritionSnapshotProps) {
+export function NutritionSnapshot({
+  recipe,
+  dogsWithMER,
+  onBalance,
+  balancing = false,
+}: NutritionSnapshotProps) {
   const { totals, checks, okCount } = assessRecipeNutrition(recipe, dogsWithMER);
   const allOk = okCount === checks.length;
   const issueHints = checks.filter((c) => c.status !== 'ok').map((c) => c.hint);
@@ -52,15 +60,27 @@ export function NutritionSnapshot({ recipe, dogsWithMER }: NutritionSnapshotProp
             {totals.calories} kcal
           </span>
         </p>
-        <span
-          className={`text-[10px] font-medium tabular-nums ${
-            allOk
-              ? 'text-emerald-600 dark:text-emerald-400'
-              : 'text-amber-700 dark:text-amber-400'
-          }`}
-        >
-          {okCount}/{checks.length}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`text-[10px] font-medium tabular-nums ${
+              allOk
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-amber-700 dark:text-amber-400'
+            }`}
+          >
+            {okCount}/{checks.length}
+          </span>
+          {onBalance && !allOk && (
+            <button
+              type="button"
+              onClick={onBalance}
+              disabled={balancing}
+              className="rounded-lg bg-zinc-900 px-2 py-0.5 text-[10px] font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
+            >
+              {balancing ? 'Balancing…' : 'Balance %'}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="mt-1.5 flex gap-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

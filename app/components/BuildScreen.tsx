@@ -34,6 +34,7 @@ interface BuildScreenProps {
   onDraftNameChange: (name: string) => void;
   onToggleLock: (category: Category, name: string) => void;
   onSwap: (category: Category, oldName: string, newName: string) => void;
+  onBalance?: () => void;
 }
 
 /** Create-only flow: generate, reroll, name, then use as the active plan. */
@@ -57,6 +58,7 @@ export function BuildScreen({
   onDraftNameChange,
   onToggleLock,
   onSwap,
+  onBalance,
 }: BuildScreenProps) {
   const [mixOpen, setMixOpen] = useState(false);
   const sum = CATEGORIES.reduce((total, c) => total + ratios[c], 0);
@@ -124,7 +126,11 @@ export function BuildScreen({
             />
           </div>
 
-          <NutritionSnapshot recipe={draftRecipe} dogsWithMER={dogsWithMER} />
+          <NutritionSnapshot
+            recipe={draftRecipe}
+            dogsWithMER={dogsWithMER}
+            onBalance={onBalance}
+          />
 
           <div className="shrink-0 space-y-2 rounded-2xl border border-zinc-100 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
             <input

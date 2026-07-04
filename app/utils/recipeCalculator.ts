@@ -1,11 +1,12 @@
 import {
   CATEGORIES,
   CALCIUM_MG_PER_KCAL,
+  AAFCO_ADULT_PER_1000_KCAL,
   GRAMS_PER_LB,
   LB_PER_KG,
   type Category,
 } from './constants';
-import { ingredients, type Ingredient } from '../data/ingredients';
+import { findFoodByName, ingredients, type Ingredient } from '../data/ingredients';
 
 export type { Ingredient };
 
@@ -135,31 +136,18 @@ export function createRecipe(
   const totalDogWeight = dogs.reduce((sum, dog) => sum + dog.weight, 0);
   let totalSupplementCalories = 0;
 
+  // Non-eggshell supplements first (eggshell is dosed after foods so Ca:P can balance).
   for (const supplement of ingredients.supplements) {
-    if (supplement.name === 'Eggshell Powder (Calcium)') {
-      const calciumNeeds = calculateCalciumNeeds(totalMER);
-      const eggshellGrams = supplement.calciumMgPerGram
-        ? calciumNeeds / supplement.calciumMgPerGram
-        : 0;
-      const calories = round2((eggshellGrams * (supplement.caloriesPer100g || 0)) / 100);
-      recipe.ingredients.supplements.push({
-        name: supplement.name,
-        grams: round2(eggshellGrams),
-        calories,
-        gramsPerScoop: supplement.gramsPerScoop || null,
-      });
-      totalSupplementCalories += calories;
-    } else {
-      const gramsPerDay = totalDogWeight * (supplement.gramsPerPoundPerDay || 0);
-      const calories = round2((gramsPerDay * (supplement.caloriesPer100g || 0)) / 100);
-      recipe.ingredients.supplements.push({
-        name: supplement.name,
-        grams: round2(gramsPerDay),
-        calories,
-        gramsPerScoop: supplement.gramsPerScoop || null,
-      });
-      totalSupplementCalories += calories;
-    }
+    if (supplement.name === 'Eggshell Powder (Calcium)') continue;
+    const gramsPerDay = totalDogWeight * (supplement.gramsPerPoundPerDay || 0);
+    const calories = round2((gramsPerDay * (supplement.caloriesPer100g || 0)) / 100);
+    recipe.ingredients.supplements.push({
+      name: supplement.name,
+      grams: round2(gramsPerDay),
+      calories,
+      gramsPerScoop: supplement.gramsPerScoop || null,
+    });
+    totalSupplementCalories += calories;
   }
 
   const remainingMER = totalMER - totalSupplementCalories;
@@ -201,6 +189,37 @@ export function createRecipe(
       });
       mainIngredientsCalories += actualCalories;
     }
+  }
+
+  // Dose eggshell to meet AAFCO calcium minimum and keep Ca:P ≥ 1:1.
+  let foodCalciumMg = 0;
+  let foodPhosphorusMg = 0;
+  for (const category of CATEGORIES) {
+    for (const row of recipe.ingredients[category]) {
+      const food = findFoodByName(row.name);
+      if (!food) continue;
+      foodCalciumMg += (food.calciumMgPer100g * row.grams) / 100;
+      foodPhosphorusMg += (food.phosphorusMgPer100g * row.grams) / 100;
+    }
+  }
+
+  const eggshell = ingredients.supplements.find((s) => s.name === 'Eggshell Powder (Calcium)');
+  if (eggshell?.calciumMgPerGram) {
+    const aafcoCalciumMg = calculateCalciumNeeds(totalMER);
+    const targetCalciumMg = Math.max(
+      aafcoCalciumMg,
+      foodPhosphorusMg * AAFCO_ADULT_PER_1000_KCAL.caPRatioMin,
+    );
+    const eggshellCalciumMg = Math.max(0, targetCalciumMg - foodCalciumMg);
+    const eggshellGrams = eggshellCalciumMg / eggshell.calciumMgPerGram;
+    const calories = round2((eggshellGrams * (eggshell.caloriesPer100g || 0)) / 100);
+    recipe.ingredients.supplements.push({
+      name: eggshell.name,
+      grams: round2(eggshellGrams),
+      calories,
+      gramsPerScoop: eggshell.gramsPerScoop || null,
+    });
+    totalSupplementCalories += calories;
   }
 
   recipe.totalCalories = round2(mainIngredientsCalories + totalSupplementCalories);
