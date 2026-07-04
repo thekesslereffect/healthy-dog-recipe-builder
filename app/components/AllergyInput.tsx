@@ -80,7 +80,7 @@ export function AllergyInput({ value, suggestions, onAdd, onRemove }: AllergyInp
           aria-controls={listId}
           aria-autocomplete="list"
           placeholder={value.length ? 'Add another…' : 'Type an ingredient…'}
-          className="min-w-[7rem] flex-1 bg-transparent px-1 py-0.5 text-sm text-black outline-none placeholder:text-zinc-400 dark:text-zinc-50"
+          className="min-w-[7rem] flex-1 bg-transparent px-1 py-0.5 text-base text-black outline-none placeholder:text-zinc-400 dark:text-zinc-50"
           onChange={(e) => {
             setQuery(e.target.value);
             setOpen(true);

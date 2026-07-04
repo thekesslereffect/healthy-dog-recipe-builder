@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CATEGORIES, type Category, type CategoryRatios } from '../utils/constants';
 import type { Recipe } from '../utils/recipeCalculator';
 import { ingredients } from '../data/ingredients';
@@ -26,7 +26,16 @@ export function DailyRecipePanel({
   onSwap,
   compact = false,
 }: DailyRecipePanelProps) {
-  const [editing, setEditing] = useState<string | null>(null);
+  const [editing, setEditing] = useState<{ category: Category; name: string } | null>(null);
+
+  const pickerOptions = useMemo(() => {
+    if (!editing) return [];
+    const usedNames = new Set(recipe.ingredients[editing.category].map((i) => i.name));
+    return ingredients[editing.category]
+      .filter((i) => (i.caloriesPer100g || 0) > 0)
+      .map((i) => i.name)
+      .filter((n) => !excluded.includes(n) && !usedNames.has(n));
+  }, [editing, recipe.ingredients, excluded]);
 
   const body = (
     <>
@@ -47,30 +56,6 @@ export function DailyRecipePanel({
               <div className="space-y-0.5">
                 {items.map((ingredient) => {
                   const isLocked = lockedNames.includes(ingredient.name);
-                  const editKey = `${category}:${ingredient.name}`;
-                  const isEditing = editing === editKey;
-
-                  if (isEditing) {
-                    const usedNames = new Set(items.map((i) => i.name));
-                    const options = ingredients[category]
-                      .filter((i) => (i.caloriesPer100g || 0) > 0)
-                      .map((i) => i.name)
-                      .filter((n) => !excluded.includes(n) && !usedNames.has(n));
-                    return (
-                      <div key={ingredient.name}>
-                        <IngredientPicker
-                          current={ingredient.name}
-                          suggestions={options}
-                          onSelect={(name) => {
-                            onSwap(category, ingredient.name, name);
-                            setEditing(null);
-                          }}
-                          onCancel={() => setEditing(null)}
-                        />
-                      </div>
-                    );
-                  }
-
                   return (
                     <div
                       key={ingredient.name}
@@ -78,7 +63,7 @@ export function DailyRecipePanel({
                     >
                       <button
                         type="button"
-                        onClick={() => setEditing(editKey)}
+                        onClick={() => setEditing({ category, name: ingredient.name })}
                         className="min-w-0 truncate text-left text-sm text-black dark:text-zinc-50"
                       >
                         {ingredient.name}
@@ -92,7 +77,7 @@ export function DailyRecipePanel({
                         <button
                           type="button"
                           aria-label={`Swap ${ingredient.name}`}
-                          onClick={() => setEditing(editKey)}
+                          onClick={() => setEditing({ category, name: ingredient.name })}
                           className={iconBtn}
                         >
                           <ArrowLeftRight size={14} />
@@ -145,21 +130,39 @@ export function DailyRecipePanel({
     </>
   );
 
+  const picker = editing ? (
+    <IngredientPicker
+      current={editing.name}
+      suggestions={pickerOptions}
+      onSelect={(name) => {
+        onSwap(editing.category, editing.name, name);
+        setEditing(null);
+      }}
+      onCancel={() => setEditing(null)}
+    />
+  ) : null;
+
   if (compact) {
     return (
-      <div className="flex h-full min-h-0 flex-col rounded-2xl border border-zinc-100 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
-        <div className="shrink-0 border-b border-zinc-50 px-3 py-2 dark:border-zinc-800">
-          <p className="text-sm font-medium text-black dark:text-zinc-50">Daily ingredients</p>
-          <p className="text-[11px] text-zinc-400">Tap to swap · lock to keep on reroll</p>
+      <>
+        <div className="flex h-full min-h-0 flex-col rounded-2xl border border-zinc-100 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
+          <div className="shrink-0 border-b border-zinc-50 px-3 py-2 dark:border-zinc-800">
+            <p className="text-sm font-medium text-black dark:text-zinc-50">Daily ingredients</p>
+            <p className="text-[11px] text-zinc-400">Tap to swap · lock to keep on reroll</p>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-2">{body}</div>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-2">{body}</div>
-      </div>
+        {picker}
+      </>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
-      {body}
-    </div>
+    <>
+      <div className="rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
+        {body}
+      </div>
+      {picker}
+    </>
   );
 }
