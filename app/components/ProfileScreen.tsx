@@ -1,16 +1,18 @@
+import { useState } from 'react';
 import type { Dog } from '../utils/recipeCalculator';
 import { calculateDailyCalories } from '../utils/recipeCalculator';
 import { weightUnitLabel, type WeightUnit } from '../utils/format';
-import { card } from './ui';
-import { PlusIcon } from './icons';
+import { btnPrimary, btnSecondary, segmentBtn, segmentTrack } from './ui';
+import { Plus } from 'lucide-react';
 import { DogCard } from './DogCard';
+import { DogAvatar } from './DogAvatar';
 import { Disclaimer } from './Disclaimer';
+import { Sheet } from './Sheet';
+import { Modal } from './Modal';
 
 interface ProfileScreenProps {
   dogs: Dog[];
   unit: WeightUnit;
-  showInfo: boolean;
-  onToggleInfo: () => void;
   onUnitChange: (unit: WeightUnit) => void;
   onAddDog: () => void;
   onRemoveDog: (index: number) => void;
@@ -20,93 +22,136 @@ interface ProfileScreenProps {
 export function ProfileScreen({
   dogs,
   unit,
-  showInfo,
-  onToggleInfo,
   onUnitChange,
   onAddDog,
   onRemoveDog,
   onUpdateDog,
 }: ProfileScreenProps) {
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [aboutOpen, setAboutOpen] = useState(false);
+
+  const editingDog = editingIndex !== null ? dogs[editingIndex] : null;
+  const editingName =
+    editingDog?.name?.trim() ||
+    (editingIndex !== null ? `Dog ${editingIndex + 1}` : 'Dog');
+
+  const closeEditor = () => setEditingIndex(null);
+
   return (
-    <div className="space-y-5 print:hidden">
-      <section className={card}>
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-base font-semibold text-black">Your dogs</h2>
-            <p className="text-sm text-zinc-500">Photos, weight, activity, and allergies</p>
-          </div>
-          <button
-            type="button"
-            onClick={onAddDog}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-black px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
-          >
-            <PlusIcon width={15} height={15} />
-            Add dog
-          </button>
-        </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {dogs.map((dog, index) => (
-            <DogCard
-              key={dog.id ?? index}
-              dog={dog}
-              index={index}
-              unit={unit}
-              dailyCalories={calculateDailyCalories(dog)}
-              canRemove={dogs.length > 1}
-              onChange={(field, value) => onUpdateDog(index, field, value)}
-              onRemove={() => onRemoveDog(index)}
-            />
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex shrink-0 items-center justify-between gap-2 pb-2">
+        <div className={segmentTrack}>
+          {(['lb', 'kg'] as const).map((u) => (
+            <button
+              key={u}
+              type="button"
+              className={segmentBtn(unit === u)}
+              onClick={() => onUnitChange(u)}
+            >
+              {weightUnitLabel(u)}
+            </button>
           ))}
         </div>
-      </section>
+        <button
+          type="button"
+          onClick={onAddDog}
+          className="inline-flex items-center gap-1 rounded-xl bg-black px-3 py-2 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
+        >
+          <Plus size={14} />
+          Add
+        </button>
+      </div>
 
-      <section className={card}>
-        <h2 className="text-base font-semibold text-black">Settings</h2>
-        <div className="mt-4 space-y-5">
-          <div>
-            <p className="mb-2 text-sm font-medium text-zinc-600">Weight units</p>
-            <div
-              className="inline-flex rounded-xl border border-zinc-200 bg-zinc-50 p-1"
-              role="group"
-              aria-label="Weight units"
-            >
-              {(['lb', 'kg'] as const).map((u) => (
-                <button
-                  key={u}
-                  type="button"
-                  onClick={() => onUnitChange(u)}
-                  aria-pressed={unit === u}
-                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                    unit === u ? 'bg-white text-black shadow-sm' : 'text-zinc-500 hover:text-black'
-                  }`}
-                >
-                  {weightUnitLabel(u)}
-                </button>
-              ))}
-            </div>
-          </div>
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="grid grid-cols-2 gap-2">
+          {dogs.map((dog, index) => {
+            const name = dog.name?.trim() || `Dog ${index + 1}`;
+            const cal = dog.weight > 0 ? Math.round(calculateDailyCalories(dog)) : null;
+            const allergyCount = dog.allergies?.length ?? 0;
+            return (
+              <button
+                key={dog.id ?? index}
+                type="button"
+                onClick={() => setEditingIndex(index)}
+                className="flex min-w-0 items-center gap-2.5 rounded-2xl border border-zinc-100 bg-white px-3 py-3 text-left shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none"
+              >
+                <DogAvatar name={name} avatar={dog.avatar} size="md" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-black dark:text-zinc-50">
+                    {name}
+                  </p>
+                  <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+                    {cal !== null ? `${cal} cal/day` : 'Needs weight'}
+                    {allergyCount > 0 ? ` · ${allergyCount} avoid` : ''}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
 
-          <div>
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <p className="text-sm font-medium text-zinc-600">About this tool</p>
+        <button
+          type="button"
+          onClick={() => setAboutOpen(true)}
+          className="mt-2 w-full rounded-2xl border border-zinc-100 bg-white px-3 py-3 text-left text-sm text-zinc-500 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 dark:shadow-none"
+        >
+          About this tool ›
+        </button>
+      </div>
+
+      <Modal
+        open={editingDog !== null && editingIndex !== null}
+        title={editingName}
+        onClose={closeEditor}
+        footer={
+          <>
+            {editingIndex !== null && dogs.length > 1 && (
               <button
                 type="button"
-                onClick={onToggleInfo}
-                className="rounded-xl bg-zinc-100 px-3 py-1.5 text-sm font-medium text-black transition-colors hover:bg-zinc-200"
+                onClick={() => {
+                  onRemoveDog(editingIndex);
+                  closeEditor();
+                }}
+                className="mr-auto text-sm font-medium text-red-600 hover:text-red-700"
               >
-                {showInfo ? 'Hide' : 'Show'}
+                Remove dog
               </button>
-            </div>
-            {showInfo && <Disclaimer />}
-          </div>
-        </div>
-      </section>
+            )}
+            <button type="button" onClick={closeEditor} className={btnSecondary}>
+              Cancel
+            </button>
+            <button type="button" onClick={closeEditor} className={btnPrimary}>
+              Done
+            </button>
+          </>
+        }
+      >
+        {editingDog && editingIndex !== null && (
+          <DogCard
+            dog={editingDog}
+            index={editingIndex}
+            unit={unit}
+            dailyCalories={calculateDailyCalories(editingDog)}
+            onChange={(field, value) => onUpdateDog(editingIndex, field, value)}
+          />
+        )}
+      </Modal>
 
-      <p className="px-1 text-center text-xs leading-relaxed text-zinc-400">
-        Calories: RER = 70 × kg<sup>0.75</sup> × activity factor. Calcium: 1.25 mg/kcal (AAFCO 2016).
-        Food values from USDA FoodData Central.
-      </p>
-      <p className="text-center text-sm text-zinc-400">Created by — Your Husband</p>
+      <Sheet open={aboutOpen} title="About this tool" onClose={() => setAboutOpen(false)}>
+        <Disclaimer />
+        <p className="mt-4 text-xs leading-relaxed text-zinc-400">
+          Calories: RER = 70 × kg<sup>0.75</sup> × activity factor. Calcium: 1.25 mg/kcal (AAFCO
+          2016). Food values from USDA FoodData Central.
+        </p>
+        <p className="mt-2 text-sm text-zinc-400">Created by — Your Husband</p>
+        <button
+          type="button"
+          onClick={() => setAboutOpen(false)}
+          className={`${btnPrimary} mt-4 w-full`}
+        >
+          Close
+        </button>
+      </Sheet>
     </div>
   );
 }

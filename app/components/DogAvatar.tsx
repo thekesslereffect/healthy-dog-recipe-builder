@@ -30,7 +30,7 @@ export function DogAvatar({ name, avatar, size = 'md', className = '' }: DogAvat
   return (
     <span
       aria-hidden="true"
-      className={`${dim} inline-flex shrink-0 items-center justify-center rounded-full font-semibold ring-2 ring-white ${avatarColorClass(label)} ${className}`}
+      className={`${dim} inline-flex shrink-0 items-center justify-center rounded-full font-medium ring-2 ring-white dark:ring-zinc-900 ${avatarColorClass(label)} ${className}`}
     >
       {initials(label)}
     </span>

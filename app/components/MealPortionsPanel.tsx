@@ -5,7 +5,7 @@ import {
   massUnitLabel,
   type MassUnit,
 } from '../utils/format';
-import { card, sectionTitle } from './ui';
+import { segmentBtn, segmentTrack } from './ui';
 import { DogAvatar } from './DogAvatar';
 
 interface Portion {
@@ -32,116 +32,103 @@ export function MealPortionsPanel({
   onMealsChange,
 }: MealPortionsPanelProps) {
   const portionUnitFor = (name: string): MassUnit => portionUnits[name] ?? 'g';
-  const setPortionUnitFor = (name: string, u: MassUnit) =>
-    onPortionUnitsChange({ ...portionUnits, [name]: u });
+  const entries = Object.entries(portions);
 
   return (
-    <section className={card}>
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-3 print:mb-1">
-        <div>
-          <h2 className={`${sectionTitle} print:text-lg`}>Feeding</h2>
-          <p className="mt-0.5 text-sm text-zinc-500 print:hidden">
-            How much each dog gets per day and per meal
-          </p>
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex shrink-0 items-center justify-between gap-2 pb-2 print:hidden">
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs font-medium text-zinc-500">Meals</span>
+          <div className={segmentTrack}>
+            {[1, 2, 3].map((n) => (
+              <button
+                key={n}
+                type="button"
+                className={segmentBtn(mealsPerDay === n)}
+                onClick={() => onMealsChange(n)}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3 print:hidden">
-          <label className="flex items-center gap-2 text-sm text-zinc-600">
-            All in
-            <select
-              value=""
-              onChange={(e) => {
-                const u = e.target.value as MassUnit;
-                if (!u) return;
-                const next: Record<string, MassUnit> = { ...portionUnits };
-                for (const name of Object.keys(portions)) next[name] = u;
-                onPortionUnitsChange(next);
-              }}
-              className="rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-zinc-300"
-              aria-label="Set units for all portions"
-            >
-              <option value="">Set all…</option>
-              {MASS_UNITS.map((u) => (
-                <option key={u} value={u}>
-                  {massUnitLabel(u)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex items-center gap-2 text-sm text-zinc-600">
-            Meals / day
-            <select
-              value={mealsPerDay}
-              onChange={(e) => onMealsChange(parseInt(e.target.value))}
-              className="rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-zinc-300"
-              aria-label="Meals per day"
-            >
-              <option value={1}>1</option>
-              <option value={2}>2</option>
-              <option value={3}>3</option>
-            </select>
-          </label>
+        <div className={segmentTrack}>
+          {MASS_UNITS.map((u) => {
+            const allMatch =
+              entries.length > 0 && entries.every(([name]) => portionUnitFor(name) === u);
+            return (
+              <button
+                key={u}
+                type="button"
+                className={segmentBtn(allMatch)}
+                onClick={() => {
+                  const next: Record<string, MassUnit> = { ...portionUnits };
+                  for (const [name] of entries) next[name] = u;
+                  onPortionUnitsChange(next);
+                }}
+              >
+                {massUnitLabel(u)}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 print:grid-cols-4 print:gap-2">
-        {Object.entries(portions).map(([dogName, portion]) => {
+      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain print:overflow-visible">
+        {entries.map(([dogName, portion]) => {
           const dog = dogsWithMER.find((d) => d.name === dogName);
           const pu = portionUnitFor(dogName);
           return (
             <div
               key={dogName}
-              className="rounded-2xl border border-zinc-100 bg-zinc-50/80 p-4 print:border-0 print:bg-transparent print:p-0"
+              className="flex items-center gap-3 rounded-2xl border border-zinc-100 bg-white px-3 py-3 dark:border-zinc-800 dark:bg-zinc-900 print:border-0 print:px-0 print:py-1"
             >
-              <div className="mb-3 flex items-center gap-3 print:mb-1">
-                <DogAvatar name={dogName} avatar={dog?.avatar} size="md" className="print:hidden" />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <h3 className="truncate font-semibold text-black print:text-sm">{dogName}</h3>
-                    <span className="shrink-0 text-xs font-medium tabular-nums text-zinc-400">
-                      {portion.percentage}%
+              <DogAvatar name={dogName} avatar={dog?.avatar} size="md" className="print:hidden" />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline justify-between gap-2">
+                  <h3 className="truncate text-sm font-medium text-black dark:text-zinc-50">
+                    {dogName}
+                  </h3>
+                  <span className="shrink-0 text-[11px] tabular-nums text-zinc-400">
+                    {portion.percentage}%
+                  </span>
+                </div>
+                <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-sm">
+                  <span className="tabular-nums text-black dark:text-zinc-50">
+                    <span className="font-medium">
+                      {convertMass(portion.mealPortion, pu)}
                     </span>
-                  </div>
-                  <p className="text-xs text-zinc-500">
-                    {Math.round(dog?.MER || 0)} cal/day
-                  </p>
-                </div>
-              </div>
-
-              <div className="mb-2 flex justify-end print:hidden">
-                <select
-                  value={pu}
-                  onChange={(e) => setPortionUnitFor(dogName, e.target.value as MassUnit)}
-                  aria-label={`Units for ${dogName}`}
-                  className="rounded-md border border-zinc-200 bg-white px-1.5 py-1 text-xs text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-300"
-                >
-                  {MASS_UNITS.map((option) => (
-                    <option key={option} value={option}>
-                      {massUnitLabel(option)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-baseline justify-between text-sm print:text-xs">
-                  <span className="text-zinc-500">Daily total</span>
-                  <span className="text-base font-semibold tabular-nums text-black print:text-sm">
-                    {convertMass(portion.dailyPortion, pu)} {massUnitLabel(pu)}
+                    <span className="text-zinc-500 dark:text-zinc-400">
+                      {' '}
+                      {massUnitLabel(pu)}/meal
+                    </span>
                   </span>
-                </div>
-                <div className="flex items-baseline justify-between text-sm print:text-xs">
-                  <span className="text-zinc-500">
-                    Per meal <span className="text-zinc-400">×{mealsPerDay}</span>
-                  </span>
-                  <span className="text-base font-semibold tabular-nums text-black print:text-sm">
-                    {convertMass(portion.mealPortion, pu)} {massUnitLabel(pu)}
+                  <span className="tabular-nums text-zinc-400">
+                    {convertMass(portion.dailyPortion, pu)} {massUnitLabel(pu)}/day
                   </span>
                 </div>
               </div>
+              <select
+                value={pu}
+                onChange={(e) =>
+                  onPortionUnitsChange({
+                    ...portionUnits,
+                    [dogName]: e.target.value as MassUnit,
+                  })
+                }
+                aria-label={`Units for ${dogName}`}
+                className="shrink-0 rounded-lg border-0 bg-zinc-100 py-1 pl-1.5 pr-1 text-[11px] text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 print:hidden"
+              >
+                {MASS_UNITS.map((option) => (
+                  <option key={option} value={option}>
+                    {massUnitLabel(option)}
+                  </option>
+                ))}
+              </select>
             </div>
           );
         })}
       </div>
-    </section>
+    </div>
   );
 }

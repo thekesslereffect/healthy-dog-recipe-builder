@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   calculateMealPortions,
   calculateShoppingList,
@@ -5,45 +6,42 @@ import {
   type Recipe,
 } from '../utils/recipeCalculator';
 import type { MassUnit, WeightUnit } from '../utils/format';
-import { btnPrimary, btnSecondary, card, fieldLabel, inputBase } from './ui';
+import { btnPrimary, btnSecondary, iconBtn, segmentBtn, segmentTrack } from './ui';
 import {
-  BookmarkIcon,
-  BowlIcon,
-  CopyIcon,
-  DownloadIcon,
-  PrinterIcon,
-  SlidersIcon,
-} from './icons';
+  Bookmark,
+  CookingPot,
+  Copy,
+  Pencil,
+  Printer,
+  SlidersHorizontal,
+} from 'lucide-react';
 import { ShoppingListPanel } from './ShoppingListPanel';
 import { MealPortionsPanel } from './MealPortionsPanel';
 import { DogAvatar } from './DogAvatar';
 
+type PlanPane = 'shop' | 'feed';
+
 interface HomePlanProps {
   recipe: Recipe | null;
-  /** True when Build has an unconfirmed draft. */
   hasDraft: boolean;
+  planName?: string;
   dogsWithMER: Dog[];
   numberOfDays: number;
   mealsPerDay: number;
   unit: WeightUnit;
   shoppingUnits: Record<string, MassUnit>;
+  checkedItems: Record<string, boolean>;
   portionUnits: Record<string, MassUnit>;
   copied: boolean;
-  saveName: string;
-  justSaved: boolean;
-  justUpdated: boolean;
-  currentSavedName?: string;
   canGenerate: boolean;
   hasInvalidDog: boolean;
   onDaysChange: (days: number) => void;
   onMealsChange: (meals: number) => void;
   onShoppingUnitsChange: (next: Record<string, MassUnit>) => void;
+  onCheckedItemsChange: (next: Record<string, boolean>) => void;
   onPortionUnitsChange: (next: Record<string, MassUnit>) => void;
   onCopy: () => void;
-  onExportCsv: () => void;
-  onSaveNameChange: (name: string) => void;
-  onSave: () => void;
-  onUpdate: () => void;
+  onGoEdit: () => void;
   onGoBuild: () => void;
   onGoProfile: () => void;
   onGoSaved: () => void;
@@ -52,97 +50,79 @@ interface HomePlanProps {
 export function HomePlan({
   recipe,
   hasDraft,
+  planName,
   dogsWithMER,
   numberOfDays,
   mealsPerDay,
   unit,
   shoppingUnits,
+  checkedItems,
   portionUnits,
   copied,
-  saveName,
-  justSaved,
-  justUpdated,
-  currentSavedName,
   canGenerate,
   hasInvalidDog,
   onDaysChange,
   onMealsChange,
   onShoppingUnitsChange,
+  onCheckedItemsChange,
   onPortionUnitsChange,
   onCopy,
-  onExportCsv,
-  onSaveNameChange,
-  onSave,
-  onUpdate,
+  onGoEdit,
   onGoBuild,
   onGoProfile,
   onGoSaved,
 }: HomePlanProps) {
+  const [pane, setPane] = useState<PlanPane>('shop');
+
   if (!recipe) {
     return (
-      <div className="space-y-4 print:hidden">
-        <section className={`${card} text-center`}>
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-500">
-            <BowlIcon width={28} height={28} />
-          </div>
-          <h2 className="mt-4 text-xl font-semibold tracking-tight text-black">
-            {hasDraft ? 'Finish your draft' : 'Your plan starts here'}
-          </h2>
-          <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-zinc-500">
-            {hasDraft
-              ? 'You have a draft in Build. Name it and confirm to put the shopping list and feeding amounts here.'
-              : 'Build a draft, reroll until you like it, then confirm — this screen becomes your shopping list and feeding guide.'}
-          </p>
-          <div className="mt-6 flex flex-col items-stretch justify-center gap-2 sm:flex-row sm:items-center">
-            <button
-              type="button"
-              onClick={onGoBuild}
-              disabled={!canGenerate && !hasDraft}
-              className={`${btnPrimary} inline-flex items-center justify-center gap-2`}
-            >
-              <SlidersIcon width={16} height={16} />
-              {hasDraft ? 'Finish draft' : 'Build a plan'}
+      <div className="flex h-full min-h-0 flex-col items-center justify-center px-2 text-center print:hidden">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+          <CookingPot size={28} />
+        </div>
+        <h2 className="mt-4 text-lg font-semibold tracking-tight text-black dark:text-zinc-50">
+          {hasDraft ? 'Finish your draft' : 'No active plan'}
+        </h2>
+        <p className="mt-1.5 max-w-xs text-sm text-zinc-500">
+          {hasDraft
+            ? 'Name and use your draft in Build to see shopping and feeding here.'
+            : 'Build a draft, reroll until you like it, then use it as your plan.'}
+        </p>
+        <div className="mt-5 flex w-full max-w-xs flex-col gap-2">
+          <button
+            type="button"
+            onClick={onGoBuild}
+            disabled={!canGenerate && !hasDraft}
+            className={`${btnPrimary} inline-flex items-center justify-center gap-2`}
+          >
+            <SlidersHorizontal size={16} />
+            {hasDraft ? 'Finish draft' : 'Build a plan'}
+          </button>
+          {hasInvalidDog && (
+            <button type="button" onClick={onGoProfile} className={btnSecondary}>
+              Set up dogs
             </button>
-            {hasInvalidDog && (
-              <button
-                type="button"
-                onClick={onGoProfile}
-                className={`${btnSecondary} inline-flex items-center justify-center`}
-              >
-                Set up your dogs
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={onGoSaved}
-              className={`${btnSecondary} inline-flex items-center justify-center gap-2`}
-            >
-              <BookmarkIcon width={16} height={16} />
-              Open saved
-            </button>
-          </div>
-          {!canGenerate && !hasInvalidDog && !hasDraft && (
-            <p className="mt-3 text-sm text-zinc-500">Finish ingredient ratios in Build first.</p>
           )}
-        </section>
-
+          <button
+            type="button"
+            onClick={onGoSaved}
+            className={`${btnSecondary} inline-flex items-center justify-center gap-2`}
+          >
+            <Bookmark size={16} />
+            Open saved
+          </button>
+        </div>
         {dogsWithMER.length > 0 && (
-          <section className={card}>
-            <h3 className="text-sm font-medium text-zinc-500">Your pack</h3>
-            <div className="mt-3 flex flex-wrap gap-3">
-              {dogsWithMER.map((dog) => (
-                <button
-                  key={dog.id ?? dog.name}
-                  type="button"
-                  onClick={onGoProfile}
-                  className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white py-1.5 pl-1.5 pr-3 text-sm font-medium text-black transition-colors hover:border-zinc-300"
-                >
-                  <DogAvatar name={dog.name} avatar={dog.avatar} size="sm" />
-                  {dog.name || 'Unnamed'}
-                </button>
-              ))}
-            </div>
-          </section>
+          <button type="button" onClick={onGoProfile} className="mt-6 flex items-center gap-2">
+            {dogsWithMER.slice(0, 4).map((dog) => (
+              <DogAvatar
+                key={dog.id ?? dog.name}
+                name={dog.name}
+                avatar={dog.avatar}
+                size="sm"
+              />
+            ))}
+          </button>
         )}
       </div>
     );
@@ -152,143 +132,106 @@ export function HomePlan({
   const portions = calculateMealPortions(recipe, dogsWithMER, mealsPerDay);
 
   return (
-    <div className="space-y-5 print:space-y-2">
-      {/* Compact plan toolbar */}
-      <section className={`${card} print:hidden`}>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-3">
-            <div>
-              <label className={fieldLabel} htmlFor="home-days">
-                Days
-              </label>
-              <input
-                id="home-days"
-                type="number"
-                inputMode="numeric"
-                min={1}
-                max={30}
-                value={numberOfDays}
-                onChange={(e) => onDaysChange(Math.max(1, parseInt(e.target.value) || 1))}
-                className={`${inputBase} w-20`}
-              />
-            </div>
-            <div className="flex flex-wrap gap-1.5 pt-5">
-              {dogsWithMER.map((dog) => (
-                <DogAvatar
-                  key={dog.id ?? dog.name}
-                  name={dog.name}
-                  avatar={dog.avatar}
-                  size="sm"
-                />
-              ))}
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={onCopy}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-100 px-3 py-2 text-sm font-medium text-black transition-colors hover:bg-zinc-200"
-            >
-              <CopyIcon width={15} height={15} />
-              {copied ? 'Copied' : 'Copy'}
-            </button>
-            <button
-              type="button"
-              onClick={onExportCsv}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-100 px-3 py-2 text-sm font-medium text-black transition-colors hover:bg-zinc-200"
-            >
-              <DownloadIcon width={15} height={15} />
-              CSV
-            </button>
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-100 px-3 py-2 text-sm font-medium text-black transition-colors hover:bg-zinc-200"
-            >
-              <PrinterIcon width={15} height={15} />
-              Print
-            </button>
-            <button
-              type="button"
-              onClick={onGoBuild}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-black px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
-            >
-              <SlidersIcon width={15} height={15} />
-              Adjust
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-col gap-2 border-t border-zinc-100 pt-4 sm:flex-row sm:items-center">
-          {currentSavedName && (
-            <button
-              type="button"
-              onClick={onUpdate}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-zinc-900 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
-            >
-              <BookmarkIcon width={15} height={15} />
-              {justUpdated ? 'Updated' : `Update “${currentSavedName}”`}
-            </button>
-          )}
-          <input
-            type="text"
-            value={saveName}
-            onChange={(e) => onSaveNameChange(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') onSave();
-            }}
-            placeholder="Name this plan…"
-            aria-label="Recipe name"
-            className={`${inputBase} sm:max-w-xs`}
-          />
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex shrink-0 items-center justify-between gap-2 pb-2 print:hidden">
+        <div className={segmentTrack}>
           <button
             type="button"
-            onClick={onSave}
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-zinc-100 px-3.5 py-2 text-sm font-medium text-black transition-colors hover:bg-zinc-200"
+            className={segmentBtn(pane === 'shop')}
+            onClick={() => setPane('shop')}
           >
-            <BookmarkIcon width={15} height={15} />
-            {justSaved ? 'Saved' : currentSavedName ? 'Save as new' : 'Save'}
+            Shop
+          </button>
+          <button
+            type="button"
+            className={segmentBtn(pane === 'feed')}
+            onClick={() => setPane('feed')}
+          >
+            Feed
           </button>
         </div>
-      </section>
-
-      {/* Print-only summary */}
-      <div className="hidden print:mb-2 print:block print:text-xs">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <h3 className="mb-1 font-semibold">Dogs:</h3>
-            {dogsWithMER.map((dog) => (
-              <div key={dog.id ?? dog.name} className="mb-0.5">
-                {dog.name} — {dog.weight} lbs — Activity: {dog.activityMultiplier}
-              </div>
-            ))}
-          </div>
-          <div>
-            <h3 className="mb-1 font-semibold">Settings:</h3>
-            <div>
-              Duration: {numberOfDays} days · {mealsPerDay} meals/day
-            </div>
-          </div>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={onGoEdit}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-black px-3 py-1.5 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
+          >
+            <Pencil size={14} />
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={onCopy}
+            className={iconBtn}
+            aria-label={copied ? 'Copied' : 'Copy'}
+            title={copied ? 'Copied' : 'Copy'}
+          >
+            <Copy size={16} />
+          </button>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className={iconBtn}
+            aria-label="Print"
+          >
+            <Printer size={16} />
+          </button>
         </div>
       </div>
 
-      <ShoppingListPanel
-        shoppingList={shoppingList}
-        numberOfDays={numberOfDays}
-        unit={unit}
-        shoppingUnits={shoppingUnits}
-        onShoppingUnitsChange={onShoppingUnitsChange}
-        featured
-      />
+      <div className="hidden print:mb-2 print:block print:text-xs">
+        {planName && <h2 className="mb-1 text-sm font-semibold">{planName}</h2>}
+        {dogsWithMER.map((dog) => (
+          <div key={dog.id ?? dog.name}>
+            {dog.name} — {dog.weight} lbs — {mealsPerDay} meals/day — {numberOfDays} days
+          </div>
+        ))}
+      </div>
 
-      <MealPortionsPanel
-        portions={portions}
-        dogsWithMER={dogsWithMER}
-        mealsPerDay={mealsPerDay}
-        portionUnits={portionUnits}
-        onPortionUnitsChange={onPortionUnitsChange}
-        onMealsChange={onMealsChange}
-      />
+      <div className="min-h-0 flex-1 print:hidden">
+        {pane === 'shop' ? (
+          <ShoppingListPanel
+            shoppingList={shoppingList}
+            numberOfDays={numberOfDays}
+            unit={unit}
+            shoppingUnits={shoppingUnits}
+            checkedItems={checkedItems}
+            onShoppingUnitsChange={onShoppingUnitsChange}
+            onCheckedItemsChange={onCheckedItemsChange}
+            onDaysChange={onDaysChange}
+          />
+        ) : (
+          <MealPortionsPanel
+            portions={portions}
+            dogsWithMER={dogsWithMER}
+            mealsPerDay={mealsPerDay}
+            portionUnits={portionUnits}
+            onPortionUnitsChange={onPortionUnitsChange}
+            onMealsChange={onMealsChange}
+          />
+        )}
+      </div>
+
+      <div className="hidden print:block print:space-y-4">
+        <ShoppingListPanel
+          shoppingList={shoppingList}
+          numberOfDays={numberOfDays}
+          unit={unit}
+          shoppingUnits={shoppingUnits}
+          checkedItems={checkedItems}
+          onShoppingUnitsChange={onShoppingUnitsChange}
+          onCheckedItemsChange={onCheckedItemsChange}
+          onDaysChange={onDaysChange}
+        />
+        <MealPortionsPanel
+          portions={portions}
+          dogsWithMER={dogsWithMER}
+          mealsPerDay={mealsPerDay}
+          portionUnits={portionUnits}
+          onPortionUnitsChange={onPortionUnitsChange}
+          onMealsChange={onMealsChange}
+        />
+      </div>
     </div>
   );
 }

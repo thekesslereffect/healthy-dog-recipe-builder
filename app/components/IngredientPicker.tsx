@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { CloseIcon } from './icons';
+import { X } from 'lucide-react';
 
 interface IngredientPickerProps {
   current: string;
@@ -49,7 +49,7 @@ export function IngredientPicker({
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-1.5 rounded-lg bg-white px-2 py-1.5 ring-1 ring-zinc-300">
+      <div className="flex items-center gap-1.5 rounded-lg bg-white px-2 py-1.5 ring-1 ring-zinc-300 dark:bg-zinc-900 dark:ring-zinc-600">
         <input
           ref={inputRef}
           type="text"
@@ -59,7 +59,7 @@ export function IngredientPicker({
           aria-controls={listId}
           aria-autocomplete="list"
           placeholder={`Replace ${current}…`}
-          className="min-w-0 flex-1 bg-transparent px-1 text-sm text-black outline-none placeholder:text-zinc-400"
+          className="min-w-0 flex-1 bg-transparent px-1 text-sm text-black outline-none placeholder:text-zinc-400 dark:text-zinc-50"
           onChange={(e) => {
             setQuery(e.target.value);
             setHighlight(0);
@@ -71,9 +71,9 @@ export function IngredientPicker({
           type="button"
           onClick={onCancel}
           aria-label="Cancel"
-          className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-zinc-400 hover:bg-zinc-100 hover:text-black"
+          className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-zinc-400 hover:bg-zinc-100 hover:text-black dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
         >
-          <CloseIcon width={13} height={13} />
+          <X size={13} />
         </button>
       </div>
 
@@ -81,7 +81,7 @@ export function IngredientPicker({
         <ul
           id={listId}
           role="listbox"
-          className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-zinc-200 bg-white py-1 shadow-lg"
+          className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
         >
           {matches.map((name, index) => (
             <li key={name} role="option" aria-selected={index === highlight}>
@@ -93,7 +93,9 @@ export function IngredientPicker({
                 }}
                 onMouseEnter={() => setHighlight(index)}
                 className={`block w-full px-3 py-1.5 text-left text-sm ${
-                  index === highlight ? 'bg-zinc-100 text-black' : 'text-zinc-700'
+                  index === highlight
+                    ? 'bg-zinc-100 text-black dark:bg-zinc-800 dark:text-zinc-50'
+                    : 'text-zinc-700 dark:text-zinc-300'
                 }`}
               >
                 {name}
