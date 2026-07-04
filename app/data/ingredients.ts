@@ -24,26 +24,32 @@ export type IngredientDatabase = Record<Category, Ingredient[]> & {
 // values (dogs eat them cooked) and are labelled "(cooked)".
 export const ingredients: IngredientDatabase = {
   protein: [
+    { name: 'Beef (ground, 75% lean)', caloriesPer100g: 293, source: 'USDA FDC SR Legacy, raw (75/25)' },
     { name: 'Beef (ground, 85% lean)', caloriesPer100g: 215, source: 'USDA FDC, raw' },
     { name: 'Beef (sirloin steak)', caloriesPer100g: 201, source: 'USDA FDC, raw' },
-    { name: 'Turkey (ground, 85% lean)', caloriesPer100g: 213, source: 'USDA FDC, raw' },
-    { name: 'Turkey (breast, skinless)', caloriesPer100g: 114, source: 'USDA FDC, raw' },
-    { name: 'Duck (meat without skin)', caloriesPer100g: 185, source: 'USDA FDC, raw' },
-    { name: 'Pork (lean cuts)', caloriesPer100g: 143, source: 'USDA FDC, raw (loin)' },
-    { name: 'Venison', caloriesPer100g: 158, source: 'USDA FDC, raw (ground)' },
     { name: 'Buffalo/Bison', caloriesPer100g: 146, source: 'USDA FDC, raw (ground)' },
-    { name: 'Tuna (canned in water)', caloriesPer100g: 116, source: 'USDA FDC, drained' },
+    { name: 'Chicken (ground)', caloriesPer100g: 143, source: 'USDA FDC SR Legacy, raw' },
+    { name: 'Duck (meat without skin)', caloriesPer100g: 185, source: 'USDA FDC, raw' },
+    { name: 'Lamb (ground)', caloriesPer100g: 282, source: 'USDA FDC SR Legacy, raw (FDC 174370)' },
+    { name: 'Mackerel', caloriesPer100g: 205, source: 'USDA FDC, raw (Atlantic)' },
+    { name: 'Pork (ground)', caloriesPer100g: 263, source: 'USDA FDC SR Legacy, raw' },
+    { name: 'Pork (lean cuts)', caloriesPer100g: 143, source: 'USDA FDC, raw (loin)' },
+    { name: 'Salmon (Atlantic, farmed)', caloriesPer100g: 208, source: 'USDA FDC SR Legacy, raw' },
     { name: 'Tilapia', caloriesPer100g: 96, source: 'USDA FDC, raw' },
     { name: 'Trout', caloriesPer100g: 141, source: 'USDA FDC, raw' },
-    { name: 'Mackerel', caloriesPer100g: 205, source: 'USDA FDC, raw (Atlantic)' },
+    { name: 'Tuna (canned in water)', caloriesPer100g: 116, source: 'USDA FDC, drained' },
+    { name: 'Turkey (breast, skinless)', caloriesPer100g: 114, source: 'USDA FDC, raw' },
+    { name: 'Turkey (ground, 85% lean)', caloriesPer100g: 213, source: 'USDA FDC, raw' },
+    { name: 'Venison', caloriesPer100g: 158, source: 'USDA FDC, raw (ground)' },
   ],
 
   organs: [
-    { name: 'Pork Heart', caloriesPer100g: 118, source: 'USDA FDC, raw' },
-    { name: 'Pork Liver', caloriesPer100g: 134, source: 'USDA FDC, raw' },
-    { name: 'Pork Kidneys', caloriesPer100g: 100, source: 'USDA FDC, raw' },
-    { name: 'Beef Liver', caloriesPer100g: 135, source: 'USDA FDC, raw' },
     { name: 'Beef Kidneys', caloriesPer100g: 99, source: 'USDA FDC, raw' },
+    { name: 'Beef Liver', caloriesPer100g: 135, source: 'USDA FDC, raw' },
+    { name: 'Chicken Heart', caloriesPer100g: 153, source: 'USDA FDC SR Legacy, raw (FDC 171458)' },
+    { name: 'Pork Heart', caloriesPer100g: 118, source: 'USDA FDC, raw' },
+    { name: 'Pork Kidneys', caloriesPer100g: 100, source: 'USDA FDC, raw' },
+    { name: 'Pork Liver', caloriesPer100g: 134, source: 'USDA FDC, raw' },
   ],
 
   carbs: [
@@ -54,11 +60,13 @@ export const ingredients: IngredientDatabase = {
   fruits: [
     { name: 'Apple', caloriesPer100g: 52, source: 'USDA FDC, raw' },
     { name: 'Blueberry', caloriesPer100g: 57, source: 'USDA FDC, raw' },
+    { name: 'Cantaloupe', caloriesPer100g: 34, source: 'USDA FDC SR Legacy, raw' },
     { name: 'Strawberries', caloriesPer100g: 32, source: 'USDA FDC, raw' },
     { name: 'Watermelon', caloriesPer100g: 30, source: 'USDA FDC, raw' },
   ],
 
   veggies: [
+    { name: 'Bok Choy', caloriesPer100g: 13, source: 'USDA FDC, raw (pak-choi)' },
     { name: 'Broccoli', caloriesPer100g: 34, source: 'USDA FDC, raw' },
     { name: 'Brussels Sprouts', caloriesPer100g: 43, source: 'USDA FDC, raw' },
     { name: 'Cabbage', caloriesPer100g: 25, source: 'USDA FDC, raw' },
@@ -70,11 +78,11 @@ export const ingredients: IngredientDatabase = {
     { name: 'Green Beans', caloriesPer100g: 31, source: 'USDA FDC, raw' },
     { name: 'Green Peas', caloriesPer100g: 81, source: 'USDA FDC, raw' },
     { name: 'Kale', caloriesPer100g: 49, source: 'USDA FDC, raw' },
+    { name: 'Pumpkin', caloriesPer100g: 26, source: 'USDA FDC SR Legacy, raw' },
     { name: 'Spinach', caloriesPer100g: 23, source: 'USDA FDC, raw' },
-    { name: 'Zucchini', caloriesPer100g: 17, source: 'USDA FDC, raw' },
     { name: 'Summer Squash', caloriesPer100g: 16, source: 'USDA FDC, raw' },
     { name: 'Winter Squash', caloriesPer100g: 39, source: 'USDA FDC, raw' },
-    { name: 'Bok Choy', caloriesPer100g: 13, source: 'USDA FDC, raw' },
+    { name: 'Zucchini', caloriesPer100g: 17, source: 'USDA FDC, raw' },
   ],
 
   fats: [
