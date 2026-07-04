@@ -160,13 +160,8 @@ export default function Home() {
   };
 
   const generateDraft = () => {
-    const nextRatios = { ...RECOMMENDED_RATIOS };
-    const sum = CATEGORIES.reduce((s, c) => s + nextRatios[c], 0);
-    const ratiosOk = Math.abs(sum - 1) < 0.001;
-    const dogsOk = !dogs.some((d) => !d.name?.trim() || d.weight <= 0);
-    if (!ratiosOk || !dogsOk) return;
-    setRatios(nextRatios);
-    setDraftRecipe(computeRecipe(dogs, locked, nextRatios, counts));
+    if (!canGenerate) return;
+    setDraftRecipe(computeRecipe(dogs, locked, ratios, counts));
   };
 
   const balanceDraft = () => {
