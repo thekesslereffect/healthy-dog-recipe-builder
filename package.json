@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "sync:fdc": "node scripts/sync-fdc.mjs",
+    "generate:foods": "node scripts/generate-fallbacks.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.23.0",

@@ -1,11 +1,13 @@
 import type { Category, CategoryRatios } from '../utils/constants';
-import type { Recipe } from '../utils/recipeCalculator';
+import type { Dog, Recipe } from '../utils/recipeCalculator';
 import { DailyRecipePanel } from './DailyRecipePanel';
+import { NutritionSnapshot } from './NutritionSnapshot';
 import { btnPrimary, btnSecondary, inputBase } from './ui';
 
 interface EditScreenProps {
   planName: string;
   editRecipe: Recipe;
+  dogsWithMER: Dog[];
   ratios: CategoryRatios;
   allergyList: string[];
   locked: Partial<Record<Category, string[]>>;
@@ -19,6 +21,7 @@ interface EditScreenProps {
 export function EditScreen({
   planName,
   editRecipe,
+  dogsWithMER,
   ratios,
   allergyList,
   locked,
@@ -40,6 +43,8 @@ export function EditScreen({
           compact
         />
       </div>
+
+      <NutritionSnapshot recipe={editRecipe} dogsWithMER={dogsWithMER} />
 
       <div className="shrink-0 space-y-2 rounded-2xl border border-zinc-100 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
         <input

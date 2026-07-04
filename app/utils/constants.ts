@@ -72,3 +72,18 @@ export const GRAMS_PER_LB = 453.592;
 // NRC (2006) recommended allowance is 1.0 mg/kcal; AAFCO (2016) adult
 // maintenance minimum is 1.25 mg/kcal — we use the AAFCO minimum.
 export const CALCIUM_MG_PER_KCAL = 1.25;
+
+/**
+ * AAFCO Dog Food Nutrient Profiles (2016) — adult maintenance minimums,
+ * expressed per 1,000 kcal of metabolizable energy. Used only as a screening
+ * check against the daily recipe total, not a complete diet analysis.
+ */
+export const AAFCO_ADULT_PER_1000_KCAL = {
+  proteinG: 45,
+  fatG: 13.8,
+  calciumMg: 1250,
+  phosphorusMg: 1000,
+  /** Acceptable Ca:P ratio range (AAFCO). */
+  caPRatioMin: 1,
+  caPRatioMax: 2,
+} as const;

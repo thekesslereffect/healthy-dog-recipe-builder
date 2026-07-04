@@ -6,9 +6,10 @@ import {
   type CategoryCounts,
   type CategoryRatios,
 } from '../utils/constants';
-import type { Recipe } from '../utils/recipeCalculator';
+import type { Dog, Recipe } from '../utils/recipeCalculator';
 import { CategoryBar } from './CategoryBar';
 import { DailyRecipePanel } from './DailyRecipePanel';
+import { NutritionSnapshot } from './NutritionSnapshot';
 import { Sheet } from './Sheet';
 import { btnPrimary, btnSecondary, inputBase } from './ui';
 import { Shuffle } from 'lucide-react';
@@ -17,6 +18,7 @@ interface BuildScreenProps {
   ratios: CategoryRatios;
   counts: CategoryCounts;
   draftRecipe: Recipe | null;
+  dogsWithMER: Dog[];
   hasActivePlan: boolean;
   allergyList: string[];
   canGenerate: boolean;
@@ -39,6 +41,7 @@ export function BuildScreen({
   ratios,
   counts,
   draftRecipe,
+  dogsWithMER,
   hasActivePlan,
   allergyList,
   canGenerate,
@@ -120,6 +123,8 @@ export function BuildScreen({
               compact
             />
           </div>
+
+          <NutritionSnapshot recipe={draftRecipe} dogsWithMER={dogsWithMER} />
 
           <div className="shrink-0 space-y-2 rounded-2xl border border-zinc-100 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
             <input

@@ -146,16 +146,38 @@ export default function Home() {
   const computeRecipe = (
     dogList: Dog[],
     lockedState: Partial<Record<Category, string[]>> = locked,
+    ratioState: CategoryRatios = ratios,
+    countState: CategoryCounts = counts,
   ): Recipe => {
     const withMER = dogList.map((dog) => ({ ...dog, MER: calculateDailyCalories(dog) }));
     const totalMER = getTotalMER(withMER);
     const excluded = Array.from(new Set(dogList.flatMap((d) => d.allergies ?? [])));
-    return createRecipe(totalMER, withMER, ratios, counts, { excluded, locked: lockedState });
+    return createRecipe(totalMER, withMER, ratioState, countState, {
+      excluded,
+      locked: lockedState,
+    });
   };
 
   const generateDraft = () => {
     if (!canGenerate) return;
     setDraftRecipe(computeRecipe(dogs));
+  };
+
+  /** Keep an existing draft when the mix changes (preserve locks). */
+  const refreshDraft = (
+    ratioState: CategoryRatios,
+    countState: CategoryCounts,
+    dogList: Dog[] = dogs,
+  ) => {
+    if (!draftRecipe) return;
+    const sum = CATEGORIES.reduce((s, c) => s + ratioState[c], 0);
+    const ratiosOk = Math.abs(sum - 1) < 0.001;
+    const dogsOk = !dogList.some((d) => !d.name?.trim() || d.weight <= 0);
+    if (!ratiosOk || !dogsOk) {
+      setDraftRecipe(null);
+      return;
+    }
+    setDraftRecipe(computeRecipe(dogList, locked, ratioState, countState));
   };
 
   const addDog = () =>
@@ -188,23 +210,22 @@ export default function Home() {
     }
   };
 
-  const clearDraft = () => {
-    if (draftRecipe) setDraftRecipe(null);
-  };
-
   const updateRatio = (category: Category, value: number) => {
-    setRatios({ ...ratios, [category]: value });
-    clearDraft();
+    const nextRatios = { ...ratios, [category]: value };
+    setRatios(nextRatios);
+    refreshDraft(nextRatios, counts);
   };
 
   const updateCount = (category: Category, value: number) => {
-    setCounts({ ...counts, [category]: value });
-    clearDraft();
+    const nextCounts = { ...counts, [category]: value };
+    setCounts(nextCounts);
+    refreshDraft(ratios, nextCounts);
   };
 
   const applyRecommendedRatios = () => {
-    setRatios({ ...RECOMMENDED_RATIOS });
-    clearDraft();
+    const nextRatios = { ...RECOMMENDED_RATIOS };
+    setRatios(nextRatios);
+    refreshDraft(nextRatios, counts);
   };
 
   const toggleLock = (category: Category, name: string) => {
@@ -498,6 +519,7 @@ export default function Home() {
             ratios={ratios}
             counts={counts}
             draftRecipe={draftRecipe}
+            dogsWithMER={dogsWithMER}
             hasActivePlan={!!recipe}
             allergyList={allergyList}
             canGenerate={canGenerate}
@@ -520,6 +542,7 @@ export default function Home() {
           <EditScreen
             planName={activePlanName}
             editRecipe={editRecipe}
+            dogsWithMER={dogsWithMER}
             ratios={ratios}
             allergyList={allergyList}
             locked={locked}
