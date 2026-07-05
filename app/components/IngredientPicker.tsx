@@ -31,14 +31,14 @@ export function IngredientPicker({
   boost = false,
 }: IngredientPickerProps) {
   const [query, setQuery] = useState('');
-  const listOptions = useMemo(
-    () =>
+  const listOptions = useMemo((): IngredientPickerOption[] => {
+    return (
       options ??
       suggestions.map((name) => ({
         name,
-      })),
-    [options, suggestions],
-  );
+      }))
+    );
+  }, [options, suggestions]);
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return listOptions;

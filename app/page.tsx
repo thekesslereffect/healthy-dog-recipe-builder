@@ -19,6 +19,7 @@ import {
   type SupplementOptions,
 } from './utils/recipeCalculator';
 import { getIngredientCatalogOrThrow, findFoodByName } from './data/ingredients';
+import { normalizeSupplementOptions } from './data/supplements';
 import { recipeToText } from './utils/export';
 import { balanceRecipeMix, applyRatiosToRecipe } from './utils/rebalance';
 import { removeNutritionBoost, hasNutritionBoostInCategory } from './utils/nutritionBoost';
