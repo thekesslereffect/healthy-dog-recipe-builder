@@ -5,6 +5,7 @@ import { btnPrimary, btnSecondary, inputBase } from './ui';
 
 interface EditScreenProps {
   planName: string;
+  onPlanNameChange: (name: string) => void;
   editRecipe: Recipe;
   dogsWithMER: Dog[];
   ratios: CategoryRatios;
@@ -21,6 +22,7 @@ interface EditScreenProps {
 
 export function EditScreen({
   planName,
+  onPlanNameChange,
   editRecipe,
   dogsWithMER,
   ratios,
@@ -56,9 +58,10 @@ export function EditScreen({
         <input
           type="text"
           value={planName}
-          disabled
+          onChange={(e) => onPlanNameChange(e.target.value)}
+          placeholder="Name your plan…"
           aria-label="Plan name"
-          className={`${inputBase} disabled:cursor-not-allowed disabled:opacity-60`}
+          className={inputBase}
         />
         <div className="flex gap-2">
           <button type="button" onClick={onCancel} className={`${btnSecondary} flex-1`}>

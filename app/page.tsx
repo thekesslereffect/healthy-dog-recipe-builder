@@ -85,6 +85,7 @@ export default function Home() {
   const [draftName, setDraftName] = useState('');
   /** Working copy while on the Edit screen (never used by Build). */
   const [editRecipe, setEditRecipe] = useState<Recipe | null>(null);
+  const [editPlanName, setEditPlanName] = useState('');
   const [currentSavedId, setCurrentSavedId] = useLocalStorage<string | null>(
     'hdrb.currentSavedId',
     null,
@@ -399,41 +400,43 @@ export default function Home() {
   const startEdit = () => {
     if (!recipe) return;
     setEditRecipe(recipe);
+    setEditPlanName(planName || currentSaved?.name || '');
     setActiveScreen('edit');
   };
   const cancelEdit = () => {
     setEditRecipe(null);
+    setEditPlanName('');
     setActiveScreen('plan');
   };
   const saveEdit = () => {
-    if (!editRecipe || !currentSavedId) {
-      if (editRecipe) {
-        setRecipe(editRecipe);
-        setEditRecipe(null);
-        setActiveScreen('plan');
-      }
-      return;
+    if (!editRecipe) return;
+    const name =
+      editPlanName.trim() || planName || currentSaved?.name || `Plan ${new Date().toLocaleDateString()}`;
+    if (currentSavedId) {
+      setSaved((prev) =>
+        prev.map((s) =>
+          s.id === currentSavedId
+            ? {
+                ...s,
+                name,
+                savedAt: Date.now(),
+                dogs,
+                ratios,
+                counts,
+                numberOfDays,
+                mealsPerDay,
+                locked,
+                supplementOptions,
+                recipe: editRecipe,
+              }
+            : s,
+        ),
+      );
     }
-    setSaved((prev) =>
-      prev.map((s) =>
-        s.id === currentSavedId
-          ? {
-              ...s,
-              savedAt: Date.now(),
-              dogs,
-              ratios,
-              counts,
-              numberOfDays,
-              mealsPerDay,
-              locked,
-              supplementOptions,
-              recipe: editRecipe,
-            }
-          : s,
-      ),
-    );
+    setPlanName(name);
     setRecipe(editRecipe);
     setEditRecipe(null);
+    setEditPlanName('');
     setActiveScreen('plan');
   };
 
@@ -481,6 +484,7 @@ export default function Home() {
     setDraftRecipe(null);
     setDraftName('');
     setEditRecipe(null);
+    setEditPlanName('');
     setCurrentSavedId(entry.id);
     setActiveScreen('plan');
   };
@@ -509,6 +513,7 @@ export default function Home() {
     setCurrentSavedId(null);
     setCheckedItems({});
     setEditRecipe(null);
+    setEditPlanName('');
   };
   const activePlanName = planName || currentSaved?.name || (recipe ? 'Untitled plan' : '');
   const pickerLabel =
@@ -517,7 +522,7 @@ export default function Home() {
       : activeScreen === 'build'
         ? draftName.trim() || 'New plan'
         : activeScreen === 'edit'
-          ? activePlanName || 'Edit plan'
+          ? editPlanName.trim() || activePlanName || 'Edit plan'
           : activePlanName || 'Select a plan';
   return (
     <div className="flex h-dvh flex-col bg-background text-foreground print:h-auto print:min-h-0 print:bg-white print:text-black">
@@ -638,7 +643,8 @@ export default function Home() {
         {activeScreen === 'edit' && editRecipe && (
           <div key="edit" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
             <EditScreen
-              planName={activePlanName}
+              planName={editPlanName}
+              onPlanNameChange={setEditPlanName}
               editRecipe={editRecipe}
               dogsWithMER={dogsWithMER}
               ratios={ratios}
