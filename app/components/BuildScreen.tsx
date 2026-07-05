@@ -36,6 +36,8 @@ interface BuildScreenProps {
   onDraftNameChange: (name: string) => void;
   onToggleLock: (category: Category, name: string) => void;
   onSwap: (category: Category, oldName: string, newName: string) => void;
+  onRemoveBoost?: (category: Category, name: string) => void;
+  onSwapBoost?: (category: Category, oldName: string, newName: string) => void;
   onBalance?: () => void;
 }
 
@@ -85,6 +87,8 @@ export function BuildScreen({
   onDraftNameChange,
   onToggleLock,
   onSwap,
+  onRemoveBoost,
+  onSwapBoost,
   onBalance,
 }: BuildScreenProps) {
   const [mixOpen, setMixOpen] = useState(false);
@@ -159,6 +163,8 @@ export function BuildScreen({
               excluded={allergyList}
               onToggleLock={onToggleLock}
               onSwap={onSwap}
+              onRemoveBoost={onRemoveBoost}
+              onSwapBoost={onSwapBoost}
               dogsWithMER={dogsWithMER}
               onBalance={onBalance}
               compact

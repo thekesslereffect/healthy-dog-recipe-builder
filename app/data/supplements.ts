@@ -17,6 +17,8 @@ export type SupplementToggleId =
   | 'rxEssentials'
   | 'rxCanineMinerals'
   | 'hempSeedOil'
+  | 'fishOil'
+  | 'kelp'
   | 'turmeric'
   | 'ginger';
 
@@ -27,6 +29,10 @@ export interface SupplementOptions {
   /** Recommended with Rx Essentials for home-prepared diets (Rx Vitamins). */
   rxCanineMinerals: boolean;
   hempSeedOil: boolean;
+  /** Optional EPA/DHA + vitamin D when oily fish is limited. */
+  fishOil: boolean;
+  /** Optional iodine source when fish/kelp foods are not in the recipe. */
+  kelp: boolean;
   /** Optional — not required for nutritional balance. */
   turmeric: boolean;
   /** Optional — not required for nutritional balance. */
@@ -38,6 +44,8 @@ export const DEFAULT_SUPPLEMENT_OPTIONS: SupplementOptions = {
   rxEssentials: true,
   rxCanineMinerals: true,
   hempSeedOil: true,
+  fishOil: false,
+  kelp: false,
   turmeric: false,
   ginger: false,
 };
@@ -117,6 +125,37 @@ export const SUPPLEMENT_CATALOG: SupplementCatalogEntry[] = [
     fatGPer100g: 100,
     source: 'USDA FDC (hemp/flax oils ~886)',
     description: 'Plant omega-3 (ALA); oily fish still covers EPA/DHA best.',
+  },
+  {
+    id: 'fishOil',
+    name: 'Fish Oil (EPA/DHA)',
+    toggleable: true,
+    caloriesPer100g: 900,
+    gramsPerPoundPerDay: 0.033,
+    gramsPerScoop: 1,
+    fatGPer100g: 100,
+    nutrientsPerScoop: {
+      epaMg: 180,
+      dhaMg: 120,
+      vitaminDIU: 50,
+    },
+    source: 'Typical canine fish-oil label (~1 g per 30 lb)',
+    description:
+      'Marine omega-3s when the recipe has little or no oily fish. Turn off if you use sardines, herring, or cod liver oil in the mix.',
+  },
+  {
+    id: 'kelp',
+    name: 'Kelp Powder',
+    toggleable: true,
+    caloriesPer100g: 250,
+    gramsPerPoundPerDay: 0.005,
+    gramsPerScoop: 1,
+    nutrientsPerScoop: {
+      iodineMcg: 400,
+    },
+    source: 'Typical kelp supplement label (iodine varies by batch)',
+    description:
+      'Iodine support when fish and kelp veggies are not in the recipe. Use sparingly — excess iodine can be harmful.',
   },
   {
     id: 'turmeric',

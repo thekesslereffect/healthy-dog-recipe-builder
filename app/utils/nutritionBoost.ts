@@ -1,8 +1,8 @@
 import { CATEGORIES, type Category } from './constants';
 import type { FoodIngredient } from '../data/ingredientTypes';
 import { getIngredientCatalogOrThrow } from '../data/ingredients';
-import type { NutrientCheck } from './nutrition';
-import type { Recipe, RecipeIngredient } from './recipeCalculator';
+import { assessRecipeNutrition, type NutrientCheck } from './nutrition';
+import type { Dog, Recipe, RecipeIngredient } from './recipeCalculator';
 
 /** At most one nutrition add per food category (protein, organs, fats, etc.). */
 export const MAX_BOOSTS_PER_CATEGORY = 1;
@@ -74,6 +74,27 @@ function isMuscleMeat(name: string): boolean {
 
 function isOrgan(name: string): boolean {
   return ORGAN_PATTERN.test(name);
+}
+
+type OrganSubtype = 'liver' | 'heart' | 'kidney';
+
+function organSubtype(name: string): OrganSubtype | null {
+  if (/liver/i.test(name)) return 'liver';
+  if (/heart/i.test(name)) return 'heart';
+  if (/kidney/i.test(name)) return 'kidney';
+  return null;
+}
+
+function recipeOrganSubtypes(recipe: Recipe, exceptName?: string): Set<OrganSubtype> {
+  const subtypes = new Set<OrganSubtype>();
+  for (const category of CATEGORIES) {
+    for (const row of recipe.ingredients[category]) {
+      if (exceptName && row.name === exceptName) continue;
+      const subtype = organSubtype(row.name);
+      if (subtype) subtypes.add(subtype);
+    }
+  }
+  return subtypes;
 }
 
 function isEgg(name: string): boolean {
@@ -207,7 +228,48 @@ function compositeBoostScore(
     else if (muscleMeatCount(recipe) >= 1) score *= 0.35;
   }
 
+  if (isFish(name)) {
+    if (recipeHasFish(recipe)) {
+      score *= 0.05;
+    } else if (/sardine/i.test(name)) {
+      score *= 1.35;
+    } else if (/salmon/i.test(name)) {
+      score *= 1.15;
+    } else if (/mackerel/i.test(name)) {
+      score *= 0.85;
+    }
+  }
+
   return score;
+}
+
+function isAllowedBoostFood(
+  food: FoodIngredient,
+  recipe: Recipe,
+  usedNames: Set<string>,
+  excluded: string[],
+  exceptName?: string,
+): boolean {
+  if ((food.caloriesPer100g || 0) <= 0) return false;
+  if (excluded.includes(food.name)) return false;
+  if (usedNames.has(food.name) && food.name !== exceptName) return false;
+
+  const subtype = organSubtype(food.name);
+  if (subtype && recipeOrganSubtypes(recipe, exceptName).has(subtype)) return false;
+
+  if (isFish(food.name) && recipeHasFish(recipe)) {
+    const fishRows = CATEGORIES.flatMap((category) => recipe.ingredients[category]).filter((row) =>
+      isFish(row.name),
+    );
+    const onlyCurrentFish =
+      exceptName &&
+      fishRows.length === 1 &&
+      fishRows[0]?.name === exceptName &&
+      food.name !== exceptName;
+    if (!onlyCurrentFish) return false;
+  }
+
+  return true;
 }
 
 function pickBestBoostFood(
@@ -224,8 +286,7 @@ function pickBestBoostFood(
     if (hasNutritionBoostInCategory(recipe, category)) continue;
 
     for (const food of catalog[category]) {
-      if ((food.caloriesPer100g || 0) <= 0) continue;
-      if (usedNames.has(food.name) || excluded.includes(food.name)) continue;
+      if (!isAllowedBoostFood(food, recipe, usedNames, excluded)) continue;
 
       const score = compositeBoostScore(food, lows, recipe);
       if (score <= 0) continue;
@@ -276,4 +337,56 @@ export function tryAddNutritionBoost(
 
 export function isNutritionBoostRow(row: RecipeIngredient): boolean {
   return row.additional === true;
+}
+
+/** Remove one nutrition add without redistributing calories. */
+export function removeNutritionBoost(
+  recipe: Recipe,
+  category: Category,
+  name: string,
+): Recipe {
+  return {
+    ...recipe,
+    ingredients: {
+      ...recipe.ingredients,
+      [category]: recipe.ingredients[category].filter(
+        (row) => !(row.additional && row.name === name),
+      ),
+    },
+  };
+}
+
+function nutrientChecksForBoostSwap(
+  recipe: Recipe,
+  dogsWithMER: Dog[],
+): NutrientCheck[] {
+  const assessment = assessRecipeNutrition(recipe, dogsWithMER);
+  const failed = assessment.checks.filter((check) => check.status !== 'ok');
+  const lows = failed.filter((check) => check.status === 'low');
+  return lows.length > 0 ? lows : failed;
+}
+
+/** Rank alternative boost ingredients for the swap sheet. */
+export function getBoostSwapCandidates(
+  recipe: Recipe,
+  category: Category,
+  boostName: string,
+  dogsWithMER: Dog[],
+  excluded: string[] = [],
+): string[] {
+  const catalog = getIngredientCatalogOrThrow();
+  const usedNames = recipeIngredientNames(recipe);
+  const checks = nutrientChecksForBoostSwap(recipe, dogsWithMER);
+  const ranked: { name: string; score: number }[] = [];
+
+  for (const food of catalog[category]) {
+    if (food.name === boostName) continue;
+    if (!isAllowedBoostFood(food, recipe, usedNames, excluded, boostName)) continue;
+    const score = compositeBoostScore(food, checks, recipe);
+    if (score <= 0) continue;
+    ranked.push({ name: food.name, score });
+  }
+
+  ranked.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+  return ranked.map((entry) => entry.name);
 }

@@ -12,6 +12,8 @@ interface EditScreenProps {
   locked: Partial<Record<Category, string[]>>;
   onToggleLock: (category: Category, name: string) => void;
   onSwap: (category: Category, oldName: string, newName: string) => void;
+  onRemoveBoost?: (category: Category, name: string) => void;
+  onSwapBoost?: (category: Category, oldName: string, newName: string) => void;
   onSave: () => void;
   onCancel: () => void;
   onBalance?: () => void;
@@ -26,6 +28,8 @@ export function EditScreen({
   locked,
   onToggleLock,
   onSwap,
+  onRemoveBoost,
+  onSwapBoost,
   onSave,
   onCancel,
   onBalance,
@@ -40,6 +44,8 @@ export function EditScreen({
           excluded={allergyList}
           onToggleLock={onToggleLock}
           onSwap={onSwap}
+          onRemoveBoost={onRemoveBoost}
+          onSwapBoost={onSwapBoost}
           dogsWithMER={dogsWithMER}
           onBalance={onBalance}
           compact

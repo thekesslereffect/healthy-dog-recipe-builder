@@ -15,8 +15,11 @@ import { balanceRecipeMix } from './rebalance';
 import {
   MAX_BOOSTS_PER_CATEGORY,
   countNutritionBoostsInCategory,
+  getBoostSwapCandidates,
   stripNutritionBoosts,
+  tryAddNutritionBoost,
 } from './nutritionBoost';
+import { assessRecipeNutrition } from './nutrition';
 import { seededRandom } from './random';
 
 const dogs: Dog[] = [
@@ -118,6 +121,83 @@ describe('nutrition boosts', () => {
     assertAtMostOneBoostPerCategory(result!.recipe);
     for (const boost of boosts) {
       expect(isMuscleMeat(boost.name)).toBe(false);
+    }
+  });
+
+  it('does not add a second liver when beef liver is already in the recipe', () => {
+    const base = createRecipe(getTotalMER(dogs), dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
+      random: seededRandom(11),
+    });
+    if (!base.ingredients.organs.some((row) => row.name === 'Beef Liver')) {
+      base.ingredients.organs.push({
+        name: 'Beef Liver',
+        grams: 30,
+        calories: 40,
+        additional: false,
+      });
+    }
+
+    const assessment = assessRecipeNutrition(base, dogs);
+    const failed = assessment.checks.filter((check) => check.status !== 'ok');
+    const boosted = tryAddNutritionBoost(base, failed, getTotalMER(dogs), []);
+    if (!boosted) return;
+
+    const added = CATEGORIES.flatMap((category) =>
+      boosted.ingredients[category].filter((row) => row.additional),
+    );
+    for (const row of added) {
+      expect(row.name).not.toMatch(/pork liver/i);
+    }
+  });
+
+  it('does not add a second fish when fish is already in the recipe', () => {
+    const base = createRecipe(getTotalMER(dogs), dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
+      random: seededRandom(11),
+    });
+    if (!base.ingredients.protein.some((row) => row.name === 'Sardines (canned in water, no salt)')) {
+      base.ingredients.protein.push({
+        name: 'Sardines (canned in water, no salt)',
+        grams: 40,
+        calories: 80,
+        additional: false,
+      });
+    }
+
+    const assessment = assessRecipeNutrition(base, dogs);
+    const failed = assessment.checks.filter((check) => check.status !== 'ok');
+    const boosted = tryAddNutritionBoost(base, failed, getTotalMER(dogs), []);
+    if (!boosted) return;
+
+    const added = CATEGORIES.flatMap((category) =>
+      boosted.ingredients[category].filter((row) => row.additional),
+    );
+    for (const row of added) {
+      expect(row.name).not.toMatch(/mackerel/i);
+    }
+  });
+
+  it('ranks sardines ahead of mackerel for boost swaps when no fish is present', () => {
+    const base = createRecipe(getTotalMER(dogs), dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
+      random: seededRandom(11),
+    });
+    base.ingredients.protein.push({
+      name: 'Mackerel',
+      grams: 20,
+      calories: 40,
+      additional: true,
+    });
+
+    const candidates = getBoostSwapCandidates(
+      base,
+      'protein',
+      'Mackerel',
+      dogs,
+      [],
+    );
+    const sardineIndex = candidates.findIndex((name) => /sardine/i.test(name));
+    const mackerelIndex = candidates.findIndex((name) => /^mackerel$/i.test(name));
+    if (sardineIndex >= 0 && mackerelIndex >= 0) {
+      expect(sardineIndex).toBeLessThan(mackerelIndex);
     }
   });
 });

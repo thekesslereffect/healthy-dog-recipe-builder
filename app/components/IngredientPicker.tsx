@@ -7,6 +7,7 @@ interface IngredientPickerProps {
   suggestions: string[];
   onSelect: (name: string) => void;
   onCancel: () => void;
+  title?: string;
 }
 
 export function IngredientPicker({
@@ -14,6 +15,7 @@ export function IngredientPicker({
   suggestions,
   onSelect,
   onCancel,
+  title,
 }: IngredientPickerProps) {
   const [query, setQuery] = useState('');
 
@@ -24,7 +26,7 @@ export function IngredientPicker({
   }, [query, suggestions]);
 
   return (
-    <Sheet open title={`Replace ${current}`} onClose={onCancel} size="md" scroll="child">
+    <Sheet open title={title ?? `Replace ${current}`} onClose={onCancel} size="md" scroll="child">
       <div className="flex min-h-0 flex-1 flex-col gap-3">
         <input
           type="search"

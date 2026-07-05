@@ -137,6 +137,98 @@
     }
   },
   {
+    "name": "Anchovies (canned, drained)",
+    "category": "protein",
+    "fdcId": 174183,
+    "basis": "drained",
+    "fallback": {
+      "caloriesPer100g": 210,
+      "proteinGPer100g": 28.9,
+      "fatGPer100g": 9.7,
+      "calciumMgPer100g": 147,
+      "phosphorusMgPer100g": 178,
+      "zincMgPer100g": 1.72,
+      "copperMgPer100g": 0.344,
+      "vitaminDIUPer100g": 40,
+      "vitaminEMgPer100g": 1.57,
+      "cholineMgPer100g": 85,
+      "epaMgPer100g": 538,
+      "dhaMgPer100g": 911
+    }
+  },
+  {
+    "name": "Cod (Atlantic, raw)",
+    "category": "protein",
+    "fdcId": 171955,
+    "basis": "raw",
+    "fallback": {
+      "caloriesPer100g": 82,
+      "proteinGPer100g": 17.8,
+      "fatGPer100g": 0.7,
+      "calciumMgPer100g": 16,
+      "phosphorusMgPer100g": 203,
+      "epaMgPer100g": 28,
+      "dhaMgPer100g": 154
+    }
+  },
+  {
+    "name": "Herring (Atlantic, raw)",
+    "category": "protein",
+    "fdcId": 175116,
+    "basis": "raw",
+    "fallback": {
+      "caloriesPer100g": 158,
+      "proteinGPer100g": 17.9,
+      "fatGPer100g": 9.0,
+      "calciumMgPer100g": 57,
+      "phosphorusMgPer100g": 240,
+      "zincMgPer100g": 0.99,
+      "copperMgPer100g": 0.092,
+      "vitaminDIUPer100g": 680,
+      "vitaminEMgPer100g": 1.07,
+      "cholineMgPer100g": 65,
+      "epaMgPer100g": 709,
+      "dhaMgPer100g": 1045
+    }
+  },
+  {
+    "name": "Oysters (raw)",
+    "category": "protein",
+    "fdcId": 175172,
+    "basis": "raw",
+    "fallback": {
+      "caloriesPer100g": 68,
+      "proteinGPer100g": 7.0,
+      "fatGPer100g": 2.5,
+      "calciumMgPer100g": 59,
+      "phosphorusMgPer100g": 97,
+      "zincMgPer100g": 90.95,
+      "copperMgPer100g": 4.29,
+      "vitaminDIUPer100g": 320,
+      "vitaminEMgPer100g": 1.0,
+      "cholineMgPer100g": 65
+    }
+  },
+  {
+    "name": "Blue Mussels (raw)",
+    "category": "protein",
+    "fdcId": 174216,
+    "basis": "raw",
+    "fallback": {
+      "caloriesPer100g": 86,
+      "proteinGPer100g": 11.9,
+      "fatGPer100g": 2.2,
+      "calciumMgPer100g": 26,
+      "phosphorusMgPer100g": 146,
+      "zincMgPer100g": 2.27,
+      "copperMgPer100g": 0.247,
+      "iodineMcgPer100g": 140,
+      "vitaminDIUPer100g": 0,
+      "vitaminEMgPer100g": 0.85,
+      "cholineMgPer100g": 65
+    }
+  },
+  {
     "name": "Pork (ground)",
     "category": "protein",
     "fdcId": 167902,
@@ -342,6 +434,54 @@
     }
   },
   {
+    "name": "Chicken Liver",
+    "category": "organs",
+    "fdcId": 171060,
+    "basis": "raw",
+    "fallback": {
+      "caloriesPer100g": 119,
+      "proteinGPer100g": 16.9,
+      "fatGPer100g": 4.8,
+      "calciumMgPer100g": 8,
+      "phosphorusMgPer100g": 387,
+      "zincMgPer100g": 1.75,
+      "copperMgPer100g": 0.496,
+      "cholineMgPer100g": 85.5
+    }
+  },
+  {
+    "name": "Turkey Liver",
+    "category": "organs",
+    "fdcId": 171486,
+    "basis": "raw",
+    "fallback": {
+      "caloriesPer100g": 128,
+      "proteinGPer100g": 17.2,
+      "fatGPer100g": 5.5,
+      "calciumMgPer100g": 14,
+      "phosphorusMgPer100g": 228,
+      "zincMgPer100g": 2.93,
+      "copperMgPer100g": 0.626,
+      "cholineMgPer100g": 93
+    }
+  },
+  {
+    "name": "Beef Heart",
+    "category": "organs",
+    "fdcId": 168625,
+    "basis": "raw",
+    "fallback": {
+      "caloriesPer100g": 112,
+      "proteinGPer100g": 17.7,
+      "fatGPer100g": 3.9,
+      "calciumMgPer100g": 7,
+      "phosphorusMgPer100g": 212,
+      "zincMgPer100g": 1.7,
+      "copperMgPer100g": 0.176,
+      "cholineMgPer100g": 82.6
+    }
+  },
+  {
     "name": "Pork Heart",
     "category": "organs",
     "fdcId": 168267,
@@ -396,6 +536,21 @@
       "fatGPer100g": 0.3,
       "calciumMgPer100g": 10,
       "phosphorusMgPer100g": 43
+    }
+  },
+  {
+    "name": "Sweet Potato (cooked)",
+    "category": "carbs",
+    "fdcId": 168483,
+    "basis": "cooked",
+    "fallback": {
+      "caloriesPer100g": 86,
+      "proteinGPer100g": 1.6,
+      "fatGPer100g": 0.1,
+      "calciumMgPer100g": 30,
+      "phosphorusMgPer100g": 47,
+      "vitaminEMgPer100g": 0.71,
+      "cholineMgPer100g": 12.3
     }
   },
   {
@@ -638,6 +793,23 @@
     }
   },
   {
+    "name": "Kelp",
+    "category": "veggies",
+    "fdcId": 168457,
+    "basis": "raw",
+    "fallback": {
+      "caloriesPer100g": 43,
+      "proteinGPer100g": 1.7,
+      "fatGPer100g": 0.6,
+      "calciumMgPer100g": 168,
+      "phosphorusMgPer100g": 42,
+      "iodineMcgPer100g": 2984,
+      "vitaminDIUPer100g": 0,
+      "vitaminEMgPer100g": 0.87,
+      "cholineMgPer100g": 12.8
+    }
+  },
+  {
     "name": "Pumpkin",
     "category": "veggies",
     "fdcId": 168448,
@@ -730,6 +902,37 @@
       "fatGPer100g": 100,
       "calciumMgPer100g": 0,
       "phosphorusMgPer100g": 0
+    }
+  },
+  {
+    "name": "Cod Liver Oil",
+    "category": "fats",
+    "fdcId": 173577,
+    "basis": "oil",
+    "fallback": {
+      "caloriesPer100g": 902,
+      "proteinGPer100g": 0,
+      "fatGPer100g": 100,
+      "calciumMgPer100g": 0,
+      "phosphorusMgPer100g": 0,
+      "vitaminDIUPer100g": 10000,
+      "vitaminEMgPer100g": 30,
+      "epaMgPer100g": 9355,
+      "dhaMgPer100g": 10820
+    }
+  },
+  {
+    "name": "Flaxseed Oil",
+    "category": "fats",
+    "fdcId": 167702,
+    "basis": "oil",
+    "fallback": {
+      "caloriesPer100g": 884,
+      "proteinGPer100g": 0,
+      "fatGPer100g": 100,
+      "calciumMgPer100g": 0,
+      "phosphorusMgPer100g": 0,
+      "vitaminEMgPer100g": 0.47
     }
   }
 ]

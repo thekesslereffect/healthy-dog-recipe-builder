@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react';
 import { CATEGORIES, type Category, type CategoryRatios } from '../utils/constants';
 import type { Dog, Recipe } from '../utils/recipeCalculator';
 import { getIngredientCatalogOrThrow } from '../data/ingredients';
-import { isNutritionBoostRow } from '../utils/nutritionBoost';
+import { getBoostSwapCandidates, isNutritionBoostRow } from '../utils/nutritionBoost';
 import { groupLabel, iconBtn } from './ui';
-import { ArrowLeftRight, Lock, LockOpen } from 'lucide-react';
+import { ArrowLeftRight, Lock, LockOpen, Trash2 } from 'lucide-react';
 import { IngredientPicker } from './IngredientPicker';
 import { NutritionSnapshot } from './NutritionSnapshot';
 
@@ -15,12 +15,20 @@ interface DailyRecipePanelProps {
   excluded: string[];
   onToggleLock: (category: Category, name: string) => void;
   onSwap: (category: Category, oldName: string, newName: string) => void;
+  onRemoveBoost?: (category: Category, name: string) => void;
+  onSwapBoost?: (category: Category, oldName: string, newName: string) => void;
   dogsWithMER?: Dog[];
   onBalance?: () => void;
   balancing?: boolean;
   /** Viewport-fit layout for Build screen. */
   compact?: boolean;
 }
+
+type EditingTarget = {
+  category: Category;
+  name: string;
+  boost: boolean;
+};
 
 export function DailyRecipePanel({
   recipe,
@@ -29,21 +37,45 @@ export function DailyRecipePanel({
   excluded,
   onToggleLock,
   onSwap,
+  onRemoveBoost,
+  onSwapBoost,
   dogsWithMER,
   onBalance,
   balancing = false,
   compact = false,
 }: DailyRecipePanelProps) {
-  const [editing, setEditing] = useState<{ category: Category; name: string } | null>(null);
+  const [editing, setEditing] = useState<EditingTarget | null>(null);
+
+  const calorieShares = useMemo(() => {
+    const foodCalories = CATEGORIES.reduce(
+      (sum, category) =>
+        sum + recipe.ingredients[category].reduce((total, row) => total + row.calories, 0),
+      0,
+    );
+    const shares = {} as CategoryRatios;
+    for (const category of CATEGORIES) {
+      const categoryCalories = recipe.ingredients[category].reduce(
+        (total, row) => total + row.calories,
+        0,
+      );
+      shares[category] =
+        foodCalories > 0 ? categoryCalories / foodCalories : (ratios[category] ?? 0);
+    }
+    return shares;
+  }, [recipe, ratios]);
 
   const pickerOptions = useMemo(() => {
     if (!editing) return [];
+    if (editing.boost) {
+      if (!dogsWithMER) return [];
+      return getBoostSwapCandidates(recipe, editing.category, editing.name, dogsWithMER, excluded);
+    }
     const usedNames = new Set(recipe.ingredients[editing.category].map((i) => i.name));
     return getIngredientCatalogOrThrow()[editing.category]
       .filter((i) => (i.caloriesPer100g || 0) > 0)
       .map((i) => i.name)
       .filter((n) => !excluded.includes(n) && !usedNames.has(n));
-  }, [editing, recipe.ingredients, excluded]);
+  }, [editing, recipe, excluded, dogsWithMER]);
 
   const body = (
     <>
@@ -58,7 +90,7 @@ export function DailyRecipePanel({
               <h3 className={`${groupLabel} mb-1 flex items-baseline gap-1.5`}>
                 {category}
                 <span className="font-medium normal-case tracking-normal text-zinc-400">
-                  {Math.round((ratios[category] ?? 0) * 100)}%
+                  {Math.round((calorieShares[category] ?? 0) * 100)}%
                 </span>
               </h3>
               <div className="space-y-0.5">
@@ -81,7 +113,7 @@ export function DailyRecipePanel({
                         ) : (
                           <button
                             type="button"
-                            onClick={() => setEditing({ category, name: ingredient.name })}
+                            onClick={() => setEditing({ category, name: ingredient.name, boost: false })}
                             className="truncate text-left font-medium transition-colors hover:text-accent"
                           >
                             {ingredient.name}
@@ -94,12 +126,39 @@ export function DailyRecipePanel({
                             {ingredient.grams}g
                           </span>
                         </span>
-                        {!isBoost && (
+                        {isBoost ? (
+                          <>
+                            {onSwapBoost && (
+                              <button
+                                type="button"
+                                aria-label={`Swap ${ingredient.name} boost`}
+                                onClick={() =>
+                                  setEditing({ category, name: ingredient.name, boost: true })
+                                }
+                                className={`${iconBtn} h-8 w-8 sm:h-9 sm:w-9`}
+                              >
+                                <ArrowLeftRight size={14} />
+                              </button>
+                            )}
+                            {onRemoveBoost && (
+                              <button
+                                type="button"
+                                aria-label={`Remove ${ingredient.name} boost`}
+                                onClick={() => onRemoveBoost(category, ingredient.name)}
+                                className={`${iconBtn} h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600 sm:h-9 sm:w-9`}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+                          </>
+                        ) : (
                           <>
                             <button
                               type="button"
                               aria-label={`Swap ${ingredient.name}`}
-                              onClick={() => setEditing({ category, name: ingredient.name })}
+                              onClick={() =>
+                                setEditing({ category, name: ingredient.name, boost: false })
+                              }
                               className={`${iconBtn} h-8 w-8 sm:h-9 sm:w-9`}
                             >
                               <ArrowLeftRight size={14} />
@@ -158,8 +217,13 @@ export function DailyRecipePanel({
     <IngredientPicker
       current={editing.name}
       suggestions={pickerOptions}
+      title={editing.boost ? `Swap ${editing.name}` : undefined}
       onSelect={(name) => {
-        onSwap(editing.category, editing.name, name);
+        if (editing.boost) {
+          onSwapBoost?.(editing.category, editing.name, name);
+        } else {
+          onSwap(editing.category, editing.name, name);
+        }
         setEditing(null);
       }}
       onCancel={() => setEditing(null)}

@@ -20,7 +20,8 @@ import {
 } from './utils/recipeCalculator';
 import { normalizeSupplementOptions, getIngredientCatalogOrThrow } from './data/ingredients';
 import { recipeToText } from './utils/export';
-import { balanceRecipeMix } from './utils/rebalance';
+import { balanceRecipeMix, applyRatiosToRecipe } from './utils/rebalance';
+import { removeNutritionBoost } from './utils/nutritionBoost';
 import { type MassUnit, type WeightUnit } from './utils/format';
 import { createId, resolveSupplementOptions, type SavedRecipe } from './utils/savedRecipes';
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -156,7 +157,7 @@ export default function Home() {
     if (!draftRecipe) return;
     const result = balanceRecipeMix(draftRecipe, dogs, supplementOptions, allergyList);
     if (!result) return;
-    setRatios(result.ratios);
+    // Keep Mix-sheet ratios unchanged so Reroll still uses the user's percentages.
     setDraftRecipe(result.recipe);
   };
 
@@ -164,7 +165,6 @@ export default function Home() {
     if (!editRecipe) return;
     const result = balanceRecipeMix(editRecipe, dogs, supplementOptions, allergyList);
     if (!result) return;
-    setRatios(result.ratios);
     setEditRecipe(result.recipe);
   };
 
@@ -268,7 +268,12 @@ export default function Home() {
     const nextCategoryItems = source.ingredients[category].map((row) => {
       if (row.name !== oldName) return row;
       const grams = cpg > 0 ? round2((row.calories / cpg) * 100) : 0;
-      return { name: newName, grams, calories: round2((grams * cpg) / 100) };
+      return {
+        name: newName,
+        grams,
+        calories: round2((grams * cpg) / 100),
+        additional: row.additional,
+      };
     });
 
     const nextRecipe: Recipe = {
@@ -292,14 +297,77 @@ export default function Home() {
     });
   };
 
+  const recalculateRecipe = (source: Recipe): Recipe =>
+    applyRatiosToRecipe(source, dogs, ratios, supplementOptions);
+
+  const removeBoost = (
+    source: Recipe,
+    setSource: (recipe: Recipe) => void,
+    category: Category,
+    name: string,
+  ) => {
+    setSource(recalculateRecipe(removeNutritionBoost(source, category, name)));
+  };
+
+  const swapBoost = (
+    source: Recipe,
+    setSource: (recipe: Recipe) => void,
+    category: Category,
+    oldName: string,
+    newName: string,
+  ) => {
+    if (oldName === newName) return;
+    const data = getIngredientCatalogOrThrow()[category].find((i) => i.name === newName);
+    if (!data) return;
+    const round2 = (n: number) => Math.round(n * 100) / 100;
+    const cpg = data.caloriesPer100g || 0;
+
+    const nextCategoryItems = source.ingredients[category].map((row) => {
+      if (row.name !== oldName || !row.additional) return row;
+      const grams = cpg > 0 ? round2((row.calories / cpg) * 100) : 0;
+      return {
+        name: newName,
+        grams,
+        calories: round2((grams * cpg) / 100),
+        additional: true as const,
+      };
+    });
+
+    const swapped: Recipe = {
+      ...source,
+      ingredients: { ...source.ingredients, [category]: nextCategoryItems },
+    };
+    setSource(recalculateRecipe(swapped));
+  };
+
   const swapDraftIngredient = (category: Category, oldName: string, newName: string) => {
     if (!draftRecipe) return;
     applySwap(draftRecipe, setDraftRecipe, category, oldName, newName);
   };
 
+  const removeDraftBoost = (category: Category, name: string) => {
+    if (!draftRecipe) return;
+    removeBoost(draftRecipe, setDraftRecipe, category, name);
+  };
+
+  const swapDraftBoost = (category: Category, oldName: string, newName: string) => {
+    if (!draftRecipe) return;
+    swapBoost(draftRecipe, setDraftRecipe, category, oldName, newName);
+  };
+
   const swapEditIngredient = (category: Category, oldName: string, newName: string) => {
     if (!editRecipe) return;
     applySwap(editRecipe, setEditRecipe, category, oldName, newName);
+  };
+
+  const removeEditBoost = (category: Category, name: string) => {
+    if (!editRecipe) return;
+    removeBoost(editRecipe, setEditRecipe, category, name);
+  };
+
+  const swapEditBoost = (category: Category, oldName: string, newName: string) => {
+    if (!editRecipe) return;
+    swapBoost(editRecipe, setEditRecipe, category, oldName, newName);
   };
 
   /** Build only: commit a new plan (never updates an existing one). */
@@ -580,6 +648,8 @@ export default function Home() {
             onDraftNameChange={setDraftName}
             onToggleLock={toggleLock}
             onSwap={swapDraftIngredient}
+            onRemoveBoost={removeDraftBoost}
+            onSwapBoost={swapDraftBoost}
             onBalance={balanceDraft}
           />
           </div>
@@ -596,6 +666,8 @@ export default function Home() {
             locked={locked}
             onToggleLock={toggleLock}
             onSwap={swapEditIngredient}
+            onRemoveBoost={removeEditBoost}
+            onSwapBoost={swapEditBoost}
             onSave={saveEdit}
             onCancel={cancelEdit}
             onBalance={balanceEdit}
