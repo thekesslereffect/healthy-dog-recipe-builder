@@ -11,9 +11,19 @@ const SEED_PATTERN = /seed/i;
 const DAIRY_PATTERN = /yogurt|cottage cheese/i;
 const SMALL_ITEM_PATTERN = /shrimp|clam|oyster|mussel|anchov|parsley|kelp/i;
 
+/** Powders and scoop-based supplements — recipe amounts are in grams. */
+const GRAM_SUPPLEMENTS = new Set([
+  'Rx Essentials',
+  'Rx Canine Minerals',
+  'Kelp Powder',
+  'Turmeric',
+  'Ginger',
+]);
+
 /** Typical store unit for an ingredient when shopping. */
 export function suggestedShoppingMassUnit(name: string, weightUnit: WeightUnit): MassUnit {
   if (getSupplementCatalogEntry(name)) {
+    if (GRAM_SUPPLEMENTS.has(name)) return 'g';
     return weightUnit === 'kg' ? 'g' : 'oz';
   }
   const food = findFoodByName(name);

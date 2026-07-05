@@ -22,7 +22,15 @@ describe('suggestedShoppingMassUnit', () => {
     expect(suggestedShoppingMassUnit('Olive Oil', 'lb')).toBe('oz');
     expect(suggestedShoppingMassUnit('Sardines (canned in water, no salt)', 'lb')).toBe('oz');
   });
-  it('uses oz for supplements', () => {
-    expect(suggestedShoppingMassUnit('Rx Essentials', 'lb')).toBe('oz');
+  it('uses g for powder supplements', () => {
+    expect(suggestedShoppingMassUnit('Rx Essentials', 'lb')).toBe('g');
+    expect(suggestedShoppingMassUnit('Rx Canine Minerals', 'lb')).toBe('g');
+    expect(suggestedShoppingMassUnit('Kelp Powder', 'lb')).toBe('g');
+    expect(suggestedShoppingMassUnit('Turmeric', 'lb')).toBe('g');
+    expect(suggestedShoppingMassUnit('Ginger', 'lb')).toBe('g');
+  });
+
+  it('uses oz for liquid supplements in imperial mode', () => {
+    expect(suggestedShoppingMassUnit('Fish Oil (EPA/DHA)', 'lb')).toBe('oz');
   });
 });

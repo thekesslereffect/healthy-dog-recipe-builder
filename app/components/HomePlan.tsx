@@ -22,7 +22,6 @@ import {
   stepperReadout,
   stepperReadoutLabel,
   stepperReadoutValue,
-  stepperValue,
   toolbarUnitSelect,
 } from './ui';
 
