@@ -1,7 +1,6 @@
 import type { Category, CategoryRatios } from '../utils/constants';
 import type { Dog, Recipe } from '../utils/recipeCalculator';
 import { DailyRecipePanel } from './DailyRecipePanel';
-import { NutritionSnapshot } from './NutritionSnapshot';
 import { btnPrimary, btnSecondary, inputBase } from './ui';
 
 interface EditScreenProps {
@@ -42,15 +41,11 @@ export function EditScreen({
           excluded={allergyList}
           onToggleLock={onToggleLock}
           onSwap={onSwap}
+          dogsWithMER={dogsWithMER}
+          onBalance={onBalance}
           compact
         />
       </div>
-
-      <NutritionSnapshot
-        recipe={editRecipe}
-        dogsWithMER={dogsWithMER}
-        onBalance={onBalance}
-      />
 
       <div className="shrink-0 space-y-2 rounded-2xl border border-zinc-100 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
         <input

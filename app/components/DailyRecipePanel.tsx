@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import { CATEGORIES, type Category, type CategoryRatios } from '../utils/constants';
-import type { Recipe } from '../utils/recipeCalculator';
+import type { Dog, Recipe } from '../utils/recipeCalculator';
 import { getIngredientCatalogOrThrow } from '../data/ingredients';
 import { isNutritionBoostRow } from '../utils/nutritionBoost';
 import { groupLabel, iconBtn } from './ui';
 import { ArrowLeftRight, Lock, LockOpen } from 'lucide-react';
 import { IngredientPicker } from './IngredientPicker';
+import { NutritionSnapshot } from './NutritionSnapshot';
 
 interface DailyRecipePanelProps {
   recipe: Recipe;
@@ -14,6 +15,9 @@ interface DailyRecipePanelProps {
   excluded: string[];
   onToggleLock: (category: Category, name: string) => void;
   onSwap: (category: Category, oldName: string, newName: string) => void;
+  dogsWithMER?: Dog[];
+  onBalance?: () => void;
+  balancing?: boolean;
   /** Viewport-fit layout for Build screen. */
   compact?: boolean;
 }
@@ -25,6 +29,9 @@ export function DailyRecipePanel({
   excluded,
   onToggleLock,
   onSwap,
+  dogsWithMER,
+  onBalance,
+  balancing = false,
   compact = false,
 }: DailyRecipePanelProps) {
   const [editing, setEditing] = useState<{ category: Category; name: string } | null>(null);
@@ -168,6 +175,16 @@ export function DailyRecipePanel({
             <p className="text-[11px] text-zinc-400">Tap to swap · lock to keep on reroll</p>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-2">{body}</div>
+          {dogsWithMER && (
+            <NutritionSnapshot
+              recipe={recipe}
+              dogsWithMER={dogsWithMER}
+              onBalance={onBalance}
+              balancing={balancing}
+              collapsible
+              embedded
+            />
+          )}
         </div>
         {picker}
       </>

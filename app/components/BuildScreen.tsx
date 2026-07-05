@@ -9,7 +9,6 @@ import {
 import type { Dog, Recipe, SupplementOptions } from '../utils/recipeCalculator';
 import { CategoryBar } from './CategoryBar';
 import { DailyRecipePanel } from './DailyRecipePanel';
-import { NutritionSnapshot } from './NutritionSnapshot';
 import { SupplementControlsPanel, enabledSupplementCount, enabledSupplementNames } from './SupplementControls';
 import { Sheet } from './Sheet';
 import { btnPrimary, btnSecondary, inputBase } from './ui';
@@ -150,15 +149,11 @@ export function BuildScreen({
               excluded={allergyList}
               onToggleLock={onToggleLock}
               onSwap={onSwap}
+              dogsWithMER={dogsWithMER}
+              onBalance={onBalance}
               compact
             />
           </div>
-
-          <NutritionSnapshot
-            recipe={draftRecipe}
-            dogsWithMER={dogsWithMER}
-            onBalance={onBalance}
-          />
 
           <div className="shrink-0 space-y-2 rounded-2xl border border-zinc-100 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
             <input
