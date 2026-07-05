@@ -14,28 +14,17 @@ import {
 
 import type { MassUnit, WeightUnit } from '../utils/format';
 
-import { btnGhost, btnPrimary, btnSecondary, emptyIconWrap, iconBtn, segmentBtn, segmentTrack } from './ui';
+import { btnPrimary, btnSecondary, emptyIconWrap, iconBtn, segmentBtn, segmentTrack } from './ui';
 
 import {
-
   ArrowRight,
-
-  Bookmark,
-
   Check,
-
   CookingPot,
-
   Copy,
-
   Pencil,
-
   Printer,
-
   SlidersHorizontal,
-
   Sparkles,
-
 } from 'lucide-react';
 
 import { ShoppingListPanel } from './ShoppingListPanel';
@@ -93,11 +82,7 @@ interface HomePlanProps {
   onGoEdit: () => void;
 
   onGoBuild: () => void;
-
   onGoProfile: () => void;
-
-  onGoSaved: () => void;
-
 }
 
 
@@ -145,11 +130,7 @@ export function HomePlan({
   onGoEdit,
 
   onGoBuild,
-
   onGoProfile,
-
-  onGoSaved,
-
 }: HomePlanProps) {
 
   const [pane, setPane] = useState<PlanPane>('shop');
@@ -178,9 +159,8 @@ export function HomePlan({
 
           {hasDraft
 
-            ? 'Name and confirm your draft in Build to unlock shopping lists and feeding guides.'
-
-            : 'Create a balanced meal plan tailored to your pack — then shop and feed with confidence.'}
+            ? 'Name and confirm your draft to unlock shopping and feeding guides.'
+            : 'Pick a saved plan from the menu above, or create a new one.'}
 
         </p>
 
@@ -247,31 +227,10 @@ export function HomePlan({
           </button>
 
           {hasInvalidDog && (
-
             <button type="button" onClick={onGoProfile} className={btnSecondary}>
-
               Set up your dogs first
-
             </button>
-
           )}
-
-          <button
-
-            type="button"
-
-            onClick={onGoSaved}
-
-            className={`${btnGhost} inline-flex items-center justify-center gap-2`}
-
-          >
-
-            <Bookmark size={15} />
-
-            Browse saved plans
-
-          </button>
-
         </div>
 
       </div>

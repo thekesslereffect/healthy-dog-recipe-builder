@@ -68,7 +68,7 @@ export function DailyRecipePanel({
                   return (
                     <div
                       key={`${ingredient.name}-${isBoost ? 'boost' : 'base'}`}
-                      className="flex items-center justify-between gap-2 rounded-lg py-1"
+                      className="flex items-center justify-between gap-1.5 rounded-lg py-0.5 sm:gap-2 sm:py-1"
                     >
                       <div className="min-w-0 truncate text-left text-sm text-foreground">
                         {isBoost ? (
@@ -100,7 +100,7 @@ export function DailyRecipePanel({
                               type="button"
                               aria-label={`Swap ${ingredient.name}`}
                               onClick={() => setEditing({ category, name: ingredient.name })}
-                              className={iconBtn}
+                              className={`${iconBtn} h-8 w-8 sm:h-9 sm:w-9`}
                             >
                               <ArrowLeftRight size={14} />
                             </button>
@@ -109,7 +109,7 @@ export function DailyRecipePanel({
                               aria-pressed={isLocked}
                               aria-label={`${isLocked ? 'Unlock' : 'Lock'} ${ingredient.name}`}
                               onClick={() => onToggleLock(category, ingredient.name)}
-                              className={`${iconBtn} ${isLocked ? 'text-accent' : ''}`}
+                              className={`${iconBtn} h-8 w-8 sm:h-9 sm:w-9 ${isLocked ? 'text-accent' : ''}`}
                             >
                               {isLocked ? <Lock size={14} /> : <LockOpen size={14} />}
                             </button>
@@ -170,11 +170,11 @@ export function DailyRecipePanel({
     return (
       <>
         <div className="flex h-full min-h-0 flex-col rounded-2xl border border-border bg-surface shadow-[var(--shadow-sm)]">
-          <div className="shrink-0 border-b border-border px-4 py-3">
+          <div className="shrink-0 border-b border-border px-3 py-2 sm:px-4 sm:py-3">
             <p className="text-sm font-semibold text-foreground">Daily ingredients</p>
-            <p className="text-[11px] text-muted">Tap to swap · lock to keep on reroll</p>
+            <p className="hidden text-[11px] text-muted sm:block">Tap to swap · lock to keep on reroll</p>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-2">{body}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-1.5 sm:px-4 sm:py-2">{body}</div>
           {dogsWithMER && (
             <NutritionSnapshot
               recipe={recipe}

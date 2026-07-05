@@ -60,6 +60,30 @@ function BuildStep({ step, label, active, done }: { step: number; label: string;
   );
 }
 
+function ConfigChip({
+  label,
+  detail,
+  onClick,
+}: {
+  label: string;
+  detail: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-xl border border-border bg-surface px-3 py-2.5 text-left shadow-[var(--shadow-sm)] active:scale-[0.98]"
+    >
+      <span className="truncate text-sm font-semibold text-foreground">{label}</span>
+      <span className="inline-flex shrink-0 items-center gap-0.5 text-xs font-medium text-muted">
+        {detail}
+        <ChevronRight size={12} />
+      </span>
+    </button>
+  );
+}
+
 export function BuildScreen({
   ratios,
   counts,
@@ -92,8 +116,9 @@ export function BuildScreen({
   const activeStep: 2 | 3 = draftRecipe ? 3 : 2;
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 px-0.5 py-0.5">
-      <div className="flex shrink-0 items-center gap-2 rounded-2xl bg-surface px-4 py-3 shadow-[var(--shadow-sm)]">
+    <div className="flex h-full min-h-0 flex-col gap-2 sm:gap-3 sm:px-0.5 sm:py-0.5">
+      {/* Desktop stepper */}
+      <div className="hidden shrink-0 items-center gap-2 rounded-2xl bg-surface px-4 py-3 shadow-[var(--shadow-sm)] sm:flex">
         <BuildStep step={1} label="Configure" active={false} done />
         <div className="h-0.5 flex-1 rounded-full bg-sage" />
         <BuildStep step={2} label="Generate" active={activeStep === 2} done={activeStep > 2} />
@@ -101,7 +126,59 @@ export function BuildScreen({
         <BuildStep step={3} label="Confirm" active={activeStep === 3} done={false} />
       </div>
 
-      <div className="grid shrink-0 grid-cols-2 gap-3 px-0.5">
+      {/* Mobile: slim chips when reviewing a draft; full stacked cards when configuring */}
+      {draftRecipe ? (
+        <div className="flex shrink-0 gap-2 sm:hidden">
+          <ConfigChip
+            label="Mix"
+            detail={`${Math.round(sum * 100)}%`}
+            onClick={() => setMixOpen(true)}
+          />
+          <ConfigChip
+            label="Supplements"
+            detail={`${supplementCount} on`}
+            onClick={() => setSupplementsOpen(true)}
+          />
+        </div>
+      ) : (
+        <div className="grid shrink-0 grid-cols-1 gap-2 sm:hidden">
+          <button
+            type="button"
+            onClick={() => setMixOpen(true)}
+            className="flex min-w-0 flex-col rounded-2xl border border-border bg-surface p-3 text-left shadow-[var(--shadow-sm)] active:scale-[0.98]"
+          >
+            <div className="mb-2 flex items-center justify-between gap-1">
+              <span className="text-sm font-semibold text-foreground">Ingredient mix</span>
+              <span className="inline-flex items-center gap-0.5 text-xs font-medium text-muted">
+                {Math.round(sum * 100)}%
+                <ChevronRight size={12} />
+              </span>
+            </div>
+            <CategoryBar ratios={ratios} compact />
+          </button>
+          <button
+            type="button"
+            onClick={() => setSupplementsOpen(true)}
+            className="flex min-w-0 flex-col rounded-2xl border border-border bg-surface p-3 text-left shadow-[var(--shadow-sm)] active:scale-[0.98]"
+          >
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-sm font-semibold text-foreground">Supplements</span>
+              <span className="inline-flex items-center gap-0.5 text-xs font-medium text-muted">
+                {supplementCount} on
+                <ChevronRight size={12} />
+              </span>
+            </div>
+            <p className="mt-1.5 line-clamp-1 text-xs text-muted">
+              {enabledSupplements.length > 0
+                ? enabledSupplements.join(', ')
+                : 'Tap to choose supplements'}
+            </p>
+          </button>
+        </div>
+      )}
+
+      {/* Desktop: always show full config cards */}
+      <div className="hidden shrink-0 grid-cols-2 gap-3 px-0.5 sm:grid">
         <button
           type="button"
           onClick={() => setMixOpen(true)}
@@ -138,17 +215,25 @@ export function BuildScreen({
       </div>
 
       {!draftRecipe ? (
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface/60 px-6 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-soft text-accent">
-            <Sparkles size={26} />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface/60 px-4 py-5 text-center sm:px-6">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-soft text-accent sm:h-14 sm:w-14">
+            <Sparkles size={24} className="sm:hidden" />
+            <Sparkles size={26} className="hidden sm:block" />
           </div>
-          <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">
-            {hasActivePlan
-              ? 'Your plan is live. Generate a new draft here — it won\'t replace your active plan until you confirm.'
-              : 'Hit generate to create a balanced draft. Reroll until the ingredients feel right.'}
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted sm:mt-4">
+            <span className="sm:hidden">
+              {hasActivePlan
+                ? 'Generate a new draft — your active plan stays until you confirm.'
+                : 'Generate a draft, then reroll until the mix looks right.'}
+            </span>
+            <span className="hidden sm:inline">
+              {hasActivePlan
+                ? 'Your plan is live. Generate a new draft here — it won\'t replace your active plan until you confirm.'
+                : 'Hit generate to create a balanced draft. Reroll until the ingredients feel right.'}
+            </span>
           </p>
           {allergyList.length > 0 && (
-            <p className="mt-3 rounded-full bg-accent-soft px-3 py-1 text-xs font-medium text-accent">
+            <p className="mt-2 max-w-xs truncate rounded-full bg-accent-soft px-3 py-1 text-xs font-medium text-accent sm:mt-3">
               Avoiding: {allergyList.join(', ')}
             </p>
           )}
@@ -156,13 +241,13 @@ export function BuildScreen({
             type="button"
             onClick={onGenerate}
             disabled={!canGenerate}
-            className={`${btnPrimary} mt-6 inline-flex items-center gap-2 px-6 py-3`}
+            className={`${btnPrimary} mt-4 inline-flex w-full max-w-xs items-center justify-center gap-2 py-3 sm:mt-6 sm:w-auto`}
           >
             <Shuffle size={16} />
             Generate draft
           </button>
           {!canGenerate && (
-            <p className="mt-3 text-xs text-muted">
+            <p className="mt-2 text-xs text-muted">
               {!isPercentageValid
                 ? 'Mix must total 100%.'
                 : hasInvalidDog
@@ -173,7 +258,7 @@ export function BuildScreen({
         </div>
       ) : (
         <>
-          <div className="min-h-0 flex-1 px-0.5">
+          <div className="min-h-0 flex-1 sm:px-0.5">
             <DailyRecipePanel
               recipe={draftRecipe}
               ratios={ratios}
@@ -187,7 +272,7 @@ export function BuildScreen({
             />
           </div>
 
-          <div className="shrink-0 space-y-2.5 rounded-2xl border border-border bg-surface p-4 shadow-[var(--shadow-md)]">
+          <div className="shrink-0 space-y-2 rounded-2xl border border-border bg-surface p-3 shadow-[var(--shadow-md)] sm:space-y-2.5 sm:p-4">
             <input
               type="text"
               value={draftName}

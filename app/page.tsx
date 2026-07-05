@@ -28,16 +28,9 @@ import { HomePlan } from './components/HomePlan';
 import { BuildScreen } from './components/BuildScreen';
 import { EditScreen } from './components/EditScreen';
 import { ProfileScreen } from './components/ProfileScreen';
-import { SavedRecipes } from './components/SavedRecipes';
-import { TopTabs, BottomTabs, type TabDef, type TabId } from './components/TabBar';
-import {
-  ShoppingCart,
-  Bookmark,
-  User,
-  SlidersHorizontal,
-  Sun,
-  Moon,
-} from 'lucide-react';
+import { PlanPicker } from './components/PlanPicker';
+import type { ScreenId } from './components/TabBar';
+import { User, Sun, Moon } from 'lucide-react';
 import { iconBtn } from './components/ui';
 
 type Theme = 'light' | 'dark';
@@ -46,20 +39,6 @@ const DEFAULT_DOGS: Dog[] = [
   { id: 'default-jackson', name: 'Jackson', weight: 30, activityMultiplier: 1.3, allergies: [] },
   { id: 'default-joey', name: 'Joey', weight: 12, activityMultiplier: 1.0, allergies: [] },
 ];
-
-const TABS: TabDef[] = [
-  { id: 'home', label: 'Plan', icon: ShoppingCart },
-  { id: 'build', label: 'Build', icon: SlidersHorizontal },
-  { id: 'saved', label: 'Saved', icon: Bookmark },
-];
-
-const PAGE_TITLE: Record<TabId, string> = {
-  home: 'Plan',
-  build: 'Build',
-  edit: 'Edit',
-  saved: 'Saved',
-  profile: 'Profile',
-};
 
 export default function Home() {
   const [unit, setUnit] = useLocalStorage<WeightUnit>('hdrb.unit', 'lb');
@@ -90,7 +69,7 @@ export default function Home() {
     {},
   );
   const [theme, setTheme] = useLocalStorage<Theme>('hdrb.theme', 'light');
-  const [activeTab, setActiveTab] = useState<TabId>('home');
+  const [activeScreen, setActiveScreen] = useState<ScreenId>('plan');
   const [copied, setCopied] = useState(false);
   const [draftName, setDraftName] = useState('');
   /** Working copy while on the Edit screen (never used by Build). */
@@ -347,18 +326,18 @@ export default function Home() {
     setDraftRecipe(null);
     setDraftName('');
     setEditRecipe(null);
-    setActiveTab('home');
+    setActiveScreen('plan');
   };
 
   const startEdit = () => {
     if (!recipe) return;
     setEditRecipe(recipe);
-    setActiveTab('edit');
+    setActiveScreen('edit');
   };
 
   const cancelEdit = () => {
     setEditRecipe(null);
-    setActiveTab('home');
+    setActiveScreen('plan');
   };
 
   const saveEdit = () => {
@@ -366,7 +345,7 @@ export default function Home() {
       if (editRecipe) {
         setRecipe(editRecipe);
         setEditRecipe(null);
-        setActiveTab('home');
+        setActiveScreen('plan');
       }
       return;
     }
@@ -390,7 +369,7 @@ export default function Home() {
     );
     setRecipe(editRecipe);
     setEditRecipe(null);
-    setActiveTab('home');
+    setActiveScreen('plan');
   };
 
   /** Keep the linked saved plan in sync when Plan settings change. */
@@ -428,11 +407,6 @@ export default function Home() {
 
   const currentSaved = currentSavedId ? saved.find((s) => s.id === currentSavedId) : undefined;
 
-  const renameSavedRecipe = (id: string, name: string) => {
-    setSaved(saved.map((s) => (s.id === id ? { ...s, name } : s)));
-    if (id === currentSavedId) setPlanName(name);
-  };
-
   const loadSavedRecipe = (id: string) => {
     const entry = saved.find((s) => s.id === id);
     if (!entry) return;
@@ -450,7 +424,25 @@ export default function Home() {
     setDraftName('');
     setEditRecipe(null);
     setCurrentSavedId(entry.id);
-    setActiveTab('home');
+    setActiveScreen('plan');
+  };
+
+  const startNewPlan = () => {
+    setEditRecipe(null);
+    setActiveScreen('build');
+  };
+
+  const goToScreen = (id: ScreenId) => {
+    if (id !== 'edit') setEditRecipe(null);
+    setActiveScreen(id);
+  };
+
+  const deleteSavedRecipe = (id: string) => {
+    const next = saved.filter((s) => s.id !== id);
+    setSaved(next);
+    if (id === currentSavedId || next.length === 0) {
+      clearActivePlan();
+    }
   };
 
   const clearActivePlan = () => {
@@ -461,45 +453,55 @@ export default function Home() {
     setEditRecipe(null);
   };
 
-  const goToTab = (id: TabId) => {
-    if (id !== 'edit') setEditRecipe(null);
-    setActiveTab(id);
-  };
-
-  const deleteSavedRecipe = (id: string) => {
-    const next = saved.filter((s) => s.id !== id);
-    setSaved(next);
-    // Removing the active plan (or the last saved plan) clears Plan.
-    if (id === currentSavedId || next.length === 0) {
-      clearActivePlan();
-    }
-  };
-
-  // Prefer explicit plan name; fall back to linked saved entry (legacy sessions).
   const activePlanName =
     planName || currentSaved?.name || (recipe ? 'Untitled plan' : '');
+
+  const pickerLabel =
+    activeScreen === 'profile'
+      ? 'Profile'
+      : activeScreen === 'build'
+        ? draftName.trim() || 'New plan'
+        : activeScreen === 'edit'
+          ? activePlanName || 'Edit plan'
+          : activePlanName || 'Select a plan';
+
+  const headerEyebrow =
+    activeScreen === 'profile'
+      ? 'Settings'
+      : activeScreen === 'build'
+        ? 'Building'
+        : activeScreen === 'edit'
+          ? 'Editing'
+          : 'Paws & Portions';
 
   return (
     <div className="app-mesh flex h-dvh flex-col text-foreground print:h-auto print:min-h-0 print:bg-white print:text-black">
       <header className="flex shrink-0 items-center justify-between gap-3 px-4 pb-3 pt-[max(0.875rem,env(safe-area-inset-top))] sm:px-6 print:px-2 print:py-2">
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-muted print:hidden">
-            {activeTab === 'home' && activePlanName
-              ? 'Active plan'
-              : activeTab === 'edit'
-                ? 'Editing'
-                : 'Paws & Portions'}
+            {headerEyebrow}
           </p>
-          <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl print:text-2xl print:text-black">
-            {activeTab === 'home' && activePlanName
-              ? activePlanName
-              : activeTab === 'edit' && activePlanName
-                ? activePlanName
-                : PAGE_TITLE[activeTab]}
+          {activeScreen === 'profile' ? (
+            <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl print:text-2xl print:text-black">
+              Profile
+            </h1>
+          ) : (
+            <div className="print:hidden">
+              <PlanPicker
+                saved={saved}
+                currentSavedId={currentSavedId}
+                label={pickerLabel}
+                onSelectPlan={loadSavedRecipe}
+                onNewPlan={startNewPlan}
+                onDeletePlan={deleteSavedRecipe}
+              />
+            </div>
+          )}
+          <h1 className="hidden truncate text-xl font-bold tracking-tight print:block print:text-2xl print:text-black">
+            {activePlanName || 'Dog meal plan'}
           </h1>
         </div>
         <div className="flex shrink-0 items-center gap-1.5 print:hidden sm:gap-2">
-          <TopTabs tabs={TABS} active={activeTab} onChange={goToTab} />
           <button
             type="button"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -510,19 +512,19 @@ export default function Home() {
           </button>
           <button
             type="button"
-            onClick={() => goToTab('profile')}
+            onClick={() => goToScreen('profile')}
             aria-label="Profile"
-            aria-current={activeTab === 'profile' ? 'page' : undefined}
-            className={`${iconBtn} ${activeTab === 'profile' ? 'bg-accent-soft text-accent' : ''}`}
+            aria-current={activeScreen === 'profile' ? 'page' : undefined}
+            className={`${iconBtn} ${activeScreen === 'profile' ? 'bg-accent-soft text-accent' : ''}`}
           >
             <User size={18} />
           </button>
         </div>
       </header>
 
-      <main className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col overflow-visible px-4 sm:max-w-5xl sm:px-6 print:max-w-none print:overflow-visible print:px-2">
-        {activeTab === 'home' && (
-          <div key="home" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
+      <main className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col overflow-visible px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:max-w-5xl sm:px-6 print:max-w-none print:overflow-visible print:px-2">
+        {activeScreen === 'plan' && (
+          <div key="plan" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
           <HomePlan
             recipe={recipe}
             hasDraft={!!draftRecipe}
@@ -544,14 +546,13 @@ export default function Home() {
             onPortionUnitsChange={setPortionUnits}
             onCopy={copyRecipe}
             onGoEdit={startEdit}
-            onGoBuild={() => goToTab('build')}
-            onGoProfile={() => goToTab('profile')}
-            onGoSaved={() => goToTab('saved')}
+            onGoBuild={startNewPlan}
+            onGoProfile={() => goToScreen('profile')}
           />
           </div>
         )}
 
-        {activeTab === 'build' && (
+        {activeScreen === 'build' && (
           <div key="build" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
           <BuildScreen
             ratios={ratios}
@@ -580,7 +581,7 @@ export default function Home() {
           </div>
         )}
 
-        {activeTab === 'edit' && editRecipe && (
+        {activeScreen === 'edit' && editRecipe && (
           <div key="edit" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
           <EditScreen
             planName={activePlanName}
@@ -598,18 +599,7 @@ export default function Home() {
           </div>
         )}
 
-        {activeTab === 'saved' && (
-          <div key="saved" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
-          <SavedRecipes
-            saved={saved}
-            onLoad={loadSavedRecipe}
-            onDelete={deleteSavedRecipe}
-            onRename={renameSavedRecipe}
-          />
-          </div>
-        )}
-
-        {activeTab === 'profile' && (
+        {activeScreen === 'profile' && (
           <div key="profile" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
           <ProfileScreen
             dogs={dogs}
@@ -622,8 +612,6 @@ export default function Home() {
           </div>
         )}
       </main>
-
-      <BottomTabs tabs={TABS} active={activeTab} onChange={goToTab} />
     </div>
   );
 }
