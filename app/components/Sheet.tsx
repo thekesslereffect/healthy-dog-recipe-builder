@@ -10,6 +10,8 @@ interface SheetProps {
   onClose: () => void;
   children: React.ReactNode;
   size?: 'md' | 'lg';
+  /** `body` scrolls all content; `child` lets children own scroll (e.g. search + list). */
+  scroll?: 'body' | 'child';
 }
 
 const DESKTOP_MAX_W: Record<NonNullable<SheetProps['size']>, string> = {
@@ -17,7 +19,14 @@ const DESKTOP_MAX_W: Record<NonNullable<SheetProps['size']>, string> = {
   lg: 'sm:max-w-lg',
 };
 
-export function Sheet({ open, title, onClose, children, size = 'lg' }: SheetProps) {
+export function Sheet({
+  open,
+  title,
+  onClose,
+  children,
+  size = 'lg',
+  scroll = 'body',
+}: SheetProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -36,7 +45,7 @@ export function Sheet({ open, title, onClose, children, size = 'lg' }: SheetProp
   if (!open || !mounted) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center sm:p-6 print:hidden">
+    <div className="fixed inset-0 z-[60] flex flex-col justify-end sm:items-center sm:justify-center sm:p-6 print:hidden">
       <button
         type="button"
         aria-label="Close"
@@ -63,7 +72,13 @@ export function Sheet({ open, title, onClose, children, size = 'lg' }: SheetProp
             <X size={18} />
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-5">
+        <div
+          className={
+            scroll === 'child'
+              ? 'flex min-h-0 flex-1 flex-col overflow-hidden px-5 pb-5'
+              : 'min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-5'
+          }
+        >
           {children}
         </div>
       </div>

@@ -24,8 +24,8 @@ export function IngredientPicker({
   }, [query, suggestions]);
 
   return (
-    <Sheet open title={`Replace ${current}`} onClose={onCancel} size="md">
-      <div className="space-y-3">
+    <Sheet open title={`Replace ${current}`} onClose={onCancel} size="md" scroll="child">
+      <div className="flex min-h-0 flex-1 flex-col gap-3">
         <input
           type="search"
           value={query}
@@ -36,14 +36,14 @@ export function IngredientPicker({
           spellCheck={false}
           placeholder="Filter ingredients…"
           aria-label="Filter ingredients"
-          className={`${inputBase} text-base`}
+          className={`${inputBase} shrink-0 text-base`}
           onChange={(e) => setQuery(e.target.value)}
         />
 
         <ul
           role="listbox"
           aria-label="Ingredient options"
-          className="max-h-[50dvh] overflow-y-auto overscroll-contain rounded-xl border border-border"
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl border border-border"
         >
           {matches.length === 0 ? (
             <li className="px-3 py-4 text-center text-sm text-muted">No matches</li>

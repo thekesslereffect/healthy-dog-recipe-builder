@@ -1,5 +1,7 @@
-import { useId, useMemo, useRef, useState } from 'react';
-import { X } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Plus, X } from 'lucide-react';
+import { Sheet } from './Sheet';
+import { inputBase } from './ui';
 
 interface AllergyInputProps {
   value: string[];
@@ -8,54 +10,46 @@ interface AllergyInputProps {
   onRemove: (name: string) => void;
 }
 
-const MAX_SUGGESTIONS = 6;
-
 export function AllergyInput({ value, suggestions, onAdd, onRemove }: AllergyInputProps) {
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [open, setOpen] = useState(false);
-  const [highlight, setHighlight] = useState(0);
-  const listId = useId();
-  const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const available = useMemo(
+    () => suggestions.filter((s) => !value.includes(s)),
+    [suggestions, value],
+  );
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const available = suggestions.filter((s) => !value.includes(s));
-    if (!q) return available.slice(0, MAX_SUGGESTIONS);
-    return available
-      .filter((s) => s.toLowerCase().includes(q))
-      .slice(0, MAX_SUGGESTIONS);
-  }, [query, suggestions, value]);
+    if (!q) return available;
+    return available.filter((s) => s.toLowerCase().includes(q));
+  }, [query, available]);
+
+  const trimmedQuery = query.trim();
+  const canAddCustom =
+    trimmedQuery.length > 0 &&
+    !value.some((name) => name.toLowerCase() === trimmedQuery.toLowerCase());
+
+  const openPicker = () => {
+    setQuery('');
+    setPickerOpen(true);
+  };
+
+  const closePicker = () => {
+    setPickerOpen(false);
+    setQuery('');
+  };
 
   const commit = (name: string) => {
     const trimmed = name.trim();
-    if (!trimmed || value.includes(trimmed)) {
-      setQuery('');
-      return;
-    }
+    if (!trimmed || value.includes(trimmed)) return;
     onAdd(trimmed);
-    setQuery('');
-    setHighlight(0);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setOpen(true);
-      setHighlight((h) => Math.min(h + 1, matches.length - 1));
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setHighlight((h) => Math.max(h - 1, 0));
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      commit(matches[highlight] ?? query);
-    } else if (e.key === 'Backspace' && query === '' && value.length > 0) {
-      onRemove(value[value.length - 1]);
-    }
+    closePicker();
   };
 
   return (
-    <div className="relative">
-      <div className="flex flex-wrap items-center gap-1.5 rounded-xl bg-surface-muted px-2.5 py-2 focus-within:bg-surface focus-within:ring-2 focus-within:ring-accent/15">
+    <>
+      <div className="flex flex-wrap items-center gap-1.5">
         {value.map((name) => (
           <span
             key={name}
@@ -72,55 +66,68 @@ export function AllergyInput({ value, suggestions, onAdd, onRemove }: AllergyInp
             </button>
           </span>
         ))}
-        <input
-          type="text"
-          value={query}
-          role="combobox"
-          aria-expanded={open && matches.length > 0}
-          aria-controls={listId}
-          aria-autocomplete="list"
-          placeholder={value.length ? 'Add another…' : 'Type an ingredient…'}
-          className="min-w-[7rem] flex-1 bg-transparent px-1 py-0.5 text-base text-foreground outline-none placeholder:text-muted/60"
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setOpen(true);
-            setHighlight(0);
-          }}
-          onFocus={() => setOpen(true)}
-          onBlur={() => {
-            blurTimer.current = setTimeout(() => setOpen(false), 120);
-          }}
-          onKeyDown={handleKeyDown}
-        />
+        <button
+          type="button"
+          onClick={openPicker}
+          className="inline-flex h-8 items-center gap-1 rounded-lg border border-dashed border-border px-2.5 text-xs font-semibold text-muted transition-colors hover:border-accent/30 hover:bg-surface-muted hover:text-accent"
+        >
+          <Plus size={14} />
+          Add ingredient
+        </button>
       </div>
 
-      {open && matches.length > 0 && (
-        <ul
-          id={listId}
-          role="listbox"
-          className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-xl border border-border bg-surface py-1 shadow-[var(--shadow-lg)]"
-          onMouseDown={() => {
-            if (blurTimer.current) clearTimeout(blurTimer.current);
-          }}
-        >
-          {matches.map((name, index) => (
-            <li key={name} role="option" aria-selected={index === highlight}>
-              <button
-                type="button"
-                onClick={() => commit(name)}
-                onMouseEnter={() => setHighlight(index)}
-                className={`block w-full px-3 py-1.5 text-left text-sm ${
-                  index === highlight
-                    ? 'bg-accent-soft text-foreground'
-                    : 'text-muted'
-                }`}
-              >
-                {name}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+      <Sheet open={pickerOpen} title="Avoid ingredients" onClose={closePicker} size="md" scroll="child">
+        <div className="flex min-h-0 flex-1 flex-col gap-3">
+          <input
+            type="search"
+            value={query}
+            enterKeyHint="search"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            placeholder="Filter ingredients…"
+            aria-label="Filter ingredients to avoid"
+            className={`${inputBase} shrink-0`}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+
+          <ul
+            role="listbox"
+            aria-label="Ingredients to avoid"
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl border border-border"
+          >
+            {canAddCustom && (
+              <li role="option">
+                <button
+                  type="button"
+                  onClick={() => commit(trimmedQuery)}
+                  className="w-full border-b border-border/50 px-3 py-3 text-left text-base font-semibold text-accent transition-colors hover:bg-accent-soft active:bg-accent-soft"
+                >
+                  Add &ldquo;{trimmedQuery}&rdquo;
+                </button>
+              </li>
+            )}
+            {matches.length === 0 && !canAddCustom ? (
+              <li className="px-3 py-4 text-center text-sm text-muted">
+                {available.length === 0 ? 'All catalog ingredients are already avoided' : 'No matches'}
+              </li>
+            ) : (
+              matches.map((name) => (
+                <li key={name} role="option">
+                  <button
+                    type="button"
+                    onClick={() => commit(name)}
+                    className="w-full border-b border-border/50 px-3 py-3 text-left text-base text-foreground transition-colors last:border-b-0 hover:bg-surface-muted active:bg-accent-soft"
+                  >
+                    {name}
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+      </Sheet>
+    </>
   );
 }
