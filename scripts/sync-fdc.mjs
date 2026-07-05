@@ -1,8 +1,8 @@
 /**
  * Sync dog-safe allowlist nutrients from USDA FoodData Central.
  *
- * Dev/build only — not called by the app at runtime. The app reads pre-synced
- * data from GET /api/ingredients (see app/server/getIngredientCatalog.ts).
+ * Dev only — not called by the app at runtime. Writes `app/data/foods.generated.ts`,
+ * which the app imports directly.
  *
  * Usage:
  *   npm run sync:fdc
