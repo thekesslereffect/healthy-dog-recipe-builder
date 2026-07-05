@@ -12,7 +12,7 @@ export const sectionTitle =
 export const fieldLabel = 'block text-xs font-medium text-muted mb-1.5';
 
 export const inputBase =
-  'w-full px-3.5 py-2.5 text-sm font-normal text-foreground bg-surface-muted rounded-xl border border-transparent focus:outline-none focus:border-accent/30 focus:bg-surface focus:ring-2 focus:ring-accent/15 transition-all placeholder:text-muted/60';
+  'w-full px-3.5 py-2.5 text-base font-normal text-foreground bg-surface-muted rounded-xl border border-transparent focus:outline-none focus:border-accent/30 focus:bg-surface focus:ring-2 focus:ring-accent/15 transition-all placeholder:text-muted/60 sm:text-sm';
 
 export const groupLabel =
   'text-[10px] font-semibold uppercase tracking-widest text-muted';
