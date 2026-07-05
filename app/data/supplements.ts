@@ -231,10 +231,8 @@ export function buildWeightDosedSupplements(
   for (const entry of SUPPLEMENT_CATALOG) {
     if (entry.id === 'eggshell') continue;
     if (!isEnabled(entry, options)) continue;
-
     const grams = doseSupplementGrams(entry, totalDogWeightLbs);
     if (grams <= 0) continue;
-
     const calories = round2((grams * (entry.caloriesPer100g || 0)) / 100);
     rows.push({
       name: entry.name,
@@ -247,10 +245,7 @@ export function buildWeightDosedSupplements(
 }
 
 /** Sum calcium (mg) from enabled supplements except eggshell. */
-export function supplementCalciumMg(
-  totalDogWeightLbs: number,
-  options: SupplementOptions,
-): number {
+export function supplementCalciumMg(totalDogWeightLbs: number, options: SupplementOptions): number {
   let calciumMg = 0;
   for (const entry of SUPPLEMENT_CATALOG) {
     if (entry.id === 'eggshell' || !isEnabled(entry, options)) continue;
@@ -278,10 +273,8 @@ export function doseEggshellRow(
   options: SupplementOptions,
 ): SupplementRow | null {
   if (!normalizeSupplementOptions(options).eggshell) return null;
-
   const eggshell = getSupplementCatalogEntry('Eggshell Powder (Calcium)');
   if (!eggshell?.calciumMgPerGram) return null;
-
   const aafcoCalciumMg = Math.round(totalMER * CALCIUM_MG_PER_KCAL);
   const targetCalciumMg = Math.max(
     aafcoCalciumMg,
@@ -290,7 +283,6 @@ export function doseEggshellRow(
   const eggshellCalciumMg = Math.max(0, targetCalciumMg - foodCalciumMg - extraCalciumMg);
   const eggshellGrams = eggshellCalciumMg / eggshell.calciumMgPerGram;
   if (eggshellGrams < 0.01) return null;
-
   return {
     name: eggshell.name,
     grams: round2(eggshellGrams),

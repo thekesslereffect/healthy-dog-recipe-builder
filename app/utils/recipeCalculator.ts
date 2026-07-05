@@ -122,7 +122,6 @@ function selectIngredients(
   const available = pool.filter((i) => !excluded.includes(i.name));
   const locked = available.filter((i) => lockedNames.includes(i.name));
   if (locked.length >= count) return locked.slice(0, count);
-
   const rest = available.filter((i) => !lockedNames.includes(i.name));
   const picks = shuffle(rest, random).slice(0, count - locked.length);
   return [...locked, ...picks];
@@ -143,31 +142,24 @@ export function createRecipe(
   } = options;
   const supplements = normalizeSupplementOptions(supplementOptions);
   const recipe = emptyRecipe();
-
   const totalDogWeight = dogs.reduce((sum, dog) => sum + dog.weight, 0);
   let totalSupplementCalories = 0;
-
   const weightDosed = buildWeightDosedSupplements(totalDogWeight, supplements);
   for (const row of weightDosed) {
     recipe.ingredients.supplements.push(row);
     totalSupplementCalories += row.calories;
   }
-
   const extraCalciumMg = supplementCalciumMg(totalDogWeight, supplements);
-
   const remainingMER = totalMER - totalSupplementCalories;
   let mainIngredientsCalories = 0;
-
   for (const category of CATEGORIES) {
     const percentage = ingredientPercentages[category] ?? 0;
     const count = ingredientCounts[category] ?? 0;
     const calorieTarget = remainingMER * percentage;
-
     if (calorieTarget <= 0 || percentage === 0 || count === 0) {
       recipe.ingredients[category] = [];
       continue;
     }
-
     const selected = selectIngredients(
       getIngredientCatalogOrThrow()[category],
       count,
@@ -175,12 +167,10 @@ export function createRecipe(
       excluded,
       random,
     );
-
     if (selected.length === 0) {
       recipe.ingredients[category] = [];
       continue;
     }
-
     const caloriesPerIngredient = calorieTarget / selected.length;
     for (const ingredient of selected) {
       const caloriesPer100g = ingredient.caloriesPer100g || 0;
@@ -195,7 +185,6 @@ export function createRecipe(
       mainIngredientsCalories += actualCalories;
     }
   }
-
   let foodCalciumMg = 0;
   let foodPhosphorusMg = 0;
   for (const category of CATEGORIES) {
@@ -206,7 +195,6 @@ export function createRecipe(
       foodPhosphorusMg += (food.phosphorusMgPer100g * row.grams) / 100;
     }
   }
-
   const eggshellRow = doseEggshellRow(
     totalMER,
     foodCalciumMg,
@@ -218,19 +206,16 @@ export function createRecipe(
     recipe.ingredients.supplements.push(eggshellRow);
     totalSupplementCalories += eggshellRow.calories;
   }
-
   recipe.totalCalories = round2(mainIngredientsCalories + totalSupplementCalories);
   return recipe;
 }
 
 export function calculateShoppingList(recipe: Recipe, numberOfDays: number): ShoppingList {
   const shoppingList: ShoppingList = {};
-
   for (const category of CATEGORIES) {
     for (const ingredient of recipe.ingredients[category]) {
       const totalGrams = ingredient.grams * numberOfDays;
       const totalPounds = Math.round((totalGrams / GRAMS_PER_LB) * 1000) / 1000;
-
       if (shoppingList[ingredient.name]) {
         shoppingList[ingredient.name].grams += totalGrams;
         if (shoppingList[ingredient.name].pounds !== undefined) {
@@ -241,11 +226,9 @@ export function calculateShoppingList(recipe: Recipe, numberOfDays: number): Sho
       }
     }
   }
-
   for (const supplement of recipe.ingredients.supplements) {
     shoppingList[supplement.name] = { grams: supplement.grams * numberOfDays };
   }
-
   return shoppingList;
 }
 
@@ -264,30 +247,24 @@ export function calculateMealPortions(
   const totalWeightLbs = dogs.reduce((sum, dog) => sum + (dog.weight || 0), 0);
   const meals = mealsPerDay > 0 ? mealsPerDay : 1;
   const portions: Record<string, MealPortion> = {};
-
   for (const dog of dogs) {
     const dogEnergyShare = totalMER > 0 ? (dog.MER || 0) / totalMER : 0;
     const dogWeightShare = totalWeightLbs > 0 ? (dog.weight || 0) / totalWeightLbs : 0;
-
     let totalDailyGrams = 0;
-
     for (const category of CATEGORIES) {
       for (const ingredient of recipe.ingredients[category]) {
         totalDailyGrams += ingredient.grams * dogEnergyShare;
       }
     }
-
     for (const supplement of recipe.ingredients.supplements) {
       totalDailyGrams += supplement.grams * dogWeightShare;
     }
-
     portions[dog.name] = {
       dailyPortion: round2(totalDailyGrams),
       mealPortion: round2(totalDailyGrams / meals),
       percentage: Math.round(dogEnergyShare * 100),
     };
   }
-
   return portions;
 }
 

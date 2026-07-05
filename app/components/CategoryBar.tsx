@@ -20,7 +20,6 @@ export function CategoryBar({
 }) {
   const total = CATEGORIES.reduce((sum, c) => sum + (ratios[c] || 0), 0);
   if (total <= 0) return null;
-
   return (
     <div>
       <div

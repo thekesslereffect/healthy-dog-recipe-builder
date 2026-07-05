@@ -23,6 +23,7 @@ import { recipeToText } from './utils/export';
 import { balanceRecipeMix, applyRatiosToRecipe } from './utils/rebalance';
 import { removeNutritionBoost, hasNutritionBoostInCategory } from './utils/nutritionBoost';
 import { type MassUnit, type WeightUnit } from './utils/format';
+import type { ShoppingMassUnitMode } from './utils/shoppingMassUnit';
 import { createId, resolveSupplementOptions, type SavedRecipe } from './utils/savedRecipes';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { HomePlan } from './components/HomePlan';
@@ -48,7 +49,10 @@ export default function Home() {
   const [mealsPerDay, setMealsPerDay] = useLocalStorage('hdrb.meals', 2);
   const [ratios, setRatios] = useLocalStorage<CategoryRatios>('hdrb.ratios', RECOMMENDED_RATIOS);
   const [counts, setCounts] = useLocalStorage<CategoryCounts>('hdrb.counts', DEFAULT_COUNTS);
-  const [locked, setLocked] = useLocalStorage<Partial<Record<Category, string[]>>>('hdrb.locked', {});
+  const [locked, setLocked] = useLocalStorage<Partial<Record<Category, string[]>>>(
+    'hdrb.locked',
+    {},
+  );
   const [supplementOptions, setSupplementOptions] = useLocalStorage<SupplementOptions>(
     'hdrb.supplements',
     DEFAULT_SUPPLEMENT_OPTIONS,
@@ -60,6 +64,10 @@ export default function Home() {
   const [shoppingUnits, setShoppingUnits] = useLocalStorage<Record<string, MassUnit>>(
     'hdrb.shoppingUnits',
     {},
+  );
+  const [shoppingUnitMode, setShoppingUnitMode] = useLocalStorage<ShoppingMassUnitMode>(
+    'hdrb.shoppingUnitMode',
+    'auto',
   );
   const [checkedItems, setCheckedItems] = useLocalStorage<Record<string, boolean>>(
     'hdrb.shoppingChecked',
@@ -80,13 +88,11 @@ export default function Home() {
     'hdrb.currentSavedId',
     null,
   );
-
   useEffect(() => {
     if (dogs.some((d) => !d.id)) {
       setDogs(dogs.map((d) => (d.id ? d : { ...d, id: createId() })));
     }
   }, [dogs, setDogs]);
-
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
@@ -122,15 +128,12 @@ export default function Home() {
       setCheckedItems({});
     }
   }, [saved.length, recipe, planName, setRecipe, setPlanName, setCheckedItems]);
-
   const percentageSum = CATEGORIES.reduce((sum, c) => sum + ratios[c], 0);
   const isPercentageValid = Math.abs(percentageSum - 1) < 0.001;
   const hasInvalidDog = dogs.some((d) => !d.name?.trim() || d.weight <= 0);
   const canGenerate = isPercentageValid && !hasInvalidDog;
-
   const dogsWithMER = dogs.map((dog) => ({ ...dog, MER: calculateDailyCalories(dog) }));
   const allergyList = Array.from(new Set(dogs.flatMap((d) => d.allergies ?? [])));
-
   const computeRecipe = (
     dogList: Dog[],
     lockedState: Partial<Record<Category, string[]>> = locked,
@@ -147,12 +150,10 @@ export default function Home() {
       supplementOptions: normalizeSupplementOptions(supplementState),
     });
   };
-
   const generateDraft = () => {
     if (!canGenerate) return;
     setDraftRecipe(computeRecipe(dogs, locked, ratios, counts, supplementOptions));
   };
-
   const balanceDraft = () => {
     if (!draftRecipe) return;
     const result = balanceRecipeMix(draftRecipe, dogs, supplementOptions, allergyList);
@@ -160,7 +161,6 @@ export default function Home() {
     // Keep Mix-sheet ratios unchanged so Reroll still uses the user's percentages.
     setDraftRecipe(result.recipe);
   };
-
   const balanceEdit = () => {
     if (!editRecipe) return;
     const result = balanceRecipeMix(editRecipe, dogs, supplementOptions, allergyList);
@@ -185,7 +185,6 @@ export default function Home() {
     }
     setDraftRecipe(computeRecipe(dogList, locked, ratioState, countState, supplementState));
   };
-
   const updateSupplementOptions = (next: SupplementOptions) => {
     const normalized = normalizeSupplementOptions(next);
     setSupplementOptions(normalized);
@@ -193,17 +192,14 @@ export default function Home() {
       refreshDraft(ratios, counts, dogs, normalized);
     }
   };
-
   const addDog = () =>
     setDogs([
       ...dogs,
       { id: createId(), name: '', weight: 0, activityMultiplier: 1.6, allergies: [] },
     ]);
-
   const removeDog = (index: number) => {
     if (dogs.length > 1) setDogs(dogs.filter((_, i) => i !== index));
   };
-
   const updateDog = (
     index: number,
     field: keyof Dog,
@@ -223,35 +219,28 @@ export default function Home() {
       if (recipe) setRecipe(computeRecipe(nextDogs));
     }
   };
-
   const updateRatio = (category: Category, value: number) => {
     const nextRatios = { ...ratios, [category]: value };
     setRatios(nextRatios);
     refreshDraft(nextRatios, counts);
   };
-
   const updateCount = (category: Category, value: number) => {
     const nextCounts = { ...counts, [category]: value };
     setCounts(nextCounts);
     refreshDraft(ratios, nextCounts);
   };
-
   const applyRecommendedRatios = () => {
     const nextRatios = { ...RECOMMENDED_RATIOS };
     setRatios(nextRatios);
     refreshDraft(nextRatios, counts);
   };
-
   const toggleLock = (category: Category, name: string) => {
     setLocked((prev) => {
       const current = prev[category] ?? [];
-      const next = current.includes(name)
-        ? current.filter((n) => n !== name)
-        : [...current, name];
+      const next = current.includes(name) ? current.filter((n) => n !== name) : [...current, name];
       return { ...prev, [category]: next };
     });
   };
-
   const applySwap = (
     source: Recipe,
     setSource: (r: Recipe) => void,
@@ -264,7 +253,6 @@ export default function Home() {
     if (!data) return;
     const round2 = (n: number) => Math.round(n * 100) / 100;
     const cpg = data.caloriesPer100g || 0;
-
     const nextCategoryItems = source.ingredients[category].map((row) => {
       if (row.name !== oldName) return row;
       const grams = cpg > 0 ? round2((row.calories / cpg) * 100) : 0;
@@ -275,31 +263,25 @@ export default function Home() {
         additional: row.additional,
       };
     });
-
     const nextRecipe: Recipe = {
       ...source,
       ingredients: { ...source.ingredients, [category]: nextCategoryItems },
     };
-
     let total = 0;
     for (const c of CATEGORIES) {
       for (const row of nextRecipe.ingredients[c]) total += row.calories;
     }
     for (const supplement of nextRecipe.ingredients.supplements) total += supplement.calories;
     nextRecipe.totalCalories = round2(total);
-
     setSource(nextRecipe);
-
     setLocked((prev) => {
       const current = prev[category] ?? [];
       if (!current.includes(oldName)) return prev;
       return { ...prev, [category]: current.map((n) => (n === oldName ? newName : n)) };
     });
   };
-
   const recalculateRecipe = (source: Recipe): Recipe =>
     applyRatiosToRecipe(source, dogs, ratios, supplementOptions);
-
   const removeBoost = (
     source: Recipe,
     setSource: (recipe: Recipe) => void,
@@ -308,7 +290,6 @@ export default function Home() {
   ) => {
     setSource(recalculateRecipe(removeNutritionBoost(source, category, name)));
   };
-
   const swapBoost = (
     source: Recipe,
     setSource: (recipe: Recipe) => void,
@@ -322,16 +303,13 @@ export default function Home() {
     const newCategory = food.category;
     const round2 = (n: number) => Math.round(n * 100) / 100;
     const cpg = food.caloriesPer100g || 0;
-
     const oldRow = source.ingredients[category].find(
       (row) => row.name === oldName && row.additional,
     );
     if (!oldRow) return;
-
     if (newCategory !== category && hasNutritionBoostInCategory(source, newCategory)) {
       return;
     }
-
     const grams = cpg > 0 ? round2((oldRow.calories / cpg) * 100) : 0;
     const newRow = {
       name: newName,
@@ -339,7 +317,6 @@ export default function Home() {
       calories: round2((grams * cpg) / 100),
       additional: true as const,
     };
-
     const nextIngredients = {
       protein: [...source.ingredients.protein],
       organs: [...source.ingredients.organs],
@@ -349,7 +326,6 @@ export default function Home() {
       fats: [...source.ingredients.fats],
       supplements: source.ingredients.supplements.map((row) => ({ ...row })),
     };
-
     if (newCategory === category) {
       nextIngredients[category] = nextIngredients[category].map((row) => {
         if (row.name !== oldName || !row.additional) return row;
@@ -361,39 +337,32 @@ export default function Home() {
       );
       nextIngredients[newCategory] = [...nextIngredients[newCategory], newRow];
     }
-
     const swapped: Recipe = {
       ...source,
       ingredients: nextIngredients,
     };
     setSource(recalculateRecipe(swapped));
   };
-
   const swapDraftIngredient = (category: Category, oldName: string, newName: string) => {
     if (!draftRecipe) return;
     applySwap(draftRecipe, setDraftRecipe, category, oldName, newName);
   };
-
   const removeDraftBoost = (category: Category, name: string) => {
     if (!draftRecipe) return;
     removeBoost(draftRecipe, setDraftRecipe, category, name);
   };
-
   const swapDraftBoost = (category: Category, oldName: string, newName: string) => {
     if (!draftRecipe) return;
     swapBoost(draftRecipe, setDraftRecipe, category, oldName, newName);
   };
-
   const swapEditIngredient = (category: Category, oldName: string, newName: string) => {
     if (!editRecipe) return;
     applySwap(editRecipe, setEditRecipe, category, oldName, newName);
   };
-
   const removeEditBoost = (category: Category, name: string) => {
     if (!editRecipe) return;
     removeBoost(editRecipe, setEditRecipe, category, name);
   };
-
   const swapEditBoost = (category: Category, oldName: string, newName: string) => {
     if (!editRecipe) return;
     swapBoost(editRecipe, setEditRecipe, category, oldName, newName);
@@ -426,18 +395,15 @@ export default function Home() {
     setEditRecipe(null);
     setActiveScreen('plan');
   };
-
   const startEdit = () => {
     if (!recipe) return;
     setEditRecipe(recipe);
     setActiveScreen('edit');
   };
-
   const cancelEdit = () => {
     setEditRecipe(null);
     setActiveScreen('plan');
   };
-
   const saveEdit = () => {
     if (!editRecipe || !currentSavedId) {
       if (editRecipe) {
@@ -474,22 +440,17 @@ export default function Home() {
   const syncSavedMeta = (patch: Partial<Pick<SavedRecipe, 'numberOfDays' | 'mealsPerDay'>>) => {
     if (!currentSavedId) return;
     setSaved((prev) =>
-      prev.map((s) =>
-        s.id === currentSavedId ? { ...s, ...patch, savedAt: Date.now() } : s,
-      ),
+      prev.map((s) => (s.id === currentSavedId ? { ...s, ...patch, savedAt: Date.now() } : s)),
     );
   };
-
   const changeDays = (days: number) => {
     setNumberOfDays(days);
     syncSavedMeta({ numberOfDays: days });
   };
-
   const changeMeals = (meals: number) => {
     setMealsPerDay(meals);
     syncSavedMeta({ mealsPerDay: meals });
   };
-
   const copyRecipe = async () => {
     if (!recipe) return;
     try {
@@ -502,9 +463,7 @@ export default function Home() {
       // no-op
     }
   };
-
   const currentSaved = currentSavedId ? saved.find((s) => s.id === currentSavedId) : undefined;
-
   const loadSavedRecipe = (id: string) => {
     const entry = saved.find((s) => s.id === id);
     if (!entry) return;
@@ -524,22 +483,18 @@ export default function Home() {
     setCurrentSavedId(entry.id);
     setActiveScreen('plan');
   };
-
   const startNewPlan = () => {
     setEditRecipe(null);
     setActiveScreen('build');
   };
-
   const openProfile = () => {
     if (activeScreen === 'profile') return;
     setReturnScreen(activeScreen);
     setActiveScreen('profile');
   };
-
   const closeProfile = () => {
     setActiveScreen(returnScreen === 'profile' ? 'plan' : returnScreen);
   };
-
   const deleteSavedRecipe = (id: string) => {
     const next = saved.filter((s) => s.id !== id);
     setSaved(next);
@@ -547,7 +502,6 @@ export default function Home() {
       clearActivePlan();
     }
   };
-
   const clearActivePlan = () => {
     setRecipe(null);
     setPlanName('');
@@ -555,10 +509,7 @@ export default function Home() {
     setCheckedItems({});
     setEditRecipe(null);
   };
-
-  const activePlanName =
-    planName || currentSaved?.name || (recipe ? 'Untitled plan' : '');
-
+  const activePlanName = planName || currentSaved?.name || (recipe ? 'Untitled plan' : '');
   const pickerLabel =
     activeScreen === 'profile'
       ? 'Profile'
@@ -567,19 +518,13 @@ export default function Home() {
         : activeScreen === 'edit'
           ? activePlanName || 'Edit plan'
           : activePlanName || 'Select a plan';
-
   return (
     <div className="flex h-dvh flex-col bg-background text-foreground print:h-auto print:min-h-0 print:bg-white print:text-black">
       <header className="flex shrink-0 items-center justify-between gap-3 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6 print:px-2 print:py-2">
         <div className="min-w-0 flex-1">
           {activeScreen === 'profile' ? (
             <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={closeProfile}
-                className={iconBtn}
-                aria-label="Back"
-              >
+              <button type="button" onClick={closeProfile} className={iconBtn} aria-label="Back">
                 <ArrowLeft size={18} />
               </button>
               <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl print:text-2xl print:text-black">
@@ -626,94 +571,102 @@ export default function Home() {
       <main className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col overflow-visible px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:max-w-5xl sm:px-6 print:max-w-none print:overflow-visible print:px-2">
         {activeScreen === 'plan' && (
           <div key="plan" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
-          <HomePlan
-            recipe={recipe}
-            hasDraft={!!draftRecipe}
-            planName={activePlanName}
-            dogsWithMER={dogsWithMER}
-            numberOfDays={numberOfDays}
-            mealsPerDay={mealsPerDay}
-            unit={unit}
-            shoppingUnits={shoppingUnits}
-            checkedItems={checkedItems}
-            portionUnits={portionUnits}
-            copied={copied}
-            canGenerate={canGenerate}
-            hasInvalidDog={hasInvalidDog}
-            onDaysChange={changeDays}
-            onMealsChange={changeMeals}
-            onShoppingUnitsChange={setShoppingUnits}
-            onCheckedItemsChange={setCheckedItems}
-            onPortionUnitsChange={setPortionUnits}
-            onCopy={copyRecipe}
-            onGoEdit={startEdit}
-            onGoBuild={startNewPlan}
-            onGoProfile={openProfile}
-          />
+            <HomePlan
+              recipe={recipe}
+              hasDraft={!!draftRecipe}
+              planName={activePlanName}
+              dogsWithMER={dogsWithMER}
+              numberOfDays={numberOfDays}
+              mealsPerDay={mealsPerDay}
+              unit={unit}
+              shoppingUnits={shoppingUnits}
+              shoppingUnitMode={shoppingUnitMode}
+              checkedItems={checkedItems}
+              portionUnits={portionUnits}
+              copied={copied}
+              canGenerate={canGenerate}
+              hasInvalidDog={hasInvalidDog}
+              onDaysChange={changeDays}
+              onMealsChange={changeMeals}
+              onShoppingUnitsChange={setShoppingUnits}
+              onShoppingUnitModeChange={setShoppingUnitMode}
+              onCheckedItemsChange={setCheckedItems}
+              onPortionUnitsChange={setPortionUnits}
+              onCopy={copyRecipe}
+              onGoEdit={startEdit}
+              onGoBuild={startNewPlan}
+              onGoProfile={openProfile}
+            />
           </div>
         )}
 
         {activeScreen === 'build' && (
-          <div key="build" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
-          <BuildScreen
-            ratios={ratios}
-            counts={counts}
-            draftRecipe={draftRecipe}
-            dogsWithMER={dogsWithMER}
-            hasActivePlan={!!recipe}
-            allergyList={allergyList}
-            canGenerate={canGenerate}
-            isPercentageValid={isPercentageValid}
-            hasInvalidDog={hasInvalidDog}
-            draftName={draftName}
-            locked={locked}
-            supplementOptions={supplementOptions}
-            onSupplementOptionsChange={updateSupplementOptions}
-            onRatioChange={updateRatio}
-            onCountChange={updateCount}
-            onApplyRecommended={applyRecommendedRatios}
-            onGenerate={generateDraft}
-            onConfirm={confirmDraft}
-            onDraftNameChange={setDraftName}
-            onToggleLock={toggleLock}
-            onSwap={swapDraftIngredient}
-            onRemoveBoost={removeDraftBoost}
-            onSwapBoost={swapDraftBoost}
-            onBalance={balanceDraft}
-          />
+          <div
+            key="build"
+            className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible"
+          >
+            <BuildScreen
+              ratios={ratios}
+              counts={counts}
+              draftRecipe={draftRecipe}
+              dogsWithMER={dogsWithMER}
+              hasActivePlan={!!recipe}
+              allergyList={allergyList}
+              canGenerate={canGenerate}
+              isPercentageValid={isPercentageValid}
+              hasInvalidDog={hasInvalidDog}
+              draftName={draftName}
+              locked={locked}
+              supplementOptions={supplementOptions}
+              onSupplementOptionsChange={updateSupplementOptions}
+              onRatioChange={updateRatio}
+              onCountChange={updateCount}
+              onApplyRecommended={applyRecommendedRatios}
+              onGenerate={generateDraft}
+              onConfirm={confirmDraft}
+              onDraftNameChange={setDraftName}
+              onToggleLock={toggleLock}
+              onSwap={swapDraftIngredient}
+              onRemoveBoost={removeDraftBoost}
+              onSwapBoost={swapDraftBoost}
+              onBalance={balanceDraft}
+            />
           </div>
         )}
 
         {activeScreen === 'edit' && editRecipe && (
           <div key="edit" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
-          <EditScreen
-            planName={activePlanName}
-            editRecipe={editRecipe}
-            dogsWithMER={dogsWithMER}
-            ratios={ratios}
-            allergyList={allergyList}
-            locked={locked}
-            onToggleLock={toggleLock}
-            onSwap={swapEditIngredient}
-            onRemoveBoost={removeEditBoost}
-            onSwapBoost={swapEditBoost}
-            onSave={saveEdit}
-            onCancel={cancelEdit}
-            onBalance={balanceEdit}
-          />
+            <EditScreen
+              planName={activePlanName}
+              editRecipe={editRecipe}
+              dogsWithMER={dogsWithMER}
+              ratios={ratios}
+              allergyList={allergyList}
+              locked={locked}
+              onToggleLock={toggleLock}
+              onSwap={swapEditIngredient}
+              onRemoveBoost={removeEditBoost}
+              onSwapBoost={swapEditBoost}
+              onSave={saveEdit}
+              onCancel={cancelEdit}
+              onBalance={balanceEdit}
+            />
           </div>
         )}
 
         {activeScreen === 'profile' && (
-          <div key="profile" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
-          <ProfileScreen
-            dogs={dogs}
-            unit={unit}
-            onUnitChange={setUnit}
-            onAddDog={addDog}
-            onRemoveDog={removeDog}
-            onUpdateDog={updateDog}
-          />
+          <div
+            key="profile"
+            className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible"
+          >
+            <ProfileScreen
+              dogs={dogs}
+              unit={unit}
+              onUnitChange={setUnit}
+              onAddDog={addDog}
+              onRemoveDog={removeDog}
+              onUpdateDog={updateDog}
+            />
           </div>
         )}
       </main>

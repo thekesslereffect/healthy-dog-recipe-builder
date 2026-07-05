@@ -28,11 +28,9 @@ export function Sheet({
   scroll = 'body',
 }: SheetProps) {
   const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
     setMounted(true);
   }, []);
-
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -41,9 +39,7 @@ export function Sheet({
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
-
   if (!open || !mounted) return null;
-
   return createPortal(
     <div className="fixed inset-0 z-[60] flex flex-col justify-end sm:items-center sm:justify-center sm:p-6 print:hidden">
       <button
@@ -60,9 +56,7 @@ export function Sheet({
       >
         <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-border sm:hidden" />
         <div className="flex shrink-0 items-center justify-between px-5 py-4">
-          <h2 className="text-lg font-bold tracking-tight text-foreground">
-            {title}
-          </h2>
+          <h2 className="text-lg font-bold tracking-tight text-foreground">{title}</h2>
           <button
             type="button"
             onClick={onClose}

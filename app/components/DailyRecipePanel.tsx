@@ -2,7 +2,11 @@ import { useMemo, useState } from 'react';
 import { CATEGORIES, type Category, type CategoryRatios } from '../utils/constants';
 import type { Dog, Recipe } from '../utils/recipeCalculator';
 import { getIngredientCatalogOrThrow } from '../data/ingredients';
-import { getBoostSwapCandidates, getBoostNutrientGaps, isNutritionBoostRow } from '../utils/nutritionBoost';
+import {
+  getBoostSwapCandidates,
+  getBoostNutrientGaps,
+  isNutritionBoostRow,
+} from '../utils/nutritionBoost';
 import { groupLabel, iconBtn } from './ui';
 import { ArrowLeftRight, Lock, LockOpen, Trash2 } from 'lucide-react';
 import { IngredientPicker, type IngredientPickerOption } from './IngredientPicker';
@@ -45,7 +49,6 @@ export function DailyRecipePanel({
   compact = false,
 }: DailyRecipePanelProps) {
   const [editing, setEditing] = useState<EditingTarget | null>(null);
-
   const calorieShares = useMemo(() => {
     const foodCalories = CATEGORIES.reduce(
       (sum, category) =>
@@ -63,9 +66,13 @@ export function DailyRecipePanel({
     }
     return shares;
   }, [recipe, ratios]);
-
   const pickerOptions = useMemo(() => {
-    if (!editing) return { suggestions: [] as string[], options: [] as IngredientPickerOption[], subtitle: undefined as string | undefined };
+    if (!editing)
+      return {
+        suggestions: [] as string[],
+        options: [] as IngredientPickerOption[],
+        subtitle: undefined as string | undefined,
+      };
     if (editing.boost) {
       if (!dogsWithMER) {
         return { suggestions: [], options: [], subtitle: undefined };
@@ -81,9 +88,7 @@ export function DailyRecipePanel({
       const options: IngredientPickerOption[] = candidates.map((candidate) => ({
         name: candidate.name,
         detail:
-          candidate.category !== editing.category
-            ? `${candidate.category} category`
-            : undefined,
+          candidate.category !== editing.category ? `${candidate.category} category` : undefined,
       }));
       return {
         suggestions: candidates.map((candidate) => candidate.name),
@@ -92,13 +97,12 @@ export function DailyRecipePanel({
       };
     }
     const usedNames = new Set(recipe.ingredients[editing.category].map((i) => i.name));
-    const suggestions = getIngredientCatalogOrThrow()[editing.category]
-      .filter((i) => (i.caloriesPer100g || 0) > 0)
+    const suggestions = getIngredientCatalogOrThrow()
+      [editing.category].filter((i) => (i.caloriesPer100g || 0) > 0)
       .map((i) => i.name)
       .filter((n) => !excluded.includes(n) && !usedNames.has(n));
     return { suggestions, options: undefined, subtitle: undefined };
   }, [editing, recipe, excluded, dogsWithMER]);
-
   const body = (
     <>
       <div className="space-y-3">
@@ -106,7 +110,6 @@ export function DailyRecipePanel({
           const items = recipe.ingredients[category];
           if (items.length === 0) return null;
           const lockedNames = locked[category] ?? [];
-
           return (
             <div key={category}>
               <h3 className={`${groupLabel} mb-1 flex items-baseline gap-1.5`}>
@@ -141,7 +144,9 @@ export function DailyRecipePanel({
                         ) : (
                           <button
                             type="button"
-                            onClick={() => setEditing({ category, name: ingredient.name, boost: false })}
+                            onClick={() =>
+                              setEditing({ category, name: ingredient.name, boost: false })
+                            }
                             className="truncate text-left font-medium transition-colors hover:text-accent"
                           >
                             {ingredient.name}
@@ -150,9 +155,7 @@ export function DailyRecipePanel({
                       </div>
                       <span className="flex shrink-0 items-center gap-0.5">
                         <span className="mr-1 text-sm tabular-nums text-muted">
-                          <span className="font-semibold text-foreground">
-                            {ingredient.grams}g
-                          </span>
+                          <span className="font-semibold text-foreground">{ingredient.grams}g</span>
                         </span>
                         {isBoost ? (
                           <>
@@ -226,9 +229,7 @@ export function DailyRecipePanel({
               <span className="truncate text-foreground">{supplement.name}</span>
               <span className="shrink-0 tabular-nums text-muted">
                 <span className="font-semibold text-foreground">{supplement.grams}g</span>
-                {scoops !== null && (
-                  <span className="ml-1 text-xs text-muted">{scoops} scoop</span>
-                )}
+                {scoops !== null && <span className="ml-1 text-xs text-muted">{scoops} scoop</span>}
               </span>
             </div>
           );
@@ -240,7 +241,6 @@ export function DailyRecipePanel({
       </div>
     </>
   );
-
   const picker = editing ? (
     <IngredientPicker
       current={editing.name}
@@ -260,12 +260,13 @@ export function DailyRecipePanel({
       onCancel={() => setEditing(null)}
     />
   ) : null;
-
   if (compact) {
     return (
       <>
         <div className="flex h-full min-h-0 flex-col rounded-2xl border border-border bg-surface shadow-[var(--shadow-sm)]">
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-2 sm:px-4">{body}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-2 sm:px-4">
+            {body}
+          </div>
           {dogsWithMER && (
             <NutritionSnapshot
               recipe={recipe}
@@ -281,7 +282,6 @@ export function DailyRecipePanel({
       </>
     );
   }
-
   return (
     <>
       <div className="rounded-2xl border border-border bg-surface p-4 shadow-[var(--shadow-sm)]">

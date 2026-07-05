@@ -95,7 +95,6 @@ export function BuildScreen({
   const [supplementsOpen, setSupplementsOpen] = useState(false);
   const sum = CATEGORIES.reduce((total, c) => total + ratios[c], 0);
   const supplementCount = enabledSupplementCount(supplementOptions);
-
   return (
     <div className="flex h-full min-h-0 flex-col gap-2 sm:gap-2.5 sm:px-0.5 sm:py-0.5">
       <div className="flex shrink-0 gap-2">
@@ -125,7 +124,7 @@ export function BuildScreen({
             </span>
             <span className="hidden sm:inline">
               {hasActivePlan
-                ? 'Your plan is live. Generate a new draft here — it won\'t replace your active plan until you confirm.'
+                ? "Your plan is live. Generate a new draft here — it won't replace your active plan until you confirm."
                 : 'Hit generate to create a balanced draft. Reroll until the ingredients feel right.'}
             </span>
           </p>
@@ -218,9 +217,7 @@ export function BuildScreen({
                 return (
                   <div key={category}>
                     <label className="mb-1.5 flex items-center justify-between text-sm">
-                      <span className="font-semibold capitalize text-foreground">
-                        {category}
-                      </span>
+                      <span className="font-semibold capitalize text-foreground">{category}</span>
                       <span className="tabular-nums text-muted">
                         <span className="mr-2 text-[11px] text-muted/70">
                           rec {RECOMMENDED_RANGES[category]}
@@ -252,16 +249,12 @@ export function BuildScreen({
           </div>
 
           <div>
-            <p className="mb-3 text-sm font-semibold text-muted">
-              Items per category
-            </p>
+            <p className="mb-3 text-sm font-semibold text-muted">Items per category</p>
             <div className="space-y-4">
               {CATEGORIES.map((category) => (
                 <div key={category}>
                   <label className="mb-1.5 flex items-center justify-between text-sm">
-                    <span className="font-semibold capitalize text-foreground">
-                      {category}
-                    </span>
+                    <span className="font-semibold capitalize text-foreground">{category}</span>
                     <span className="tabular-nums font-medium text-muted">{counts[category]}</span>
                   </label>
                   <input
@@ -279,7 +272,11 @@ export function BuildScreen({
             </div>
           </div>
 
-          <button type="button" onClick={() => setMixOpen(false)} className={`${btnPrimary} w-full`}>
+          <button
+            type="button"
+            onClick={() => setMixOpen(false)}
+            className={`${btnPrimary} w-full`}
+          >
             Done
           </button>
         </div>

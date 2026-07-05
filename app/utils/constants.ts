@@ -2,14 +2,7 @@
 // Everything else (data, calculations, UI) derives category lists from here so
 // there is exactly one place to change when categories are added or renamed.
 
-export const CATEGORIES = [
-  'protein',
-  'organs',
-  'fruits',
-  'veggies',
-  'carbs',
-  'fats',
-] as const;
+export const CATEGORIES = ['protein', 'organs', 'fruits', 'veggies', 'carbs', 'fats'] as const;
 
 export type Category = (typeof CATEGORIES)[number];
 

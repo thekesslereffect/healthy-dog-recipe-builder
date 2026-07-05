@@ -9,9 +9,7 @@ let catalog: IngredientDatabase = buildIngredientCatalog(FOODS, SUPPLEMENTS);
 let foodsByName: Map<string, FoodIngredient> = buildFoodsByName(catalog);
 
 function buildFoodsByName(next: IngredientDatabase): Map<string, FoodIngredient> {
-  return new Map(
-    CATEGORIES.flatMap((category) => next[category]).map((food) => [food.name, food]),
-  );
+  return new Map(CATEGORIES.flatMap((category) => next[category]).map((food) => [food.name, food]));
 }
 
 /** Override catalog (tests only). */

@@ -16,7 +16,6 @@ interface RatioControlsProps {
 export function RatioControls({ ratios, onChange, onApplyRecommended }: RatioControlsProps) {
   const sum = CATEGORIES.reduce((total, c) => total + ratios[c], 0);
   const isValid = Math.abs(sum - 1) < 0.001;
-
   return (
     <section className={card}>
       <div className="mb-4 flex items-baseline justify-between gap-3">
@@ -73,17 +72,15 @@ export function RatioControls({ ratios, onChange, onApplyRecommended }: RatioCon
       <div className="mt-5 rounded-xl bg-zinc-50 p-4 text-xs leading-relaxed text-zinc-500">
         <p className="text-sm font-semibold text-black">Recommended baseline</p>
         <p className="mt-1.5">
-          For a balanced adult diet, muscle meat should be the majority (~70%),
-          with a small amount of nutrient-dense organs (~5–10%, mostly liver),
-          some vegetables (~5–10%), a little fruit, and carbs &amp; fats for
-          extra energy. Working or very active dogs can take more carbs; less
-          active dogs need fewer.
+          For a balanced adult diet, muscle meat should be the majority (~70%), with a small amount
+          of nutrient-dense organs (~5–10%, mostly liver), some vegetables (~5–10%), a little fruit,
+          and carbs &amp; fats for extra energy. Working or very active dogs can take more carbs;
+          less active dogs need fewer.
         </p>
         <p className="mt-2">
-          Popular raw-feeding guides (e.g. BARF: ~70% meat, 10% bone, 10% organ,
-          10% veg/fruit) are measured by <em>weight</em>. This tool splits by{' '}
-          <em>calories</em>, so the exact numbers differ — treat these as a
-          starting point and confirm a long-term diet with your vet.
+          Popular raw-feeding guides (e.g. BARF: ~70% meat, 10% bone, 10% organ, 10% veg/fruit) are
+          measured by <em>weight</em>. This tool splits by <em>calories</em>, so the exact numbers
+          differ — treat these as a starting point and confirm a long-term diet with your vet.
         </p>
         <button
           type="button"

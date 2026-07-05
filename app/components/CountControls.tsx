@@ -10,9 +10,7 @@ export function CountControls({ counts, onChange }: CountControlsProps) {
   return (
     <section className={card}>
       <h2 className={sectionTitle}>Ingredients per Category</h2>
-      <p className="mt-1 mb-4 text-sm text-zinc-500">
-        How many items to pick from each group.
-      </p>
+      <p className="mt-1 mb-4 text-sm text-zinc-500">How many items to pick from each group.</p>
       <div className="space-y-4">
         {CATEGORIES.map((category) => {
           const value = counts[category];

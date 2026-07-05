@@ -42,12 +42,10 @@ describe('nutrition boosts', () => {
       calories: 40,
       additional: true,
     });
-
     const stripped = stripNutritionBoosts(recipe);
     expect(stripped.ingredients.protein.some((row) => row.additional)).toBe(false);
     expect(stripped.ingredients.protein.some((row) => row.name.includes('Sardines'))).toBe(false);
   });
-
   it('balanceRecipeMix may add nutrition boosters without removing base picks', () => {
     const base = createRecipe(getTotalMER(dogs), dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
       random: seededRandom(11),
@@ -65,7 +63,6 @@ describe('nutrition boosts', () => {
         base.ingredients[category].map((row) => `${category}:${row.name}`),
       ),
     );
-
     const result = balanceRecipeMix(base, dogs, {
       eggshell: true,
       rxEssentials: true,
@@ -74,17 +71,15 @@ describe('nutrition boosts', () => {
       turmeric: false,
       ginger: false,
     });
-
     expect(result).not.toBeNull();
     for (const key of baseNames) {
-      const [category, name] = key.split(':') as [typeof CATEGORIES[number], string];
+      const [category, name] = key.split(':') as [(typeof CATEGORIES)[number], string];
       expect(
         result!.recipe.ingredients[category].some((row) => row.name === name && !row.additional),
       ).toBe(true);
     }
     assertAtMostOneBoostPerCategory(result!.recipe);
   });
-
   it('prefers specialty boost over extra muscle meat when fish is already in the recipe', () => {
     const base = createRecipe(getTotalMER(dogs), dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
       random: seededRandom(11),
@@ -104,7 +99,6 @@ describe('nutrition boosts', () => {
         calories: 100,
       });
     }
-
     const result = balanceRecipeMix(base, dogs, {
       eggshell: true,
       rxEssentials: true,
@@ -113,7 +107,6 @@ describe('nutrition boosts', () => {
       turmeric: false,
       ginger: false,
     });
-
     expect(result).not.toBeNull();
     const boosts = CATEGORIES.flatMap((category) =>
       result!.recipe.ingredients[category].filter((row) => row.additional),
@@ -123,7 +116,6 @@ describe('nutrition boosts', () => {
       expect(isMuscleMeat(boost.name)).toBe(false);
     }
   });
-
   it('does not add a second liver when beef liver is already in the recipe', () => {
     const base = createRecipe(getTotalMER(dogs), dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
       random: seededRandom(11),
@@ -136,12 +128,10 @@ describe('nutrition boosts', () => {
         additional: false,
       });
     }
-
     const assessment = assessRecipeNutrition(base, dogs);
     const failed = assessment.checks.filter((check) => check.status !== 'ok');
     const boosted = tryAddNutritionBoost(base, failed, getTotalMER(dogs), []);
     if (!boosted) return;
-
     const added = CATEGORIES.flatMap((category) =>
       boosted.ingredients[category].filter((row) => row.additional),
     );
@@ -149,12 +139,13 @@ describe('nutrition boosts', () => {
       expect(row.name).not.toMatch(/pork liver/i);
     }
   });
-
   it('does not add a second fish when fish is already in the recipe', () => {
     const base = createRecipe(getTotalMER(dogs), dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
       random: seededRandom(11),
     });
-    if (!base.ingredients.protein.some((row) => row.name === 'Sardines (canned in water, no salt)')) {
+    if (
+      !base.ingredients.protein.some((row) => row.name === 'Sardines (canned in water, no salt)')
+    ) {
       base.ingredients.protein.push({
         name: 'Sardines (canned in water, no salt)',
         grams: 40,
@@ -162,12 +153,10 @@ describe('nutrition boosts', () => {
         additional: false,
       });
     }
-
     const assessment = assessRecipeNutrition(base, dogs);
     const failed = assessment.checks.filter((check) => check.status !== 'ok');
     const boosted = tryAddNutritionBoost(base, failed, getTotalMER(dogs), []);
     if (!boosted) return;
-
     const added = CATEGORIES.flatMap((category) =>
       boosted.ingredients[category].filter((row) => row.additional),
     );
@@ -175,7 +164,6 @@ describe('nutrition boosts', () => {
       expect(row.name).not.toMatch(/mackerel/i);
     }
   });
-
   it('ranks sardines ahead of mackerel for boost swaps when no fish is present', () => {
     const base = createRecipe(getTotalMER(dogs), dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
       random: seededRandom(11),
@@ -186,14 +174,7 @@ describe('nutrition boosts', () => {
       calories: 40,
       additional: true,
     });
-
-    const candidates = getBoostSwapCandidates(
-      base,
-      'protein',
-      'Mackerel',
-      dogs,
-      [],
-    );
+    const candidates = getBoostSwapCandidates(base, 'protein', 'Mackerel', dogs, []);
     const sardineIndex = candidates.findIndex((entry) => /sardine/i.test(entry.name));
     const mackerelIndex = candidates.findIndex((entry) => /^mackerel$/i.test(entry.name));
     if (sardineIndex >= 0 && mackerelIndex >= 0) {
@@ -211,6 +192,8 @@ function assertAtMostOneBoostPerCategory(recipe: Recipe): void {
 }
 
 function isMuscleMeat(name: string): boolean {
-  return /beef|bison|buffalo|turkey|chicken|duck|venison|pork|lamb|ground/i.test(name)
-    && !/liver|heart|kidney|organ/i.test(name);
+  return (
+    /beef|bison|buffalo|turkey|chicken|duck|venison|pork|lamb|ground/i.test(name) &&
+    !/liver|heart|kidney|organ/i.test(name)
+  );
 }

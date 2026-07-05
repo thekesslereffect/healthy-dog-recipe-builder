@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { formatSavedAt, type SavedRecipe } from '../utils/savedRecipes';
-import { btnPrimary, btnSecondary, cardElevated, emptyIconWrap, inputBase, scrollShadowRoom } from './ui';
+import {
+  btnPrimary,
+  btnSecondary,
+  cardElevated,
+  emptyIconWrap,
+  inputBase,
+  scrollShadowRoom,
+} from './ui';
 import { Bookmark, Calendar, Pencil, Trash2, Users } from 'lucide-react';
 import { Sheet } from './Sheet';
 
@@ -15,7 +22,6 @@ export function SavedRecipes({ saved, onLoad, onDelete, onRename }: SavedRecipes
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const [pendingDelete, setPendingDelete] = useState<SavedRecipe | null>(null);
-
   const startRename = (item: SavedRecipe) => {
     setRenamingId(item.id);
     setDraft(item.name);
@@ -25,13 +31,11 @@ export function SavedRecipes({ saved, onLoad, onDelete, onRename }: SavedRecipes
     if (name) onRename(id, name);
     setRenamingId(null);
   };
-
   const confirmDelete = () => {
     if (!pendingDelete) return;
     onDelete(pendingDelete.id);
     setPendingDelete(null);
   };
-
   if (saved.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center px-4 text-center">
@@ -47,20 +51,21 @@ export function SavedRecipes({ saved, onLoad, onDelete, onRename }: SavedRecipes
       </div>
     );
   }
-
   return (
     <div className="flex h-full min-h-0 flex-col">
       <p className="mb-3 shrink-0 text-xs font-medium text-muted">
         {saved.length} saved plan{saved.length === 1 ? '' : 's'}
       </p>
-      <div className={`${scrollShadowRoom} grid min-h-0 flex-1 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3`}>
+      <div
+        className={`${scrollShadowRoom} grid min-h-0 flex-1 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3`}
+      >
         {saved.map((item) => {
-          const dogNames = item.dogs.map((d) => d.name).filter(Boolean).join(', ');
+          const dogNames = item.dogs
+            .map((d) => d.name)
+            .filter(Boolean)
+            .join(', ');
           return (
-            <div
-              key={item.id}
-              className={`${cardElevated} flex h-fit flex-col`}
-            >
+            <div key={item.id} className={`${cardElevated} flex h-fit flex-col`}>
               {renamingId === item.id ? (
                 <input
                   type="text"
@@ -95,9 +100,7 @@ export function SavedRecipes({ saved, onLoad, onDelete, onRename }: SavedRecipes
                   {item.dogs.length} dog{item.dogs.length === 1 ? '' : 's'}
                 </span>
               </div>
-              {dogNames && (
-                <p className="mt-1 truncate text-xs text-muted/80">{dogNames}</p>
-              )}
+              {dogNames && <p className="mt-1 truncate text-xs text-muted/80">{dogNames}</p>}
               <p className="mt-1 text-xs font-medium text-sage">
                 {Math.round(item.recipe.totalCalories)} cal/day
               </p>
@@ -130,11 +133,8 @@ export function SavedRecipes({ saved, onLoad, onDelete, onRename }: SavedRecipes
         size="md"
       >
         <p className="text-sm text-muted">
-          Delete{' '}
-          <span className="font-semibold text-foreground">
-            "{pendingDelete?.name}"
-          </span>
-          ? This can't be undone.
+          Delete <span className="font-semibold text-foreground">"{pendingDelete?.name}"</span>?
+          This can't be undone.
           {pendingDelete && (
             <span className="mt-2 block text-muted/80">
               If this is your current plan, it will be cleared too.

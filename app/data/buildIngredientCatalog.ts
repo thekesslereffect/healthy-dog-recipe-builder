@@ -9,14 +9,12 @@ export function buildIngredientCatalog(
   const byCategory = Object.fromEntries(
     CATEGORIES.map((c) => [c, [] as FoodIngredient[]]),
   ) as Record<Category, FoodIngredient[]>;
-
   for (const food of foods) {
     byCategory[food.category].push(food);
   }
   for (const category of CATEGORIES) {
     byCategory[category].sort((a, b) => a.name.localeCompare(b.name));
   }
-
   return {
     ...byCategory,
     supplements,

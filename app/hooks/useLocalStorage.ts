@@ -9,7 +9,6 @@ export function useLocalStorage<T>(
 ): [T, React.Dispatch<React.SetStateAction<T>>, boolean] {
   const [value, setValue] = useState<T>(initial);
   const [loaded, setLoaded] = useState(false);
-
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(key);
@@ -20,7 +19,6 @@ export function useLocalStorage<T>(
     setLoaded(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
-
   useEffect(() => {
     if (!loaded) return;
     try {
@@ -29,6 +27,5 @@ export function useLocalStorage<T>(
       // Ignore quota / unavailable storage.
     }
   }, [key, value, loaded]);
-
   return [value, setValue, loaded];
 }

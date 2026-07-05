@@ -26,8 +26,7 @@ const BOOST_CATEGORIES: Record<string, Category[]> = {
 
 const FISH_PATTERN =
   /mackerel|sardine|salmon|tilapia|trout|tuna|herring|anchov|cod|shrimp|clam|oyster|mussel/i;
-const MUSCLE_MEAT_PATTERN =
-  /beef|bison|buffalo|turkey|chicken|duck|venison|pork|lamb|ground/i;
+const MUSCLE_MEAT_PATTERN = /beef|bison|buffalo|turkey|chicken|duck|venison|pork|lamb|ground/i;
 const ORGAN_PATTERN = /liver|heart|kidney|organ/i;
 
 function round2(n: number): number {
@@ -196,19 +195,13 @@ function candidateCategories(lows: NutrientCheck[]): Category[] {
   return CATEGORIES.filter((category) => categories.has(category));
 }
 
-function compositeBoostScore(
-  food: FoodIngredient,
-  lows: NutrientCheck[],
-  recipe: Recipe,
-): number {
+function compositeBoostScore(food: FoodIngredient, lows: NutrientCheck[], recipe: Recipe): number {
   let score = 0;
   const failedIds = new Set(lows.map((check) => check.id));
-
   for (const check of lows) {
     const gapWeight = 1 - Math.min(Math.max(check.progress, 0), 1);
     score += gapWeight * nutrientPer1000Kcal(food, check.id);
   }
-
   const name = food.name;
   if (
     (failedIds.has('epaDha') || failedIds.has('iodine') || failedIds.has('vitD')) &&
@@ -222,13 +215,11 @@ function compositeBoostScore(
   ) {
     score *= 1.6;
   }
-
   if (isMuscleMeat(name)) {
     if (recipeHasFish(recipe)) score *= 0.1;
     else if (muscleMeatCount(recipe) >= 2) score *= 0.15;
     else if (muscleMeatCount(recipe) >= 1) score *= 0.35;
   }
-
   if (isFish(name)) {
     if (recipeHasFish(recipe)) {
       score *= 0.05;
@@ -240,7 +231,6 @@ function compositeBoostScore(
       score *= 0.85;
     }
   }
-
   return score;
 }
 
@@ -254,10 +244,8 @@ function isAllowedBoostFood(
   if ((food.caloriesPer100g || 0) <= 0) return false;
   if (excluded.includes(food.name)) return false;
   if (usedNames.has(food.name) && food.name !== exceptName) return false;
-
   const subtype = organSubtype(food.name);
   if (subtype && recipeOrganSubtypes(recipe, exceptName).has(subtype)) return false;
-
   if (isFish(food.name) && recipeHasFish(recipe)) {
     const fishRows = CATEGORIES.flatMap((category) => recipe.ingredients[category]).filter((row) =>
       isFish(row.name),
@@ -269,7 +257,6 @@ function isAllowedBoostFood(
       food.name !== exceptName;
     if (!onlyCurrentFish) return false;
   }
-
   return true;
 }
 
@@ -282,13 +269,10 @@ function pickBestBoostFood(
   const usedNames = recipeIngredientNames(recipe);
   const categories = candidateCategories(lows);
   let best: { food: FoodIngredient; category: Category; score: number } | null = null;
-
   for (const category of categories) {
     if (hasNutritionBoostInCategory(recipe, category)) continue;
-
     for (const food of catalog[category]) {
       if (!isAllowedBoostFood(food, recipe, usedNames, excluded)) continue;
-
       const score = compositeBoostScore(food, lows, recipe);
       if (score <= 0) continue;
       if (!best || score > best.score) {
@@ -296,7 +280,6 @@ function pickBestBoostFood(
       }
     }
   }
-
   return best;
 }
 
@@ -312,15 +295,12 @@ export function tryAddNutritionBoost(
   excluded: string[] = [],
 ): Recipe | null {
   if (boostCaloriesInRecipe(recipe) >= totalMER * MAX_BOOST_KCAL_FRACTION) return null;
-
   const lows = failedChecks
     .filter((check) => check.status === 'low')
     .sort((a, b) => a.progress - b.progress);
   if (lows.length === 0) return null;
-
   const pick = pickBestBoostFood(recipe, lows, excluded);
   if (!pick) return null;
-
   const boostKcal = round2(totalMER * BOOST_KCAL_FRACTION);
   const caloriesPer100g = pick.food.caloriesPer100g || 1;
   const grams = round2((boostKcal / caloriesPer100g) * 100);
@@ -330,7 +310,6 @@ export function tryAddNutritionBoost(
     calories: boostKcal,
     additional: true,
   };
-
   const next = cloneRecipe(recipe);
   next.ingredients[pick.category].push(row);
   return next;
@@ -341,11 +320,7 @@ export function isNutritionBoostRow(row: RecipeIngredient): boolean {
 }
 
 /** Remove one nutrition add without redistributing calories. */
-export function removeNutritionBoost(
-  recipe: Recipe,
-  category: Category,
-  name: string,
-): Recipe {
+export function removeNutritionBoost(recipe: Recipe, category: Category, name: string): Recipe {
   return {
     ...recipe,
     ingredients: {
@@ -357,10 +332,7 @@ export function removeNutritionBoost(
   };
 }
 
-function nutrientChecksForBoostSwap(
-  recipe: Recipe,
-  dogsWithMER: Dog[],
-): NutrientCheck[] {
+function nutrientChecksForBoostSwap(recipe: Recipe, dogsWithMER: Dog[]): NutrientCheck[] {
   const assessment = assessRecipeNutrition(recipe, dogsWithMER);
   const failed = assessment.checks.filter((check) => check.status !== 'ok');
   const lows = failed.filter((check) => check.status === 'low');
@@ -388,21 +360,13 @@ export function getBoostSwapCandidates(
   const catalog = getIngredientCatalogOrThrow();
   const usedNames = recipeIngredientNames(recipe);
   const checks = nutrientChecksForBoostSwap(recipe, dogsWithMER);
-  const searchCategories = new Set<Category>([
-    category,
-    ...candidateCategories(checks),
-  ]);
+  const searchCategories = new Set<Category>([category, ...candidateCategories(checks)]);
   const ranked: BoostSwapCandidate[] = [];
-
   for (const searchCategory of CATEGORIES) {
     if (!searchCategories.has(searchCategory)) continue;
-    if (
-      searchCategory !== category &&
-      hasNutritionBoostInCategory(recipe, searchCategory)
-    ) {
+    if (searchCategory !== category && hasNutritionBoostInCategory(recipe, searchCategory)) {
       continue;
     }
-
     for (const food of catalog[searchCategory]) {
       if (food.name === boostName) continue;
       if (!isAllowedBoostFood(food, recipe, usedNames, excluded, boostName)) continue;
@@ -411,11 +375,7 @@ export function getBoostSwapCandidates(
       ranked.push({ name: food.name, category: searchCategory, score });
     }
   }
-
-  ranked.sort(
-    (a, b) => b.score - a.score || a.name.localeCompare(b.name),
-  );
-
+  ranked.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
   const seen = new Set<string>();
   return ranked.filter((entry) => {
     if (seen.has(entry.name)) return false;

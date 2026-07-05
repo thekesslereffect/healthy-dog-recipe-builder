@@ -3,12 +3,7 @@ import { buildIngredientCatalog } from '../data/buildIngredientCatalog';
 import { FOODS } from '../data/foods.generated';
 import { setIngredientCatalog } from '../data/ingredientCatalogStore';
 import { SUPPLEMENTS } from '../data/supplements';
-import {
-  CALCIUM_MG_PER_KCAL,
-  DEFAULT_COUNTS,
-  RECOMMENDED_RATIOS,
-  LB_PER_KG,
-} from './constants';
+import { CALCIUM_MG_PER_KCAL, DEFAULT_COUNTS, RECOMMENDED_RATIOS, LB_PER_KG } from './constants';
 import {
   calculateDailyCalories,
   calculateMealPortions,
@@ -32,7 +27,6 @@ describe('energy requirements (RER / MER)', () => {
     expect(calculateDailyCalories(dog)).toBeCloseTo(rer, 6);
     expect(calculateDailyCalories({ ...dog, activityMultiplier: 1.6 })).toBeCloseTo(rer * 1.6, 6);
   });
-
   it('sums MER across dogs', () => {
     const dogs = [
       withMER({ name: 'A', weight: 30, activityMultiplier: 1.3 }),
@@ -48,7 +42,6 @@ describe('createRecipe', () => {
     withMER({ name: 'Joey', weight: 12, activityMultiplier: 1.0 }),
   ];
   const totalMER = getTotalMER(dogs);
-
   it('doses eggshell so total calcium meets the AAFCO minimum (1.25 mg/kcal)', () => {
     const recipe = createRecipe(totalMER, dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
       random: seededRandom(1),
@@ -61,16 +54,13 @@ describe('createRecipe', () => {
         ginger: false,
       },
     });
-    const eggshell = recipe.ingredients.supplements.find((s) =>
-      s.name.startsWith('Eggshell'),
-    );
+    const eggshell = recipe.ingredients.supplements.find((s) => s.name.startsWith('Eggshell'));
     expect(eggshell).toBeDefined();
-    expect((eggshell?.grams ?? 0)).toBeGreaterThan(0);
+    expect(eggshell?.grams ?? 0).toBeGreaterThan(0);
     const totals = sumRecipeNutrients(recipe);
     const minCalciumMg = Math.round(totalMER * CALCIUM_MG_PER_KCAL);
     expect(totals.calciumMg).toBeGreaterThanOrEqual(minCalciumMg - 2);
   });
-
   it('total calories are approximately the target MER', () => {
     const recipe = createRecipe(totalMER, dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
       random: seededRandom(7),
@@ -78,7 +68,6 @@ describe('createRecipe', () => {
     expect(recipe.totalCalories).toBeGreaterThan(totalMER * 0.98);
     expect(recipe.totalCalories).toBeLessThan(totalMER * 1.02);
   });
-
   it('is deterministic for a given seed', () => {
     const a = createRecipe(totalMER, dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
       random: seededRandom(42),
@@ -90,7 +79,6 @@ describe('createRecipe', () => {
       b.ingredients.protein.map((i) => i.name),
     );
   });
-
   it('never selects an excluded ingredient', () => {
     const counts = { ...DEFAULT_COUNTS, protein: 4 };
     const recipe = createRecipe(totalMER, dogs, RECOMMENDED_RATIOS, counts, {
@@ -101,7 +89,6 @@ describe('createRecipe', () => {
     expect(names).not.toContain('Beef (ground, 85% lean)');
     expect(names).not.toContain('Mackerel');
   });
-
   it('always keeps locked ingredients across rerolls', () => {
     const counts = { ...DEFAULT_COUNTS, protein: 2 };
     for (let seed = 0; seed < 5; seed++) {
@@ -112,7 +99,6 @@ describe('createRecipe', () => {
       expect(recipe.ingredients.protein.map((i) => i.name)).toContain('Venison');
     }
   });
-
   it('honors a zero count / zero ratio by leaving the category empty', () => {
     const counts = { ...DEFAULT_COUNTS, fruits: 0 };
     const recipe = createRecipe(totalMER, dogs, RECOMMENDED_RATIOS, counts, {
@@ -120,7 +106,6 @@ describe('createRecipe', () => {
     });
     expect(recipe.ingredients.fruits).toHaveLength(0);
   });
-
   it('honors supplement toggles — turmeric off by default', () => {
     const recipe = createRecipe(totalMER, dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
       random: seededRandom(1),
@@ -138,7 +123,6 @@ describe('createRecipe', () => {
     expect(names).not.toContain('Ginger');
     expect(names).toContain('Rx Essentials');
   });
-
   it('omits eggshell when toggled off', () => {
     const recipe = createRecipe(totalMER, dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
       random: seededRandom(1),
@@ -154,7 +138,6 @@ describe('createRecipe', () => {
     const names = recipe.ingredients.supplements.map((s) => s.name);
     expect(names.some((n) => n.startsWith('Eggshell'))).toBe(false);
   });
-
   it('does not list eggshell at 0 g when canine minerals cover calcium', () => {
     const recipe = createRecipe(totalMER, dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
       random: seededRandom(1),
@@ -172,7 +155,6 @@ describe('createRecipe', () => {
       expect(eggshell.grams).toBeGreaterThan(0);
     }
   });
-
   it('includes egg and sardine in the protein pool', async () => {
     const { getAllFoodNames } = await import('../data/ingredients');
     expect(getAllFoodNames()).toContain('Egg (whole, raw)');
@@ -202,7 +184,6 @@ describe('meal portions', () => {
   const recipe = createRecipe(getTotalMER(dogs), dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
     random: seededRandom(5),
   });
-
   it('splits the daily portion evenly across meals', () => {
     const twoMeals = calculateMealPortions(recipe, dogs, 2);
     for (const portion of Object.values(twoMeals)) {
@@ -213,7 +194,6 @@ describe('meal portions', () => {
       expect(portion.mealPortion).toBeCloseTo(portion.dailyPortion / 3, 1);
     }
   });
-
   it('energy shares add up to ~100%', () => {
     const portions = calculateMealPortions(recipe, dogs, 2);
     const total = Object.values(portions).reduce((sum, p) => sum + p.percentage, 0);

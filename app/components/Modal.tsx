@@ -14,11 +14,9 @@ interface ModalProps {
 
 export function Modal({ open, title, onClose, children, footer }: ModalProps) {
   const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
     setMounted(true);
   }, []);
-
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -27,9 +25,7 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
-
   if (!open || !mounted) return null;
-
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 print:hidden sm:p-6">
       <button
@@ -45,9 +41,7 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
         className="animate-scale-in relative z-10 flex max-h-[min(90dvh,40rem)] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-surface shadow-[var(--shadow-lg)]"
       >
         <div className="flex shrink-0 items-center justify-between px-5 py-4">
-          <h2 className="text-lg font-bold tracking-tight text-foreground">
-            {title}
-          </h2>
+          <h2 className="text-lg font-bold tracking-tight text-foreground">{title}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -57,9 +51,7 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
             <X size={18} />
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5">
-          {children}
-        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5">{children}</div>
         {footer && (
           <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border px-5 py-4">
             {footer}

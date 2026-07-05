@@ -33,11 +33,9 @@ export function PlanPicker({
   );
   const [pendingDelete, setPendingDelete] = useState<SavedRecipe | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-
   useEffect(() => {
     setMounted(true);
   }, []);
-
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -46,10 +44,8 @@ export function PlanPicker({
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
-
   useEffect(() => {
     if (!open || !triggerRef.current) return;
-
     const updatePosition = () => {
       const rect = triggerRef.current?.getBoundingClientRect();
       if (!rect) return;
@@ -59,7 +55,6 @@ export function PlanPicker({
         width: Math.max(rect.width, 260),
       });
     };
-
     updatePosition();
     window.addEventListener('resize', updatePosition);
     window.addEventListener('scroll', updatePosition, true);
@@ -68,25 +63,20 @@ export function PlanPicker({
       window.removeEventListener('scroll', updatePosition, true);
     };
   }, [open]);
-
   const close = () => setOpen(false);
-
   const handleSelect = (id: string) => {
     onSelectPlan(id);
     close();
   };
-
   const handleNew = () => {
     onNewPlan();
     close();
   };
-
   const confirmDelete = () => {
     if (!pendingDelete) return;
     onDeletePlan(pendingDelete.id);
     setPendingDelete(null);
   };
-
   const menu =
     open && menuStyle && mounted
       ? createPortal(
@@ -164,7 +154,6 @@ export function PlanPicker({
           document.body,
         )
       : null;
-
   return (
     <>
       <button
@@ -198,9 +187,8 @@ export function PlanPicker({
         size="md"
       >
         <p className="text-sm text-muted">
-          Delete{' '}
-          <span className="font-semibold text-foreground">"{pendingDelete?.name}"</span>? This
-          can't be undone.
+          Delete <span className="font-semibold text-foreground">"{pendingDelete?.name}"</span>?
+          This can't be undone.
         </p>
         <div className="mt-5 flex gap-2">
           <button

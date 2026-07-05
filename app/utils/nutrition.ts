@@ -137,7 +137,6 @@ export function sumRecipeNutrients(recipe: Recipe): RecipeNutrientTotals {
     cholineMg: 0,
     epaDhaMg: 0,
   };
-
   for (const category of CATEGORIES) {
     for (const row of recipe.ingredients[category]) {
       calories += row.calories;
@@ -155,7 +154,6 @@ export function sumRecipeNutrients(recipe: Recipe): RecipeNutrientTotals {
       addExtendedFromFood(food, row.grams, micro);
     }
   }
-
   for (const row of recipe.ingredients.supplements) {
     calories += row.calories;
     const supplement = getSupplementCatalogEntry(row.name);
@@ -189,13 +187,9 @@ export function sumRecipeNutrients(recipe: Recipe): RecipeNutrientTotals {
       phosphorusMg += extra.phosphorusMg;
     }
   }
-
   const { zincMg, copperMg, iodineMcg, vitaminDIU, vitaminEMg, cholineMg, epaDhaMg } = micro;
-
   const round1 = (n: number) => Math.round(n * 10) / 10;
-  const ratio =
-    phosphorusMg > 0 ? Math.round((calciumMg / phosphorusMg) * 100) / 100 : null;
-
+  const ratio = phosphorusMg > 0 ? Math.round((calciumMg / phosphorusMg) * 100) / 100 : null;
   return {
     calories: Math.round(calories),
     proteinG: round1(proteinG),
@@ -241,14 +235,10 @@ function formatAmount(n: number): string {
   return Number.isInteger(n) ? String(n) : String(Math.round(n * 10) / 10);
 }
 
-export function assessRecipeNutrition(
-  recipe: Recipe,
-  dogsWithMER: Dog[],
-): NutritionAssessment {
+export function assessRecipeNutrition(recipe: Recipe, dogsWithMER: Dog[]): NutritionAssessment {
   const totals = sumRecipeNutrients(recipe);
   const kcal = Math.max(totals.calories, 1);
   const scale = kcal / 1000;
-
   const targets = {
     proteinG: Math.round(AAFCO_ADULT_PER_1000_KCAL.proteinG * scale * 10) / 10,
     fatG: Math.round(AAFCO_ADULT_PER_1000_KCAL.fatG * scale * 10) / 10,
@@ -262,21 +252,82 @@ export function assessRecipeNutrition(
     cholineMg: Math.round(NRC_ADULT_PER_1000_KCAL.cholineMg * scale),
     epaDhaMg: Math.round(NRC_ADULT_PER_1000_KCAL.epaDhaMg * scale),
   };
-
   const checks: NutrientCheck[] = [
-    minCheck('protein', 'Protein', totals.proteinG, targets.proteinG, 'g', 'Add more meat or organs'),
+    minCheck(
+      'protein',
+      'Protein',
+      totals.proteinG,
+      targets.proteinG,
+      'g',
+      'Add more meat or organs',
+    ),
     minCheck('fat', 'Fat', totals.fatG, targets.fatG, 'g', 'Add fattier meat or oil'),
-    minCheck('calcium', 'Calcium', totals.calciumMg, targets.calciumMg, 'mg', 'Eggshell or Canine Minerals usually needed'),
-    minCheck('phosphorus', 'Phosphorus', totals.phosphorusMg, targets.phosphorusMg, 'mg', 'Add more meat, organs, or fish'),
-    minCheck('zinc', 'Zinc', totals.zincMg, targets.zincMg, 'mg', 'Add Rx Essentials, liver, or red meat'),
-    minCheck('copper', 'Copper', totals.copperMg, targets.copperMg, 'mg', 'Add liver or Rx Essentials'),
-    minCheck('iodine', 'Iodine', totals.iodineMcg, targets.iodineMcg, 'mcg', 'Add fish or Rx Essentials (kelp)'),
-    minCheck('vitD', 'Vitamin D', totals.vitaminDIU, targets.vitaminDIU, 'IU', 'Add oily fish, eggs, or Rx Essentials'),
-    minCheck('vitE', 'Vitamin E', totals.vitaminEMg, targets.vitaminEMg, 'mg', 'Add Rx Essentials or vitamin E oil'),
+    minCheck(
+      'calcium',
+      'Calcium',
+      totals.calciumMg,
+      targets.calciumMg,
+      'mg',
+      'Eggshell or Canine Minerals usually needed',
+    ),
+    minCheck(
+      'phosphorus',
+      'Phosphorus',
+      totals.phosphorusMg,
+      targets.phosphorusMg,
+      'mg',
+      'Add more meat, organs, or fish',
+    ),
+    minCheck(
+      'zinc',
+      'Zinc',
+      totals.zincMg,
+      targets.zincMg,
+      'mg',
+      'Add Rx Essentials, liver, or red meat',
+    ),
+    minCheck(
+      'copper',
+      'Copper',
+      totals.copperMg,
+      targets.copperMg,
+      'mg',
+      'Add liver or Rx Essentials',
+    ),
+    minCheck(
+      'iodine',
+      'Iodine',
+      totals.iodineMcg,
+      targets.iodineMcg,
+      'mcg',
+      'Add fish or Rx Essentials (kelp)',
+    ),
+    minCheck(
+      'vitD',
+      'Vitamin D',
+      totals.vitaminDIU,
+      targets.vitaminDIU,
+      'IU',
+      'Add oily fish, eggs, or Rx Essentials',
+    ),
+    minCheck(
+      'vitE',
+      'Vitamin E',
+      totals.vitaminEMg,
+      targets.vitaminEMg,
+      'mg',
+      'Add Rx Essentials or vitamin E oil',
+    ),
     minCheck('choline', 'Choline', totals.cholineMg, targets.cholineMg, 'mg', 'Add eggs or liver'),
-    minCheck('epaDha', 'EPA+DHA', totals.epaDhaMg, targets.epaDhaMg, 'mg', 'Add sardines, mackerel, or salmon'),
+    minCheck(
+      'epaDha',
+      'EPA+DHA',
+      totals.epaDhaMg,
+      targets.epaDhaMg,
+      'mg',
+      'Add sardines, mackerel, or salmon',
+    ),
   ];
-
   const ratio = totals.calciumPhosphorusRatio;
   if (ratio != null) {
     let status: NutrientStatus = 'ok';
@@ -299,7 +350,6 @@ export function assessRecipeNutrition(
       hint,
     });
   }
-
   const totalMer = dogsWithMER.reduce((sum, d) => sum + (d.MER || 0), 0);
   const perDog = dogsWithMER.map((dog) => {
     const share = totalMer > 0 ? (dog.MER || 0) / totalMer : 1 / Math.max(dogsWithMER.length, 1);
@@ -313,7 +363,6 @@ export function assessRecipeNutrition(
       phosphorusMg: Math.round(totals.phosphorusMg * share),
     };
   });
-
   return {
     totals,
     targets,

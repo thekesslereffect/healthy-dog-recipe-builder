@@ -17,7 +17,6 @@ export function recipeToText(
   lines.push('HEALTHY DOG RECIPE');
   lines.push('');
   lines.push('Daily Recipe');
-
   for (const category of CATEGORIES) {
     const items = recipe.ingredients[category];
     if (items.length === 0) continue;
@@ -27,26 +26,22 @@ export function recipeToText(
       lines.push(`    - ${item.name}${suffix}: ${item.grams}g (${Math.round(item.calories)} cal)`);
     }
   }
-
   lines.push('  Supplements:');
   for (const supplement of recipe.ingredients.supplements) {
     lines.push(`    - ${supplement.name}: ${supplement.grams}g`);
   }
   lines.push(`  Total daily calories: ${Math.round(recipe.totalCalories)}`);
   lines.push('');
-
   lines.push(`Shopping List (${numberOfDays} days)`);
   for (const [name, amounts] of Object.entries(calculateShoppingList(recipe, numberOfDays))) {
     lines.push(`  - ${name}: ${Math.round(amounts.grams)}g`);
   }
   lines.push('');
-
   lines.push(`Meal Portions (${mealsPerDay} meals/day)`);
   const portions = calculateMealPortions(recipe, dogs, mealsPerDay);
   for (const [dogName, portion] of Object.entries(portions)) {
     lines.push(`  - ${dogName}: ${portion.dailyPortion}g/day, ${portion.mealPortion}g/meal`);
   }
-
   return lines.join('\n');
 }
 

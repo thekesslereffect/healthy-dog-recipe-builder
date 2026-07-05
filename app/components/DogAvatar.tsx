@@ -16,7 +16,6 @@ const sizes = {
 export function DogAvatar({ name, avatar, size = 'md', className = '' }: DogAvatarProps) {
   const label = name.trim() || 'Dog';
   const dim = sizes[size];
-
   if (avatar) {
     return (
       <img
@@ -26,7 +25,6 @@ export function DogAvatar({ name, avatar, size = 'md', className = '' }: DogAvat
       />
     );
   }
-
   return (
     <span
       aria-hidden="true"

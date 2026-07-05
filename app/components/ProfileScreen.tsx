@@ -2,7 +2,15 @@ import { useState } from 'react';
 import type { Dog } from '../utils/recipeCalculator';
 import { calculateDailyCalories } from '../utils/recipeCalculator';
 import { weightUnitLabel, type WeightUnit } from '../utils/format';
-import { btnPrimary, btnSecondary, cardElevated, scrollShadowRoom, segmentBtn, segmentTrack, toolbarEditBtn } from './ui';
+import {
+  btnPrimary,
+  btnSecondary,
+  cardElevated,
+  scrollShadowRoom,
+  segmentBtn,
+  segmentTrack,
+  toolbarEditBtn,
+} from './ui';
 import { ChevronRight, Plus } from 'lucide-react';
 import { DogCard } from './DogCard';
 import { DogAvatar } from './DogAvatar';
@@ -16,7 +24,11 @@ interface ProfileScreenProps {
   onUnitChange: (unit: WeightUnit) => void;
   onAddDog: () => void;
   onRemoveDog: (index: number) => void;
-  onUpdateDog: (index: number, field: keyof Dog, value: string | number | string[] | undefined) => void;
+  onUpdateDog: (
+    index: number,
+    field: keyof Dog,
+    value: string | number | string[] | undefined,
+  ) => void;
 }
 
 export function ProfileScreen({
@@ -29,18 +41,14 @@ export function ProfileScreen({
 }: ProfileScreenProps) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [aboutOpen, setAboutOpen] = useState(false);
-
   const editingDog = editingIndex !== null ? dogs[editingIndex] : null;
   const editingName =
-    editingDog?.name?.trim() ||
-    (editingIndex !== null ? `Dog ${editingIndex + 1}` : 'Dog');
-
+    editingDog?.name?.trim() || (editingIndex !== null ? `Dog ${editingIndex + 1}` : 'Dog');
   const closeEditor = () => setEditingIndex(null);
   const totalCalories = dogs.reduce(
     (sum, d) => sum + (d.weight > 0 ? calculateDailyCalories(d) : 0),
     0,
   );
-
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 items-center gap-2 pb-2">
@@ -61,11 +69,7 @@ export function ProfileScreen({
             {Math.round(totalCalories)} cal/day
           </span>
         )}
-        <button
-          type="button"
-          onClick={onAddDog}
-          className={`${toolbarEditBtn} ml-auto`}
-        >
+        <button type="button" onClick={onAddDog} className={`${toolbarEditBtn} ml-auto`}>
           <Plus size={14} />
           <span className="hidden sm:inline">Add dog</span>
           <span className="sm:hidden">Add</span>
@@ -87,9 +91,7 @@ export function ProfileScreen({
               >
                 <DogAvatar name={name} avatar={dog.avatar} size="md" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-foreground">
-                    {name}
-                  </p>
+                  <p className="truncate text-sm font-semibold text-foreground">{name}</p>
                   <p className="truncate text-xs text-muted">
                     {cal !== null ? `${cal} cal/day` : 'Needs weight'}
                     {allergyCount > 0 ? ` · ${allergyCount} avoid` : ''}

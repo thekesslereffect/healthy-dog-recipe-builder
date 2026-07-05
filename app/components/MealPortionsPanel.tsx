@@ -1,10 +1,5 @@
 import type { Dog } from '../utils/recipeCalculator';
-import {
-  convertMass,
-  MASS_UNITS,
-  massUnitLabel,
-  type MassUnit,
-} from '../utils/format';
+import { convertMass, MASS_UNITS, massUnitLabel, type MassUnit } from '../utils/format';
 import { scrollShadowRoom, segmentBtn, segmentTrack } from './ui';
 import { DogAvatar } from './DogAvatar';
 
@@ -35,47 +30,46 @@ export function MealPortionsPanel({
 }: MealPortionsPanelProps) {
   const portionUnitFor = (name: string): MassUnit => portionUnits[name] ?? 'g';
   const entries = Object.entries(portions);
-
   return (
     <div className="flex h-full min-h-0 flex-col">
       {showToolbar && (
-      <div className="flex shrink-0 items-center justify-between gap-2 pb-3 print:hidden">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-muted">Meals/day</span>
+        <div className="flex shrink-0 items-center justify-between gap-2 pb-3 print:hidden">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-muted">Meals/day</span>
+            <div className={segmentTrack}>
+              {[1, 2, 3].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  className={segmentBtn(mealsPerDay === n)}
+                  onClick={() => onMealsChange(n)}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className={segmentTrack}>
-            {[1, 2, 3].map((n) => (
-              <button
-                key={n}
-                type="button"
-                className={segmentBtn(mealsPerDay === n)}
-                onClick={() => onMealsChange(n)}
-              >
-                {n}
-              </button>
-            ))}
+            {MASS_UNITS.map((u) => {
+              const allMatch =
+                entries.length > 0 && entries.every(([name]) => portionUnitFor(name) === u);
+              return (
+                <button
+                  key={u}
+                  type="button"
+                  className={segmentBtn(allMatch)}
+                  onClick={() => {
+                    const next: Record<string, MassUnit> = { ...portionUnits };
+                    for (const [name] of entries) next[name] = u;
+                    onPortionUnitsChange(next);
+                  }}
+                >
+                  {massUnitLabel(u)}
+                </button>
+              );
+            })}
           </div>
         </div>
-        <div className={segmentTrack}>
-          {MASS_UNITS.map((u) => {
-            const allMatch =
-              entries.length > 0 && entries.every(([name]) => portionUnitFor(name) === u);
-            return (
-              <button
-                key={u}
-                type="button"
-                className={segmentBtn(allMatch)}
-                onClick={() => {
-                  const next: Record<string, MassUnit> = { ...portionUnits };
-                  for (const [name] of entries) next[name] = u;
-                  onPortionUnitsChange(next);
-                }}
-              >
-                {massUnitLabel(u)}
-              </button>
-            );
-          })}
-        </div>
-      </div>
       )}
 
       <div className={`${scrollShadowRoom} min-h-0 flex-1 space-y-2.5 print:overflow-visible`}>
@@ -91,9 +85,7 @@ export function MealPortionsPanel({
                 <DogAvatar name={dogName} avatar={dog?.avatar} size="md" className="print:hidden" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2">
-                    <h3 className="truncate text-sm font-semibold text-foreground">
-                      {dogName}
-                    </h3>
+                    <h3 className="truncate text-sm font-semibold text-foreground">{dogName}</h3>
                     <span className="shrink-0 rounded-full bg-accent-soft px-2 py-0.5 text-[10px] font-bold tabular-nums text-accent">
                       {portion.percentage}%
                     </span>

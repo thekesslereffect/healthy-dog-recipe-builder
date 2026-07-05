@@ -72,7 +72,8 @@ export interface SupplementNutrientsPerScoop {
 }
 
 /** Union used by the recipe calculator food pools. */
-export type Ingredient = FoodIngredient | (SupplementIngredient & { category?: never; fdcId?: never });
+export type Ingredient =
+  FoodIngredient | (SupplementIngredient & { category?: never; fdcId?: never });
 
 export type IngredientDatabase = Record<Category, FoodIngredient[]> & {
   supplements: SupplementIngredient[];

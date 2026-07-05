@@ -31,7 +31,6 @@ export function IngredientPicker({
   boost = false,
 }: IngredientPickerProps) {
   const [query, setQuery] = useState('');
-
   const listOptions = useMemo(
     () =>
       options ??
@@ -40,7 +39,6 @@ export function IngredientPicker({
       })),
     [options, suggestions],
   );
-
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return listOptions;
@@ -50,7 +48,6 @@ export function IngredientPicker({
         (option.detail?.toLowerCase().includes(q) ?? false),
     );
   }, [query, listOptions]);
-
   return (
     <Sheet
       open
@@ -64,8 +61,8 @@ export function IngredientPicker({
           <div className="shrink-0 rounded-xl border border-sage/30 bg-sage/10 px-3 py-2.5 text-sm leading-snug text-foreground">
             <p className="font-semibold text-sage">Balance add</p>
             <p className="mt-1 text-muted">
-              This ingredient was added to improve nutrition. Pick a recommended alternative
-              below — ranked by what your recipe still needs.
+              This ingredient was added to improve nutrition. Pick a recommended alternative below —
+              ranked by what your recipe still needs.
             </p>
           </div>
         )}

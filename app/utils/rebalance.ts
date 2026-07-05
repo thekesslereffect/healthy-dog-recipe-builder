@@ -1,9 +1,4 @@
-import {
-  CATEGORIES,
-  RECOMMENDED_RATIOS,
-  type Category,
-  type CategoryRatios,
-} from './constants';
+import { CATEGORIES, RECOMMENDED_RATIOS, type Category, type CategoryRatios } from './constants';
 import {
   buildWeightDosedSupplements,
   DEFAULT_SUPPLEMENT_OPTIONS,
@@ -13,12 +8,7 @@ import {
   normalizeSupplementOptions,
   type SupplementOptions,
 } from '../data/ingredients';
-import {
-  calculateDailyCalories,
-  getTotalMER,
-  type Dog,
-  type Recipe,
-} from './recipeCalculator';
+import { calculateDailyCalories, getTotalMER, type Dog, type Recipe } from './recipeCalculator';
 import { assessRecipeNutrition, nutritionBalanceScore } from './nutrition';
 import {
   boostCaloriesInRecipe,
@@ -89,32 +79,26 @@ export function applyRatiosToRecipe(
     },
     totalCalories: 0,
   };
-
   let supplementCalories = 0;
   for (const row of buildWeightDosedSupplements(totalDogWeight, supplements)) {
     next.ingredients.supplements.push(row);
     supplementCalories += row.calories;
   }
   const extraCalciumMg = supplementCalciumMg(totalDogWeight, supplements);
-
   const boostTotal = boostCaloriesInRecipe(recipe);
   const remainingMER = Math.max(totalMER - supplementCalories - boostTotal, 0);
   let mainCalories = 0;
-
   for (const category of CATEGORIES) {
     const rows = recipe.ingredients[category];
     const baseRows = rows.filter((row) => !row.additional);
     const addRows = rows.filter((row) => row.additional);
-
     if (baseRows.length === 0 && addRows.length === 0) {
       next.ingredients[category] = [];
       continue;
     }
-
     if (baseRows.length > 0 && (fitted[category] || 0) > 0) {
       const calorieTarget = remainingMER * fitted[category];
       const caloriesPerIngredient = calorieTarget / baseRows.length;
-
       for (const row of baseRows) {
         const food = findFoodByName(row.name);
         const caloriesPer100g = food?.caloriesPer100g || 0;
@@ -139,7 +123,6 @@ export function applyRatiosToRecipe(
         mainCalories += row.calories;
       }
     }
-
     for (const row of addRows) {
       const food = findFoodByName(row.name);
       const caloriesPer100g = food?.caloriesPer100g || 0;
@@ -160,7 +143,6 @@ export function applyRatiosToRecipe(
       mainCalories += calories;
     }
   }
-
   let foodCalciumMg = 0;
   let foodPhosphorusMg = 0;
   for (const category of CATEGORIES) {
@@ -171,7 +153,6 @@ export function applyRatiosToRecipe(
       foodPhosphorusMg += (food.phosphorusMgPer100g * row.grams) / 100;
     }
   }
-
   const eggshellRow = doseEggshellRow(
     totalMER,
     foodCalciumMg,
@@ -183,7 +164,6 @@ export function applyRatiosToRecipe(
     next.ingredients.supplements.push(eggshellRow);
     supplementCalories += eggshellRow.calories;
   }
-
   next.totalCalories = round2(mainCalories + supplementCalories);
   return next;
 }
@@ -282,9 +262,11 @@ const NUDGE_BY_NUTRIENT: Record<string, Array<{ category: Category; delta: numbe
   ],
 };
 
-function nudgeRatios(ratios: CategoryRatios, failedChecks: Array<{ id: string; status: string }>): CategoryRatios {
+function nudgeRatios(
+  ratios: CategoryRatios,
+  failedChecks: Array<{ id: string; status: string }>,
+): CategoryRatios {
   const next = { ...ratios };
-
   for (const check of failedChecks) {
     if (check.id === 'cap' && check.status === 'high') {
       next.organs = Math.max(0, (next.organs || 0) - 0.05);
@@ -299,14 +281,12 @@ function nudgeRatios(ratios: CategoryRatios, failedChecks: Array<{ id: string; s
       next.veggies = (next.veggies || 0) + 0.03;
       continue;
     }
-
     const nudges = NUDGE_BY_NUTRIENT[check.id];
     if (!nudges) continue;
     for (const { category, delta } of nudges) {
       next[category] = Math.max(0, (next[category] || 0) + delta);
     }
   }
-
   return normalize(next);
 }
 
@@ -322,18 +302,14 @@ function applyNutritionBoosts(
 ): Recipe {
   let working = applyRatiosToRecipe(recipe, dogs, ratios, supplementOptions);
   const totalMER = getTotalMER(dogsWithMER);
-
   for (let step = 0; step < CATEGORIES.length; step++) {
     const assessment = assessRecipeNutrition(working, dogsWithMER);
     const failed = assessment.checks.filter((check) => check.status !== 'ok');
     if (failed.length === 0) break;
-
     const withBoost = tryAddNutritionBoost(working, failed, totalMER, excluded);
     if (!withBoost) break;
-
     working = applyRatiosToRecipe(withBoost, dogs, ratios, supplementOptions);
   }
-
   return working;
 }
 
@@ -376,47 +352,27 @@ export function balanceRecipeMix(
   }));
   if (dogsWithMER.some((d) => !d.name?.trim() || d.weight <= 0)) return null;
   if (getTotalMER(dogsWithMER) <= 0) return null;
-
   const baseRecipe = stripNutritionBoosts(recipe);
   const scored: ScoredBalance[] = [];
-
   for (const profile of RATIO_PROFILES) {
-    const result = evaluateMix(
-      baseRecipe,
-      dogs,
-      dogsWithMER,
-      profile,
-      supplementOptions,
-      excluded,
-    );
+    const result = evaluateMix(baseRecipe, dogs, dogsWithMER, profile, supplementOptions, excluded);
     scored.push(result);
     if (result.fullyBalanced) {
       return { ratios: result.ratios, recipe: result.recipe, fullyBalanced: true };
     }
   }
-
   scored.sort((a, b) => b.score - a.score);
   let best = scored[0];
   if (!best) return null;
-
   let ratios = { ...best.ratios };
-
   for (let step = 0; step < 16; step++) {
     const assessment = assessRecipeNutrition(best.recipe, dogsWithMER);
     const failed = assessment.checks.filter((check) => check.status !== 'ok');
     if (failed.length === 0) {
       return { ratios: best.ratios, recipe: best.recipe, fullyBalanced: true };
     }
-
     ratios = nudgeRatios(ratios, failed);
-    const result = evaluateMix(
-      baseRecipe,
-      dogs,
-      dogsWithMER,
-      ratios,
-      supplementOptions,
-      excluded,
-    );
+    const result = evaluateMix(baseRecipe, dogs, dogsWithMER, ratios, supplementOptions, excluded);
     if (result.fullyBalanced) {
       return { ratios: result.ratios, recipe: result.recipe, fullyBalanced: true };
     }
@@ -425,7 +381,6 @@ export function balanceRecipeMix(
       ratios = { ...result.ratios };
     }
   }
-
   return {
     ratios: best.ratios,
     recipe: best.recipe,

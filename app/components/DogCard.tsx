@@ -26,15 +26,16 @@ export function DogCard({ dog, index, unit, dailyCalories, onChange }: DogCardPr
   const displayWeight = dog.weight > 0 ? toDisplayWeight(dog.weight, unit) : '';
   const allergies = dog.allergies ?? [];
   const displayName = dog.name?.trim() ? dog.name : `Dog ${index + 1}`;
-
   const addAllergy = (name: string) => {
     if (allergies.includes(name)) return;
     onChange('allergies', [...allergies, name]);
   };
   const removeAllergy = (name: string) => {
-    onChange('allergies', allergies.filter((a) => a !== name));
+    onChange(
+      'allergies',
+      allergies.filter((a) => a !== name),
+    );
   };
-
   const onPickPhoto = async (file: File | undefined) => {
     if (!file || !file.type.startsWith('image/')) return;
     try {
@@ -44,7 +45,6 @@ export function DogCard({ dog, index, unit, dailyCalories, onChange }: DogCardPr
       // Ignore unreadable images.
     }
   };
-
   return (
     <div className="space-y-3.5">
       <div className="flex items-center gap-3">
@@ -71,9 +71,7 @@ export function DogCard({ dog, index, unit, dailyCalories, onChange }: DogCardPr
           }}
         />
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-foreground">
-            {displayName}
-          </p>
+          <p className="truncate text-sm font-semibold text-foreground">{displayName}</p>
           <p className="text-xs text-muted">
             {dog.weight > 0 ? `${Math.round(dailyCalories)} cal/day` : 'Add weight for calories'}
           </p>

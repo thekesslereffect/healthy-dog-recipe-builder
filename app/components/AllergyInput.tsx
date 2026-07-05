@@ -13,40 +13,33 @@ interface AllergyInputProps {
 export function AllergyInput({ value, suggestions, onAdd, onRemove }: AllergyInputProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [query, setQuery] = useState('');
-
   const available = useMemo(
     () => suggestions.filter((s) => !value.includes(s)),
     [suggestions, value],
   );
-
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return available;
     return available.filter((s) => s.toLowerCase().includes(q));
   }, [query, available]);
-
   const trimmedQuery = query.trim();
   const canAddCustom =
     trimmedQuery.length > 0 &&
     !value.some((name) => name.toLowerCase() === trimmedQuery.toLowerCase());
-
   const openPicker = () => {
     setQuery('');
     setPickerOpen(true);
   };
-
   const closePicker = () => {
     setPickerOpen(false);
     setQuery('');
   };
-
   const commit = (name: string) => {
     const trimmed = name.trim();
     if (!trimmed || value.includes(trimmed)) return;
     onAdd(trimmed);
     closePicker();
   };
-
   return (
     <>
       <div className="flex flex-wrap items-center gap-1.5">
@@ -76,7 +69,13 @@ export function AllergyInput({ value, suggestions, onAdd, onRemove }: AllergyInp
         </button>
       </div>
 
-      <Sheet open={pickerOpen} title="Avoid ingredients" onClose={closePicker} size="md" scroll="child">
+      <Sheet
+        open={pickerOpen}
+        title="Avoid ingredients"
+        onClose={closePicker}
+        size="md"
+        scroll="child"
+      >
         <div className="flex min-h-0 flex-1 flex-col gap-3">
           <input
             type="search"
@@ -110,7 +109,9 @@ export function AllergyInput({ value, suggestions, onAdd, onRemove }: AllergyInp
             )}
             {matches.length === 0 && !canAddCustom ? (
               <li className="px-3 py-4 text-center text-sm text-muted">
-                {available.length === 0 ? 'All catalog ingredients are already avoided' : 'No matches'}
+                {available.length === 0
+                  ? 'All catalog ingredients are already avoided'
+                  : 'No matches'}
               </li>
             ) : (
               matches.map((name) => (

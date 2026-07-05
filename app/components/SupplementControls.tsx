@@ -47,9 +47,7 @@ function ToggleRow({
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-semibold text-foreground">{label}</span>
         {description && (
-          <span className="mt-0.5 block text-[11px] leading-snug text-muted">
-            {description}
-          </span>
+          <span className="mt-0.5 block text-[11px] leading-snug text-muted">{description}</span>
         )}
       </span>
     </label>
@@ -73,13 +71,10 @@ export function enabledSupplementCount(options: SupplementOptions): number {
 /** Sheet body — toggle optional supplements before generating. */
 export function SupplementControlsPanel({ options, onChange }: SupplementControlsProps) {
   const normalized = normalizeSupplementOptions(options);
-
   const setToggle = (id: SupplementToggleId, value: boolean) => {
     onChange(normalizeSupplementOptions({ ...normalized, [id]: value }));
   };
-
   const toggleable = SUPPLEMENT_CATALOG.filter((entry) => entry.toggleable);
-
   return (
     <div className="space-y-4">
       <p className="text-sm text-zinc-500 dark:text-zinc-400">

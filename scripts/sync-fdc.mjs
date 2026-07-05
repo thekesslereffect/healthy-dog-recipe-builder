@@ -119,7 +119,6 @@ function extendedFromApi(food) {
   const choline = nutrientAmount(food, NUTRIENT_IDS.choline);
   const dhaG = nutrientAmount(food, NUTRIENT_IDS.dha);
   const epaG = nutrientAmount(food, NUTRIENT_IDS.epa);
-
   const out = {};
   if (zinc != null) out.zincMgPer100g = round1(zinc);
   if (copper != null) out.copperMgPer100g = round1(copper);
@@ -150,13 +149,11 @@ function fromApi(entry, food) {
   if (!descriptionPlausible(entry, food)) {
     throw new Error(`description mismatch: ${food.description}`);
   }
-
   const calories = requireMacro('energy', energyKcal(food));
   const protein = requireMacro('protein', nutrientAmount(food, NUTRIENT_IDS.protein));
   const fat = requireMacro('fat', nutrientAmount(food, NUTRIENT_IDS.fat));
   const calcium = nutrientAmount(food, NUTRIENT_IDS.calcium) ?? 0;
   const phosphorus = nutrientAmount(food, NUTRIENT_IDS.phosphorus) ?? 0;
-
   return {
     name: entry.name,
     category: entry.category,
@@ -224,10 +221,8 @@ async function main() {
   console.log(
     `Syncing ${allowlist.length} allowlisted foods (key=${apiKey === 'DEMO_KEY' ? 'DEMO_KEY' : 'custom'})…`,
   );
-
   const foods = [];
   const failures = [];
-
   for (const entry of allowlist) {
     try {
       const food = await fetchFood(entry.fdcId);
@@ -239,12 +234,12 @@ async function main() {
     }
     await sleep(apiKey === 'DEMO_KEY' ? 600 : 200);
   }
-
   if (failures.length > 0) {
-    console.error(`\nSync failed for ${failures.length} food(s). foods.generated.ts was not updated.`);
+    console.error(
+      `\nSync failed for ${failures.length} food(s). foods.generated.ts was not updated.`,
+    );
     process.exit(1);
   }
-
   const outPath = join(root, 'app/data/foods.generated.ts');
   writeFileSync(outPath, emitTs(foods), 'utf8');
   console.log(`\nWrote ${outPath}`);

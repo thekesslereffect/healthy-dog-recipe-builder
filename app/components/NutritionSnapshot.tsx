@@ -115,11 +115,9 @@ export function NutritionSnapshot({
   const allOk = okCount === checks.length;
   const scorePct = Math.round((nutritionBalanceScore(assessment) / checks.length) * 100);
   const failing = checks.filter((check) => check.status !== 'ok');
-
   const shellClass = embedded
     ? ''
     : 'shrink-0 rounded-xl border border-border bg-surface px-2.5 py-2 shadow-[var(--shadow-sm)]';
-
   const balanceButton =
     onBalance && !allOk ? (
       <button
@@ -131,7 +129,6 @@ export function NutritionSnapshot({
         {balancing ? 'Balancing…' : 'Balance %'}
       </button>
     ) : null;
-
   const details = (
     <>
       <p className="mt-0.5 text-[10px] text-zinc-400">
@@ -175,7 +172,6 @@ export function NutritionSnapshot({
       )}
     </>
   );
-
   if (collapsible && !expanded) {
     return (
       <div className={`${shellClass} ${embedded ? 'border-t border-border px-4 py-2.5' : ''}`}>
@@ -213,7 +209,6 @@ export function NutritionSnapshot({
       </div>
     );
   }
-
   if (collapsible && expanded) {
     return (
       <div className={`${shellClass} ${embedded ? 'border-t border-border px-4 py-2.5' : ''}`}>
@@ -247,7 +242,6 @@ export function NutritionSnapshot({
       </div>
     );
   }
-
   return (
     <div className={shellClass}>
       <div className="flex items-center justify-between gap-2">
