@@ -5,19 +5,36 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const allowlist = JSON.parse(readFileSync(join(root, 'app/data/allowlist.json'), 'utf8'));
 
+const EXTENDED_KEYS = [
+  'zincMgPer100g',
+  'copperMgPer100g',
+  'iodineMcgPer100g',
+  'vitaminDIUPer100g',
+  'vitaminEMgPer100g',
+  'cholineMgPer100g',
+  'epaMgPer100g',
+  'dhaMgPer100g',
+];
+
 const foods = allowlist
-  .map((e) => ({
-    name: e.name,
-    category: e.category,
-    fdcId: e.fdcId,
-    basis: e.basis,
-    caloriesPer100g: e.fallback.caloriesPer100g,
-    proteinGPer100g: e.fallback.proteinGPer100g,
-    fatGPer100g: e.fallback.fatGPer100g,
-    calciumMgPer100g: e.fallback.calciumMgPer100g,
-    phosphorusMgPer100g: e.fallback.phosphorusMgPer100g,
-    source: `Allowlist fallback (FDC ${e.fdcId}, ${e.basis})`,
-  }))
+  .map((e) => {
+    const food = {
+      name: e.name,
+      category: e.category,
+      fdcId: e.fdcId,
+      basis: e.basis,
+      caloriesPer100g: e.fallback.caloriesPer100g,
+      proteinGPer100g: e.fallback.proteinGPer100g,
+      fatGPer100g: e.fallback.fatGPer100g,
+      calciumMgPer100g: e.fallback.calciumMgPer100g,
+      phosphorusMgPer100g: e.fallback.phosphorusMgPer100g,
+      source: `Allowlist fallback (FDC ${e.fdcId}, ${e.basis})`,
+    };
+    for (const key of EXTENDED_KEYS) {
+      if (e.fallback[key] != null) food[key] = e.fallback[key];
+    }
+    return food;
+  })
   .sort((a, b) => a.name.localeCompare(b.name));
 
 const lines = [
@@ -32,7 +49,7 @@ const lines = [
 for (const food of foods) {
   lines.push('  {');
   for (const [key, value] of Object.entries(food)) {
-    lines.push(`    ${key}: ${JSON.stringify(value)},`);
+    lines.push(`    ${key}: ${typeof value === 'string' ? JSON.stringify(value) : value},`);
   }
   lines.push('  },');
 }

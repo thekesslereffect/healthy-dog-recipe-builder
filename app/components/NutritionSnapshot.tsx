@@ -32,6 +32,20 @@ function shortLabel(id: string): string {
       return 'P';
     case 'cap':
       return 'Ca:P';
+    case 'zinc':
+      return 'Zn';
+    case 'copper':
+      return 'Cu';
+    case 'iodine':
+      return 'I';
+    case 'vitD':
+      return 'D';
+    case 'vitE':
+      return 'E';
+    case 'choline':
+      return 'Chol';
+    case 'epaDha':
+      return 'Ω3';
     default:
       return id;
   }
@@ -49,7 +63,6 @@ export function NutritionSnapshot({
 }: NutritionSnapshotProps) {
   const { totals, checks, okCount } = assessRecipeNutrition(recipe, dogsWithMER);
   const allOk = okCount === checks.length;
-  const issueHints = checks.filter((c) => c.status !== 'ok').map((c) => c.hint);
 
   return (
     <div className="shrink-0 rounded-xl border border-zinc-100 bg-white px-2.5 py-2 dark:border-zinc-800 dark:bg-zinc-900">
@@ -83,6 +96,10 @@ export function NutritionSnapshot({
         </div>
       </div>
 
+      <p className="mt-0.5 text-[10px] text-zinc-400">
+        Balance adjusts category % and may add up to one ingredient per category marked + add.
+      </p>
+
       <div className="mt-1.5 flex gap-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {checks.map((check) => {
           const recommended = check.targetLabel.replace(/^≥\s*/, '');
@@ -103,11 +120,22 @@ export function NutritionSnapshot({
         })}
       </div>
 
-      {issueHints.length > 0 && (
-        <p className="mt-1 truncate text-[10px] text-amber-700 dark:text-amber-400">
-          {issueHints[0]}
-          {issueHints.length > 1 ? ` · +${issueHints.length - 1} more` : ''}
-        </p>
+      {checks.filter((c) => c.status !== 'ok').length > 0 && (
+        <ul className="mt-1.5 space-y-0.5">
+          {checks
+            .filter((c) => c.status !== 'ok')
+            .map((check) => (
+              <li
+                key={check.id}
+                className="text-[10px] leading-snug text-amber-800 dark:text-amber-300"
+              >
+                <span className="font-medium">{check.label}</span>
+                {check.status === 'high' ? ' high' : ' low'}
+                {' — '}
+                {check.hint}
+              </li>
+            ))}
+        </ul>
       )}
     </div>
   );

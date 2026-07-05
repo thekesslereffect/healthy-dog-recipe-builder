@@ -1,24 +1,34 @@
 import {
-  AAFCO_ADULT_PER_1000_KCAL,
-  CALCIUM_MG_PER_KCAL,
   CATEGORIES,
   RECOMMENDED_RATIOS,
   type Category,
   type CategoryRatios,
 } from './constants';
 import {
+  buildWeightDosedSupplements,
+  DEFAULT_SUPPLEMENT_OPTIONS,
+  doseEggshellRow,
+  findFoodByName,
+  supplementCalciumMg,
+  normalizeSupplementOptions,
+  type SupplementOptions,
+} from '../data/ingredients';
+import {
   calculateDailyCalories,
   getTotalMER,
   type Dog,
   type Recipe,
 } from './recipeCalculator';
-import { assessRecipeNutrition } from './nutrition';
-import { findFoodByName, ingredients } from '../data/ingredients';
+import { assessRecipeNutrition, nutritionBalanceScore } from './nutrition';
+import {
+  boostCaloriesInRecipe,
+  stripNutritionBoosts,
+  tryAddNutritionBoost,
+} from './nutritionBoost';
 
 export interface BalanceResult {
   ratios: CategoryRatios;
   recipe: Recipe;
-  /** True when every AAFCO screening check passed. */
   fullyBalanced: boolean;
 }
 
@@ -34,20 +44,13 @@ function normalize(ratios: CategoryRatios): CategoryRatios {
   return next;
 }
 
-/** Minimum share for a category that already has ingredients (keeps them in the plan). */
 const OCCUPIED_FLOOR = 0.02;
 
-/**
- * Fit a ratio profile to the current draft:
- * - empty categories stay at 0% (nothing to allocate)
- * - categories with ingredients keep at least OCCUPIED_FLOOR so Balance % never
- *   deletes foods by zeroing their share
- */
 function fitToRecipe(ratios: CategoryRatios, recipe: Recipe): CategoryRatios {
   const next = { ...ratios };
   for (const category of CATEGORIES) {
-    const occupied = recipe.ingredients[category].length > 0;
-    if (!occupied) {
+    const hasBase = recipe.ingredients[category].some((row) => !row.additional);
+    if (!hasBase) {
       next[category] = 0;
     } else {
       next[category] = Math.max(OCCUPIED_FLOOR, ratios[category] || 0);
@@ -58,12 +61,13 @@ function fitToRecipe(ratios: CategoryRatios, recipe: Recipe): CategoryRatios {
 
 /**
  * Rebuild a recipe using the same ingredient names, only changing category
- * calorie shares (percentages) and grams. Eggshell is re-dosed for Ca / Ca:P.
+ * calorie shares (percentages) and grams. Supplements and eggshell are re-dosed.
  */
 export function applyRatiosToRecipe(
   recipe: Recipe,
   dogs: Dog[],
   ratios: CategoryRatios,
+  supplementOptions: SupplementOptions = DEFAULT_SUPPLEMENT_OPTIONS,
 ): Recipe {
   const dogsWithMER = dogs.map((dog) => ({
     ...dog,
@@ -71,6 +75,7 @@ export function applyRatiosToRecipe(
   }));
   const totalMER = getTotalMER(dogsWithMER);
   const totalDogWeight = dogs.reduce((sum, dog) => sum + dog.weight, 0);
+  const supplements = normalizeSupplementOptions(supplementOptions);
   const fitted = fitToRecipe(ratios, recipe);
   const next: Recipe = {
     ingredients: {
@@ -86,47 +91,71 @@ export function applyRatiosToRecipe(
   };
 
   let supplementCalories = 0;
-  for (const supplement of ingredients.supplements) {
-    if (supplement.name === 'Eggshell Powder (Calcium)') continue;
-    if ((supplement.gramsPerPoundPerDay || 0) <= 0) continue;
-    const gramsPerDay = totalDogWeight * (supplement.gramsPerPoundPerDay || 0);
-    const calories = round2((gramsPerDay * (supplement.caloriesPer100g || 0)) / 100);
-    next.ingredients.supplements.push({
-      name: supplement.name,
-      grams: round2(gramsPerDay),
-      calories,
-      gramsPerScoop: supplement.gramsPerScoop || null,
-    });
-    supplementCalories += calories;
+  for (const row of buildWeightDosedSupplements(totalDogWeight, supplements)) {
+    next.ingredients.supplements.push(row);
+    supplementCalories += row.calories;
   }
+  const extraCalciumMg = supplementCalciumMg(totalDogWeight, supplements);
 
-  const remainingMER = Math.max(totalMER - supplementCalories, 0);
+  const boostTotal = boostCaloriesInRecipe(recipe);
+  const remainingMER = Math.max(totalMER - supplementCalories - boostTotal, 0);
   let mainCalories = 0;
 
   for (const category of CATEGORIES) {
     const rows = recipe.ingredients[category];
-    if (rows.length === 0 || (fitted[category] || 0) <= 0) {
+    const baseRows = rows.filter((row) => !row.additional);
+    const addRows = rows.filter((row) => row.additional);
+
+    if (baseRows.length === 0 && addRows.length === 0) {
       next.ingredients[category] = [];
       continue;
     }
 
-    const calorieTarget = remainingMER * fitted[category];
-    const caloriesPerIngredient = calorieTarget / rows.length;
+    if (baseRows.length > 0 && (fitted[category] || 0) > 0) {
+      const calorieTarget = remainingMER * fitted[category];
+      const caloriesPerIngredient = calorieTarget / baseRows.length;
 
-    for (const row of rows) {
+      for (const row of baseRows) {
+        const food = findFoodByName(row.name);
+        const caloriesPer100g = food?.caloriesPer100g || 0;
+        if (caloriesPer100g <= 0) {
+          next.ingredients[category].push({ ...row, additional: false });
+          mainCalories += row.calories;
+          continue;
+        }
+        const grams = (caloriesPerIngredient / caloriesPer100g) * 100;
+        const calories = round2((grams * caloriesPer100g) / 100);
+        next.ingredients[category].push({
+          name: row.name,
+          grams: round2(grams),
+          calories,
+          additional: false,
+        });
+        mainCalories += calories;
+      }
+    } else if (baseRows.length > 0) {
+      for (const row of baseRows) {
+        next.ingredients[category].push({ ...row, additional: false });
+        mainCalories += row.calories;
+      }
+    }
+
+    for (const row of addRows) {
       const food = findFoodByName(row.name);
       const caloriesPer100g = food?.caloriesPer100g || 0;
+      const targetCalories = row.calories > 0 ? row.calories : round2(totalMER * 0.025);
       if (caloriesPer100g <= 0) {
-        next.ingredients[category].push({ ...row });
+        next.ingredients[category].push({ ...row, additional: true });
         mainCalories += row.calories;
         continue;
       }
-      const grams = (caloriesPerIngredient / caloriesPer100g) * 100;
+      const grams = round2((targetCalories / caloriesPer100g) * 100);
       const calories = round2((grams * caloriesPer100g) / 100);
       next.ingredients[category].push({
         name: row.name,
-        grams: round2(grams),
+        grams,
         calories,
+        additional: true,
       });
       mainCalories += calories;
     }
@@ -143,30 +172,22 @@ export function applyRatiosToRecipe(
     }
   }
 
-  const eggshell = ingredients.supplements.find((s) => s.name === 'Eggshell Powder (Calcium)');
-  if (eggshell?.calciumMgPerGram) {
-    const aafcoCalciumMg = Math.round(totalMER * CALCIUM_MG_PER_KCAL);
-    const targetCalciumMg = Math.max(
-      aafcoCalciumMg,
-      foodPhosphorusMg * AAFCO_ADULT_PER_1000_KCAL.caPRatioMin,
-    );
-    const eggshellCalciumMg = Math.max(0, targetCalciumMg - foodCalciumMg);
-    const eggshellGrams = eggshellCalciumMg / eggshell.calciumMgPerGram;
-    const calories = round2((eggshellGrams * (eggshell.caloriesPer100g || 0)) / 100);
-    next.ingredients.supplements.push({
-      name: eggshell.name,
-      grams: round2(eggshellGrams),
-      calories,
-      gramsPerScoop: eggshell.gramsPerScoop || null,
-    });
-    supplementCalories += calories;
+  const eggshellRow = doseEggshellRow(
+    totalMER,
+    foodCalciumMg,
+    foodPhosphorusMg,
+    extraCalciumMg,
+    supplements,
+  );
+  if (eggshellRow) {
+    next.ingredients.supplements.push(eggshellRow);
+    supplementCalories += eggshellRow.calories;
   }
 
   next.totalCalories = round2(mainCalories + supplementCalories);
   return next;
 }
 
-/** Candidate percentage mixes (calorie shares). */
 const RATIO_PROFILES: CategoryRatios[] = [
   RECOMMENDED_RATIOS,
   { protein: 0.78, organs: 0.08, fruits: 0.02, veggies: 0.04, carbs: 0.02, fats: 0.06 },
@@ -176,39 +197,179 @@ const RATIO_PROFILES: CategoryRatios[] = [
   { protein: 0.82, organs: 0.08, fruits: 0.01, veggies: 0.03, carbs: 0.0, fats: 0.06 },
   { protein: 0.72, organs: 0.1, fruits: 0.02, veggies: 0.04, carbs: 0.02, fats: 0.1 },
   { protein: 0.65, organs: 0.08, fruits: 0.03, veggies: 0.06, carbs: 0.05, fats: 0.13 },
+  { protein: 0.68, organs: 0.12, fruits: 0.01, veggies: 0.04, carbs: 0.0, fats: 0.15 },
+  { protein: 0.74, organs: 0.1, fruits: 0.01, veggies: 0.03, carbs: 0.0, fats: 0.12 },
+  { protein: 0.76, organs: 0.12, fruits: 0.0, veggies: 0.02, carbs: 0.0, fats: 0.1 },
 ];
 
-function nudgeRatios(ratios: CategoryRatios, failedIds: string[]): CategoryRatios {
-  const next = { ...ratios };
-  const bump = (category: Category, delta: number) => {
-    next[category] = Math.max(0, (next[category] || 0) + delta);
-  };
+/** Categories to adjust when a nutrient is below target. */
+const NUDGE_BY_NUTRIENT: Record<string, Array<{ category: Category; delta: number }>> = {
+  protein: [
+    { category: 'protein', delta: 0.07 },
+    { category: 'organs', delta: 0.02 },
+    { category: 'carbs', delta: -0.05 },
+    { category: 'fruits', delta: -0.02 },
+    { category: 'veggies', delta: -0.02 },
+  ],
+  fat: [
+    { category: 'fats', delta: 0.06 },
+    { category: 'protein', delta: 0.02 },
+    { category: 'carbs', delta: -0.05 },
+    { category: 'veggies', delta: -0.02 },
+    { category: 'fruits', delta: -0.01 },
+  ],
+  phosphorus: [
+    { category: 'protein', delta: 0.05 },
+    { category: 'organs', delta: 0.03 },
+    { category: 'carbs', delta: -0.05 },
+    { category: 'fruits', delta: -0.02 },
+  ],
+  zinc: [
+    { category: 'organs', delta: 0.05 },
+    { category: 'protein', delta: 0.03 },
+    { category: 'carbs', delta: -0.04 },
+    { category: 'fruits', delta: -0.02 },
+    { category: 'veggies', delta: -0.02 },
+  ],
+  copper: [
+    { category: 'organs', delta: 0.06 },
+    { category: 'protein', delta: 0.02 },
+    { category: 'carbs', delta: -0.04 },
+    { category: 'veggies', delta: -0.02 },
+  ],
+  choline: [
+    { category: 'organs', delta: 0.04 },
+    { category: 'protein', delta: 0.04 },
+    { category: 'carbs', delta: -0.04 },
+    { category: 'fruits', delta: -0.02 },
+  ],
+  iodine: [
+    { category: 'protein', delta: 0.06 },
+    { category: 'fats', delta: 0.02 },
+    { category: 'carbs', delta: -0.05 },
+    { category: 'veggies', delta: -0.02 },
+  ],
+  vitD: [
+    { category: 'protein', delta: 0.06 },
+    { category: 'organs', delta: 0.02 },
+    { category: 'carbs', delta: -0.05 },
+    { category: 'veggies', delta: -0.02 },
+  ],
+  vitE: [
+    { category: 'fats', delta: 0.05 },
+    { category: 'organs', delta: 0.02 },
+    { category: 'veggies', delta: -0.03 },
+    { category: 'carbs', delta: -0.02 },
+  ],
+  epaDha: [
+    { category: 'protein', delta: 0.07 },
+    { category: 'fats', delta: 0.03 },
+    { category: 'carbs', delta: -0.06 },
+    { category: 'veggies', delta: -0.02 },
+  ],
+  calcium: [
+    { category: 'veggies', delta: 0.03 },
+    { category: 'protein', delta: 0.02 },
+    { category: 'organs', delta: -0.03 },
+    { category: 'carbs', delta: -0.02 },
+  ],
+  cap: [
+    { category: 'organs', delta: -0.04 },
+    { category: 'protein', delta: -0.02 },
+    { category: 'veggies', delta: 0.03 },
+    { category: 'fruits', delta: 0.02 },
+    { category: 'fats', delta: 0.01 },
+  ],
+};
 
-  for (const id of failedIds) {
-    if (id === 'protein' || id === 'phosphorus') {
-      bump('protein', 0.06);
-      bump('organs', 0.02);
-      bump('carbs', -0.04);
-      bump('fruits', -0.02);
-      bump('veggies', -0.02);
+function nudgeRatios(ratios: CategoryRatios, failedChecks: Array<{ id: string; status: string }>): CategoryRatios {
+  const next = { ...ratios };
+
+  for (const check of failedChecks) {
+    if (check.id === 'cap' && check.status === 'high') {
+      next.organs = Math.max(0, (next.organs || 0) - 0.05);
+      next.protein = Math.max(0, (next.protein || 0) - 0.02);
+      next.veggies = (next.veggies || 0) + 0.04;
+      next.fruits = (next.fruits || 0) + 0.02;
+      continue;
     }
-    if (id === 'fat') {
-      bump('fats', 0.05);
-      bump('protein', 0.02);
-      bump('carbs', -0.04);
-      bump('veggies', -0.02);
-      bump('fruits', -0.01);
+    if (check.id === 'cap' && check.status === 'low') {
+      next.organs = Math.max(0, (next.organs || 0) - 0.04);
+      next.protein = Math.max(0, (next.protein || 0) - 0.02);
+      next.veggies = (next.veggies || 0) + 0.03;
+      continue;
+    }
+
+    const nudges = NUDGE_BY_NUTRIENT[check.id];
+    if (!nudges) continue;
+    for (const { category, delta } of nudges) {
+      next[category] = Math.max(0, (next[category] || 0) + delta);
     }
   }
 
   return normalize(next);
 }
 
-/**
- * Adjust category percentages only (same ingredients), searching for a mix that
- * meets AAFCO adult screening checks. Returns best effort if not fully balanced.
- */
-export function balanceRecipeMix(recipe: Recipe, dogs: Dog[]): BalanceResult | null {
+type ScoredBalance = BalanceResult & { score: number };
+
+function applyNutritionBoosts(
+  recipe: Recipe,
+  ratios: CategoryRatios,
+  dogs: Dog[],
+  dogsWithMER: Dog[],
+  supplementOptions: SupplementOptions,
+  excluded: string[],
+): Recipe {
+  let working = applyRatiosToRecipe(recipe, dogs, ratios, supplementOptions);
+  const totalMER = getTotalMER(dogsWithMER);
+
+  for (let step = 0; step < CATEGORIES.length; step++) {
+    const assessment = assessRecipeNutrition(working, dogsWithMER);
+    const failed = assessment.checks.filter((check) => check.status !== 'ok');
+    if (failed.length === 0) break;
+
+    const withBoost = tryAddNutritionBoost(working, failed, totalMER, excluded);
+    if (!withBoost) break;
+
+    working = applyRatiosToRecipe(withBoost, dogs, ratios, supplementOptions);
+  }
+
+  return working;
+}
+
+function evaluateMix(
+  recipe: Recipe,
+  dogs: Dog[],
+  dogsWithMER: Dog[],
+  ratios: CategoryRatios,
+  supplementOptions: SupplementOptions,
+  excluded: string[],
+): ScoredBalance {
+  const fitted = fitToRecipe(ratios, recipe);
+  const nextRecipe = applyNutritionBoosts(
+    recipe,
+    fitted,
+    dogs,
+    dogsWithMER,
+    supplementOptions,
+    excluded,
+  );
+  const assessment = assessRecipeNutrition(nextRecipe, dogsWithMER);
+  const score = nutritionBalanceScore(assessment);
+  return {
+    ratios: fitted,
+    recipe: nextRecipe,
+    fullyBalanced: assessment.okCount === assessment.checks.length,
+    score,
+  };
+}
+
+export function balanceRecipeMix(
+  recipe: Recipe,
+  dogs: Dog[],
+  supplementOptions: SupplementOptions = DEFAULT_SUPPLEMENT_OPTIONS,
+  excluded: string[] = [],
+): BalanceResult | null {
   const dogsWithMER = dogs.map((dog) => ({
     ...dog,
     MER: calculateDailyCalories(dog),
@@ -216,48 +377,52 @@ export function balanceRecipeMix(recipe: Recipe, dogs: Dog[]): BalanceResult | n
   if (dogsWithMER.some((d) => !d.name?.trim() || d.weight <= 0)) return null;
   if (getTotalMER(dogsWithMER) <= 0) return null;
 
-  const scored: Array<BalanceResult & { score: number }> = [];
-
-  const tryRatios = (ratios: CategoryRatios): BalanceResult | null => {
-    const fitted = fitToRecipe(ratios, recipe);
-    const nextRecipe = applyRatiosToRecipe(recipe, dogs, fitted);
-    const assessment = assessRecipeNutrition(nextRecipe, dogsWithMER);
-    const score = assessment.okCount;
-    const result = { ratios: fitted, recipe: nextRecipe, fullyBalanced: score === assessment.checks.length, score };
-    scored.push(result);
-    if (result.fullyBalanced) return result;
-    return null;
-  };
+  const baseRecipe = stripNutritionBoosts(recipe);
+  const scored: ScoredBalance[] = [];
 
   for (const profile of RATIO_PROFILES) {
-    const hit = tryRatios(profile);
-    if (hit) return { ratios: hit.ratios, recipe: hit.recipe, fullyBalanced: true };
+    const result = evaluateMix(
+      baseRecipe,
+      dogs,
+      dogsWithMER,
+      profile,
+      supplementOptions,
+      excluded,
+    );
+    scored.push(result);
+    if (result.fullyBalanced) {
+      return { ratios: result.ratios, recipe: result.recipe, fullyBalanced: true };
+    }
   }
 
   scored.sort((a, b) => b.score - a.score);
   let best = scored[0];
   if (!best) return null;
 
-  // Hill-climb percentages from the best partial result.
   let ratios = { ...best.ratios };
-  for (let step = 0; step < 12; step++) {
+
+  for (let step = 0; step < 16; step++) {
     const assessment = assessRecipeNutrition(best.recipe, dogsWithMER);
-    const failedIds = assessment.checks
-      .filter((check) => check.status !== 'ok')
-      .map((check) => check.id);
-    if (failedIds.length === 0) {
+    const failed = assessment.checks.filter((check) => check.status !== 'ok');
+    if (failed.length === 0) {
       return { ratios: best.ratios, recipe: best.recipe, fullyBalanced: true };
     }
-    ratios = nudgeRatios(ratios, failedIds);
-    const fitted = fitToRecipe(ratios, recipe);
-    const nextRecipe = applyRatiosToRecipe(recipe, dogs, fitted);
-    const nextAssessment = assessRecipeNutrition(nextRecipe, dogsWithMER);
-    const score = nextAssessment.okCount;
-    if (score === nextAssessment.checks.length) {
-      return { ratios: fitted, recipe: nextRecipe, fullyBalanced: true };
+
+    ratios = nudgeRatios(ratios, failed);
+    const result = evaluateMix(
+      baseRecipe,
+      dogs,
+      dogsWithMER,
+      ratios,
+      supplementOptions,
+      excluded,
+    );
+    if (result.fullyBalanced) {
+      return { ratios: result.ratios, recipe: result.recipe, fullyBalanced: true };
     }
-    if (score > best.score) {
-      best = { ratios: fitted, recipe: nextRecipe, fullyBalanced: false, score };
+    if (result.score > best.score) {
+      best = result;
+      ratios = { ...result.ratios };
     }
   }
 

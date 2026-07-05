@@ -23,7 +23,8 @@ export function recipeToText(
     if (items.length === 0) continue;
     lines.push(`  ${capitalize(category)}:`);
     for (const item of items) {
-      lines.push(`    - ${item.name}: ${item.grams}g (${Math.round(item.calories)} cal)`);
+      const suffix = item.additional ? ' (nutrition add)' : '';
+      lines.push(`    - ${item.name}${suffix}: ${item.grams}g (${Math.round(item.calories)} cal)`);
     }
   }
 

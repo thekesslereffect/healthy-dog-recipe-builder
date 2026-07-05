@@ -1,4 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { buildIngredientCatalog } from '../data/buildIngredientCatalog';
+import { FOODS } from '../data/foods.generated';
+import { setIngredientCatalog } from '../data/ingredientCatalogStore';
+import { SUPPLEMENTS } from '../data/supplements';
 import {
   CALCIUM_MG_PER_KCAL,
   DEFAULT_COUNTS,
@@ -17,6 +21,8 @@ import { seededRandom } from './random';
 import { sumRecipeNutrients } from './nutrition';
 
 const withMER = (dog: Dog): Dog => ({ ...dog, MER: calculateDailyCalories(dog) });
+
+setIngredientCatalog(buildIngredientCatalog(FOODS, SUPPLEMENTS));
 
 describe('energy requirements (RER / MER)', () => {
   it('computes RER = 70 × kg^0.75 and applies the activity multiplier', () => {
@@ -46,11 +52,20 @@ describe('createRecipe', () => {
   it('doses eggshell so total calcium meets the AAFCO minimum (1.25 mg/kcal)', () => {
     const recipe = createRecipe(totalMER, dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
       random: seededRandom(1),
+      supplementOptions: {
+        eggshell: true,
+        rxEssentials: true,
+        rxCanineMinerals: false,
+        hempSeedOil: true,
+        turmeric: false,
+        ginger: false,
+      },
     });
     const eggshell = recipe.ingredients.supplements.find((s) =>
       s.name.startsWith('Eggshell'),
     );
     expect(eggshell).toBeDefined();
+    expect((eggshell?.grams ?? 0)).toBeGreaterThan(0);
     const totals = sumRecipeNutrients(recipe);
     const minCalciumMg = Math.round(totalMER * CALCIUM_MG_PER_KCAL);
     expect(totals.calciumMg).toBeGreaterThanOrEqual(minCalciumMg - 2);
@@ -104,6 +119,64 @@ describe('createRecipe', () => {
       random: seededRandom(1),
     });
     expect(recipe.ingredients.fruits).toHaveLength(0);
+  });
+
+  it('honors supplement toggles — turmeric off by default', () => {
+    const recipe = createRecipe(totalMER, dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
+      random: seededRandom(1),
+      supplementOptions: {
+        eggshell: true,
+        rxEssentials: true,
+        rxCanineMinerals: true,
+        hempSeedOil: true,
+        turmeric: false,
+        ginger: false,
+      },
+    });
+    const names = recipe.ingredients.supplements.map((s) => s.name);
+    expect(names).not.toContain('Turmeric');
+    expect(names).not.toContain('Ginger');
+    expect(names).toContain('Rx Essentials');
+  });
+
+  it('omits eggshell when toggled off', () => {
+    const recipe = createRecipe(totalMER, dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
+      random: seededRandom(1),
+      supplementOptions: {
+        eggshell: false,
+        rxEssentials: true,
+        rxCanineMinerals: true,
+        hempSeedOil: true,
+        turmeric: false,
+        ginger: false,
+      },
+    });
+    const names = recipe.ingredients.supplements.map((s) => s.name);
+    expect(names.some((n) => n.startsWith('Eggshell'))).toBe(false);
+  });
+
+  it('does not list eggshell at 0 g when canine minerals cover calcium', () => {
+    const recipe = createRecipe(totalMER, dogs, RECOMMENDED_RATIOS, DEFAULT_COUNTS, {
+      random: seededRandom(1),
+      supplementOptions: {
+        eggshell: true,
+        rxEssentials: true,
+        rxCanineMinerals: true,
+        hempSeedOil: true,
+        turmeric: false,
+        ginger: false,
+      },
+    });
+    const eggshell = recipe.ingredients.supplements.find((s) => s.name.startsWith('Eggshell'));
+    if (eggshell) {
+      expect(eggshell.grams).toBeGreaterThan(0);
+    }
+  });
+
+  it('includes egg and sardine in the protein pool', async () => {
+    const { getAllFoodNames } = await import('../data/ingredients');
+    expect(getAllFoodNames()).toContain('Egg (whole, raw)');
+    expect(getAllFoodNames()).toContain('Sardines (canned in water, no salt)');
   });
 });
 

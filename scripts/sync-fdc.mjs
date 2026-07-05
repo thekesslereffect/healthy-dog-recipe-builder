@@ -1,6 +1,9 @@
 /**
  * Sync dog-safe allowlist nutrients from USDA FoodData Central.
  *
+ * Dev/build only — not called by the app at runtime. The app reads pre-synced
+ * data from GET /api/ingredients (see app/server/getIngredientCatalog.ts).
+ *
  * Usage:
  *   npm run sync:fdc
  *   FDC_API_KEY=your_key npm run sync:fdc
@@ -11,21 +14,12 @@
  * Get a free key: https://fdc.nal.usda.gov/api-key-signup.html
  */
 
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
-
-// Keep in sync with app/data/allowlist.ts (script cannot import TS without a loader).
-// We read the compiled-shaped data by evaluating a minimal extract — instead,
-// duplicate is avoided by importing via dynamic read of the allowlist as JSON-like.
-// For simplicity the allowlist is imported from a generated JSON snapshot written
-// alongside, OR we parse allowlist.ts with a light regex. Cleanest: maintain
-// allowlist as JSON.
-
-import { readFileSync, existsSync } from 'node:fs';
 
 const allowlistPath = join(root, 'app/data/allowlist.json');
 const allowlistTsPath = join(root, 'app/data/allowlist.ts');
@@ -34,7 +28,6 @@ function loadAllowlist() {
   if (existsSync(allowlistPath)) {
     return JSON.parse(readFileSync(allowlistPath, 'utf8'));
   }
-  // Fallback: parse FOOD_ALLOWLIST entries from the TS file (name, fdcId, category, basis, fallback).
   const src = readFileSync(allowlistTsPath, 'utf8');
   const entries = [];
   const blockRe =
@@ -67,6 +60,14 @@ const NUTRIENT_IDS = {
   fat: 1004,
   calcium: 1087,
   phosphorus: 1091,
+  zinc: 1095,
+  copper: 1098,
+  iodine: 1100,
+  vitaminD: 1114,
+  vitaminE: 1109,
+  choline: 1180,
+  dha: 1272,
+  epa: 1278,
 };
 
 const apiKey = process.env.FDC_API_KEY || 'DEMO_KEY';
@@ -92,6 +93,63 @@ async function fetchFood(fdcId, attempt = 1) {
   return res.json();
 }
 
+function round1(n) {
+  return Math.round(n * 10) / 10;
+}
+
+function extendedFromFallback(fb) {
+  if (!fb) return {};
+  const out = {};
+  if (fb.zincMgPer100g != null) out.zincMgPer100g = fb.zincMgPer100g;
+  if (fb.copperMgPer100g != null) out.copperMgPer100g = fb.copperMgPer100g;
+  if (fb.iodineMcgPer100g != null) out.iodineMcgPer100g = fb.iodineMcgPer100g;
+  if (fb.vitaminDIUPer100g != null) out.vitaminDIUPer100g = fb.vitaminDIUPer100g;
+  if (fb.vitaminEMgPer100g != null) out.vitaminEMgPer100g = fb.vitaminEMgPer100g;
+  if (fb.cholineMgPer100g != null) out.cholineMgPer100g = fb.cholineMgPer100g;
+  if (fb.epaMgPer100g != null) out.epaMgPer100g = fb.epaMgPer100g;
+  if (fb.dhaMgPer100g != null) out.dhaMgPer100g = fb.dhaMgPer100g;
+  return out;
+}
+
+function extendedFromApi(entry, food) {
+  const fb = entry.fallback || {};
+  const zinc = nutrientAmount(food, NUTRIENT_IDS.zinc);
+  const copper = nutrientAmount(food, NUTRIENT_IDS.copper);
+  const iodine = nutrientAmount(food, NUTRIENT_IDS.iodine);
+  const vitDmcg = nutrientAmount(food, NUTRIENT_IDS.vitaminD);
+  const vitE = nutrientAmount(food, NUTRIENT_IDS.vitaminE);
+  const choline = nutrientAmount(food, NUTRIENT_IDS.choline);
+  const dhaG = nutrientAmount(food, NUTRIENT_IDS.dha);
+  const epaG = nutrientAmount(food, NUTRIENT_IDS.epa);
+
+  const out = {};
+  if (zinc != null) out.zincMgPer100g = round1(zinc);
+  else if (fb.zincMgPer100g != null) out.zincMgPer100g = fb.zincMgPer100g;
+
+  if (copper != null) out.copperMgPer100g = round1(copper);
+  else if (fb.copperMgPer100g != null) out.copperMgPer100g = fb.copperMgPer100g;
+
+  if (iodine != null) out.iodineMcgPer100g = round1(iodine);
+  else if (fb.iodineMcgPer100g != null) out.iodineMcgPer100g = fb.iodineMcgPer100g;
+
+  if (vitDmcg != null) out.vitaminDIUPer100g = Math.round(vitDmcg * 40);
+  else if (fb.vitaminDIUPer100g != null) out.vitaminDIUPer100g = fb.vitaminDIUPer100g;
+
+  if (vitE != null) out.vitaminEMgPer100g = round1(vitE);
+  else if (fb.vitaminEMgPer100g != null) out.vitaminEMgPer100g = fb.vitaminEMgPer100g;
+
+  if (choline != null) out.cholineMgPer100g = round1(choline);
+  else if (fb.cholineMgPer100g != null) out.cholineMgPer100g = fb.cholineMgPer100g;
+
+  if (epaG != null) out.epaMgPer100g = Math.round(epaG * 1000);
+  else if (fb.epaMgPer100g != null) out.epaMgPer100g = fb.epaMgPer100g;
+
+  if (dhaG != null) out.dhaMgPer100g = Math.round(dhaG * 1000);
+  else if (fb.dhaMgPer100g != null) out.dhaMgPer100g = fb.dhaMgPer100g;
+
+  return out;
+}
+
 function fromFallback(entry) {
   return {
     name: entry.name,
@@ -103,6 +161,7 @@ function fromFallback(entry) {
     fatGPer100g: entry.fallback.fatGPer100g,
     calciumMgPer100g: entry.fallback.calciumMgPer100g,
     phosphorusMgPer100g: entry.fallback.phosphorusMgPer100g,
+    ...extendedFromFallback(entry.fallback),
     source: `Allowlist fallback (FDC ${entry.fdcId}, ${entry.basis})`,
   };
 }
@@ -128,7 +187,6 @@ function fromApi(entry, food) {
   const caloriesPer100g =
     calories != null ? Math.round(calories) : entry.fallback.caloriesPer100g;
 
-  // Guard against wrong FDC IDs returning a different food.
   const expected = entry.fallback.caloriesPer100g;
   if (expected > 0 && Math.abs(caloriesPer100g - expected) / expected > 0.35) {
     throw new Error(
@@ -147,31 +205,18 @@ function fromApi(entry, food) {
     calciumMgPer100g: calcium != null ? Math.round(calcium) : entry.fallback.calciumMgPer100g,
     phosphorusMgPer100g:
       phosphorus != null ? Math.round(phosphorus) : entry.fallback.phosphorusMgPer100g,
+    ...extendedFromApi(entry, food),
     source: `USDA FDC ${food.dataType || 'food'} ${entry.fdcId} (${entry.basis})`,
     fdcDescription: food.description,
   };
 }
 
-function round1(n) {
-  return Math.round(n * 10) / 10;
+function emitField(key, value) {
+  if (value == null) return [];
+  return [`    ${key}: ${typeof value === 'string' ? JSON.stringify(value) : value},`];
 }
 
 function emitTs(foods) {
-  const byCategory = {
-    protein: [],
-    organs: [],
-    fruits: [],
-    veggies: [],
-    carbs: [],
-    fats: [],
-  };
-  for (const food of foods) {
-    byCategory[food.category].push(food);
-  }
-  for (const list of Object.values(byCategory)) {
-    list.sort((a, b) => a.name.localeCompare(b.name));
-  }
-
   const lines = [];
   lines.push('// AUTO-GENERATED by scripts/sync-fdc.mjs — do not edit by hand.');
   lines.push(`// Generated: ${new Date().toISOString()}`);
@@ -189,6 +234,18 @@ function emitTs(foods) {
     lines.push(`    fatGPer100g: ${food.fatGPer100g},`);
     lines.push(`    calciumMgPer100g: ${food.calciumMgPer100g},`);
     lines.push(`    phosphorusMgPer100g: ${food.phosphorusMgPer100g},`);
+    for (const key of [
+      'zincMgPer100g',
+      'copperMgPer100g',
+      'iodineMcgPer100g',
+      'vitaminDIUPer100g',
+      'vitaminEMgPer100g',
+      'cholineMgPer100g',
+      'epaMgPer100g',
+      'dhaMgPer100g',
+    ]) {
+      lines.push(...emitField(key, food[key]));
+    }
     lines.push(`    source: ${JSON.stringify(food.source)},`);
     if (food.fdcDescription) {
       lines.push(`    fdcDescription: ${JSON.stringify(food.fdcDescription)},`);
@@ -219,7 +276,6 @@ async function main() {
       fallbacks += 1;
       process.stdout.write(`  ⚠ ${entry.name} (fallback: ${err.message})\n`);
     }
-    // Be kind to the public API (DEMO_KEY is tightly rate-limited).
     await sleep(apiKey === 'DEMO_KEY' ? 600 : 200);
   }
 

@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { ACTIVITY_LEVELS } from '../utils/constants';
-import { ALL_FOOD_NAMES } from '../data/ingredients';
+import { getAllFoodNames } from '../data/ingredients';
 import type { Dog } from '../utils/recipeCalculator';
 import { readAvatarFile } from '../utils/avatar';
 import {
@@ -159,7 +159,7 @@ export function DogCard({ dog, index, unit, dailyCalories, onChange }: DogCardPr
         <span className={fieldLabel}>Allergies / avoid</span>
         <AllergyInput
           value={allergies}
-          suggestions={ALL_FOOD_NAMES}
+          suggestions={getAllFoodNames()}
           onAdd={addAllergy}
           onRemove={removeAllergy}
         />

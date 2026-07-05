@@ -13,14 +13,17 @@ import {
   calculateDailyCalories,
   createRecipe,
   getTotalMER,
+  DEFAULT_SUPPLEMENT_OPTIONS,
   type Dog,
   type Recipe,
+  type SupplementOptions,
 } from './utils/recipeCalculator';
-import { ingredients } from './data/ingredients';
+import { normalizeSupplementOptions, getIngredientCatalogOrThrow } from './data/ingredients';
+import { useIngredientCatalog } from './hooks/useIngredientCatalog';
 import { recipeToText } from './utils/export';
 import { balanceRecipeMix } from './utils/rebalance';
 import { type MassUnit, type WeightUnit } from './utils/format';
-import { createId, type SavedRecipe } from './utils/savedRecipes';
+import { createId, resolveSupplementOptions, type SavedRecipe } from './utils/savedRecipes';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { HomePlan } from './components/HomePlan';
 import { BuildScreen } from './components/BuildScreen';
@@ -60,6 +63,7 @@ const PAGE_TITLE: Record<TabId, string> = {
 };
 
 export default function Home() {
+  const { status: catalogStatus, error: catalogError } = useIngredientCatalog();
   const [unit, setUnit] = useLocalStorage<WeightUnit>('hdrb.unit', 'lb');
   const [dogs, setDogs] = useLocalStorage<Dog[]>('hdrb.dogs', DEFAULT_DOGS);
   const [numberOfDays, setNumberOfDays] = useLocalStorage('hdrb.days', 7);
@@ -67,6 +71,10 @@ export default function Home() {
   const [ratios, setRatios] = useLocalStorage<CategoryRatios>('hdrb.ratios', RECOMMENDED_RATIOS);
   const [counts, setCounts] = useLocalStorage<CategoryCounts>('hdrb.counts', DEFAULT_COUNTS);
   const [locked, setLocked] = useLocalStorage<Partial<Record<Category, string[]>>>('hdrb.locked', {});
+  const [supplementOptions, setSupplementOptions] = useLocalStorage<SupplementOptions>(
+    'hdrb.supplements',
+    DEFAULT_SUPPLEMENT_OPTIONS,
+  );
   const [recipe, setRecipe] = useLocalStorage<Recipe | null>('hdrb.recipe', null);
   const [planName, setPlanName] = useLocalStorage<string>('hdrb.planName', '');
   const [draftRecipe, setDraftRecipe] = useLocalStorage<Recipe | null>('hdrb.draft', null);
@@ -149,6 +157,7 @@ export default function Home() {
     lockedState: Partial<Record<Category, string[]>> = locked,
     ratioState: CategoryRatios = ratios,
     countState: CategoryCounts = counts,
+    supplementState: SupplementOptions = supplementOptions,
   ): Recipe => {
     const withMER = dogList.map((dog) => ({ ...dog, MER: calculateDailyCalories(dog) }));
     const totalMER = getTotalMER(withMER);
@@ -156,17 +165,18 @@ export default function Home() {
     return createRecipe(totalMER, withMER, ratioState, countState, {
       excluded,
       locked: lockedState,
+      supplementOptions: normalizeSupplementOptions(supplementState),
     });
   };
 
   const generateDraft = () => {
     if (!canGenerate) return;
-    setDraftRecipe(computeRecipe(dogs, locked, ratios, counts));
+    setDraftRecipe(computeRecipe(dogs, locked, ratios, counts, supplementOptions));
   };
 
   const balanceDraft = () => {
     if (!draftRecipe) return;
-    const result = balanceRecipeMix(draftRecipe, dogs);
+    const result = balanceRecipeMix(draftRecipe, dogs, supplementOptions, allergyList);
     if (!result) return;
     setRatios(result.ratios);
     setDraftRecipe(result.recipe);
@@ -174,7 +184,7 @@ export default function Home() {
 
   const balanceEdit = () => {
     if (!editRecipe) return;
-    const result = balanceRecipeMix(editRecipe, dogs);
+    const result = balanceRecipeMix(editRecipe, dogs, supplementOptions, allergyList);
     if (!result) return;
     setRatios(result.ratios);
     setEditRecipe(result.recipe);
@@ -185,6 +195,7 @@ export default function Home() {
     ratioState: CategoryRatios,
     countState: CategoryCounts,
     dogList: Dog[] = dogs,
+    supplementState: SupplementOptions = supplementOptions,
   ) => {
     if (!draftRecipe) return;
     const sum = CATEGORIES.reduce((s, c) => s + ratioState[c], 0);
@@ -194,7 +205,15 @@ export default function Home() {
       setDraftRecipe(null);
       return;
     }
-    setDraftRecipe(computeRecipe(dogList, locked, ratioState, countState));
+    setDraftRecipe(computeRecipe(dogList, locked, ratioState, countState, supplementState));
+  };
+
+  const updateSupplementOptions = (next: SupplementOptions) => {
+    const normalized = normalizeSupplementOptions(next);
+    setSupplementOptions(normalized);
+    if (draftRecipe) {
+      refreshDraft(ratios, counts, dogs, normalized);
+    }
   };
 
   const addDog = () =>
@@ -263,7 +282,7 @@ export default function Home() {
     newName: string,
   ) => {
     if (oldName === newName) return;
-    const data = ingredients[category].find((i) => i.name === newName);
+    const data = getIngredientCatalogOrThrow()[category].find((i) => i.name === newName);
     if (!data) return;
     const round2 = (n: number) => Math.round(n * 100) / 100;
     const cpg = data.caloriesPer100g || 0;
@@ -319,6 +338,7 @@ export default function Home() {
       numberOfDays,
       mealsPerDay,
       locked,
+      supplementOptions,
       recipe: draftRecipe,
     };
     setRecipe(draftRecipe);
@@ -364,6 +384,7 @@ export default function Home() {
               numberOfDays,
               mealsPerDay,
               locked,
+              supplementOptions,
               recipe: editRecipe,
             }
           : s,
@@ -423,6 +444,7 @@ export default function Home() {
     setNumberOfDays(entry.numberOfDays);
     setMealsPerDay(entry.mealsPerDay);
     setLocked(entry.locked);
+    setSupplementOptions(resolveSupplementOptions(entry));
     setRecipe(entry.recipe);
     setPlanName(entry.name);
     setCheckedItems({});
@@ -458,6 +480,23 @@ export default function Home() {
   // Prefer explicit plan name; fall back to linked saved entry (legacy sessions).
   const activePlanName =
     planName || currentSaved?.name || (recipe ? 'Untitled plan' : '');
+
+  if (catalogStatus === 'loading') {
+    return (
+      <div className="flex h-dvh items-center justify-center bg-zinc-50 text-sm text-zinc-500 dark:bg-zinc-950 dark:text-zinc-400">
+        Loading ingredients…
+      </div>
+    );
+  }
+
+  if (catalogStatus === 'error') {
+    return (
+      <div className="flex h-dvh flex-col items-center justify-center gap-2 bg-zinc-50 px-6 text-center dark:bg-zinc-950">
+        <p className="text-sm font-medium text-black dark:text-zinc-50">Could not load ingredients</p>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">{catalogError}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-dvh flex-col bg-zinc-50 text-black dark:bg-zinc-950 dark:text-zinc-50 print:h-auto print:min-h-0 print:bg-white print:text-black">
@@ -544,6 +583,8 @@ export default function Home() {
             hasInvalidDog={hasInvalidDog}
             draftName={draftName}
             locked={locked}
+            supplementOptions={supplementOptions}
+            onSupplementOptionsChange={updateSupplementOptions}
             onRatioChange={updateRatio}
             onCountChange={updateCount}
             onApplyRecommended={applyRecommendedRatios}

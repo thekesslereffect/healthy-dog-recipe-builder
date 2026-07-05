@@ -137,7 +137,7 @@ export function ProfileScreen({
         )}
       </Modal>
 
-      <Sheet open={aboutOpen} title="About this tool" onClose={() => setAboutOpen(false)}>
+      <Sheet open={aboutOpen} title="About this tool" onClose={() => setAboutOpen(false)} size="md">
         <Disclaimer />
         <p className="mt-4 text-xs leading-relaxed text-zinc-400">
           Calories: RER = 70 × kg<sup>0.75</sup> × activity factor. Calcium: 1.25 mg/kcal (AAFCO

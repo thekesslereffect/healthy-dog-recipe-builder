@@ -1,12 +1,24 @@
 import {
   CATEGORIES,
-  CALCIUM_MG_PER_KCAL,
-  AAFCO_ADULT_PER_1000_KCAL,
   GRAMS_PER_LB,
   LB_PER_KG,
+  NRC_ADULT_PER_1000_KCAL,
   type Category,
 } from './constants';
-import { findFoodByName, ingredients, type Ingredient } from '../data/ingredients';
+import {
+  findFoodByName,
+  getIngredientCatalogOrThrow,
+  type Ingredient,
+  type SupplementOptions,
+  DEFAULT_SUPPLEMENT_OPTIONS,
+  buildWeightDosedSupplements,
+  doseEggshellRow,
+  supplementCalciumMg,
+  normalizeSupplementOptions,
+} from '../data/ingredients';
+
+export type { SupplementOptions } from '../data/ingredients';
+export { DEFAULT_SUPPLEMENT_OPTIONS } from '../data/ingredients';
 
 export type { Ingredient };
 
@@ -32,6 +44,8 @@ export interface RecipeIngredient {
   grams: number;
   calories: number;
   gramsPerScoop?: number | null;
+  /** Added by Balance % to improve nutrition — original picks are unchanged. */
+  additional?: boolean;
 }
 
 export type Recipe = {
@@ -55,6 +69,8 @@ export interface RecipeOptions {
   excluded?: string[];
   /** Ingredient names to force-keep per category (locked on reroll). */
   locked?: Partial<Record<Category, string[]>>;
+  /** Which optional supplements to include in the recipe. */
+  supplementOptions?: SupplementOptions;
   /** Injectable RNG for reproducible/testable results. Defaults to Math.random. */
   random?: () => number;
 }
@@ -76,14 +92,6 @@ function emptyRecipe(): Recipe {
   };
 }
 
-// Calcium requirements are tied to energy intake (per 1,000 kcal), NOT to body
-// weight directly, because dogs eat to meet energy needs and calcium must be
-// balanced against dietary phosphorus.
-function calculateCalciumNeeds(totalDailyCalories: number): number {
-  return Math.round(totalDailyCalories * CALCIUM_MG_PER_KCAL);
-}
-
-// RER = 70 × (kg)^0.75, MER = RER × activity factor.
 export function calculateDailyCalories(dog: Dog): number {
   const weightKg = dog.weight / LB_PER_KG;
   const RER = 70 * Math.pow(weightKg, 0.75);
@@ -94,7 +102,6 @@ export function getTotalMER(dogs: Dog[]): number {
   return dogs.reduce((total, dog) => total + (dog.MER || 0), 0);
 }
 
-// Deterministic Fisher–Yates shuffle using an injected RNG.
 function shuffle<T>(items: T[], random: () => number): T[] {
   const result = [...items];
   for (let i = result.length - 1; i > 0; i--) {
@@ -104,8 +111,6 @@ function shuffle<T>(items: T[], random: () => number): T[] {
   return result;
 }
 
-// Choose `count` ingredients: honour locked names first, drop excluded ones,
-// then randomly fill the remaining slots.
 function selectIngredients(
   pool: Ingredient[],
   count: number,
@@ -130,25 +135,25 @@ export function createRecipe(
   ingredientCounts: IngredientCounts,
   options: RecipeOptions = {},
 ): Recipe {
-  const { excluded = [], locked = {}, random = Math.random } = options;
+  const {
+    excluded = [],
+    locked = {},
+    supplementOptions = DEFAULT_SUPPLEMENT_OPTIONS,
+    random = Math.random,
+  } = options;
+  const supplements = normalizeSupplementOptions(supplementOptions);
   const recipe = emptyRecipe();
 
   const totalDogWeight = dogs.reduce((sum, dog) => sum + dog.weight, 0);
   let totalSupplementCalories = 0;
 
-  // Non-eggshell supplements first (eggshell is dosed after foods so Ca:P can balance).
-  for (const supplement of ingredients.supplements) {
-    if (supplement.name === 'Eggshell Powder (Calcium)') continue;
-    const gramsPerDay = totalDogWeight * (supplement.gramsPerPoundPerDay || 0);
-    const calories = round2((gramsPerDay * (supplement.caloriesPer100g || 0)) / 100);
-    recipe.ingredients.supplements.push({
-      name: supplement.name,
-      grams: round2(gramsPerDay),
-      calories,
-      gramsPerScoop: supplement.gramsPerScoop || null,
-    });
-    totalSupplementCalories += calories;
+  const weightDosed = buildWeightDosedSupplements(totalDogWeight, supplements);
+  for (const row of weightDosed) {
+    recipe.ingredients.supplements.push(row);
+    totalSupplementCalories += row.calories;
   }
+
+  const extraCalciumMg = supplementCalciumMg(totalDogWeight, supplements);
 
   const remainingMER = totalMER - totalSupplementCalories;
   let mainIngredientsCalories = 0;
@@ -164,7 +169,7 @@ export function createRecipe(
     }
 
     const selected = selectIngredients(
-      ingredients[category],
+      getIngredientCatalogOrThrow()[category],
       count,
       locked[category] ?? [],
       excluded,
@@ -191,7 +196,6 @@ export function createRecipe(
     }
   }
 
-  // Dose eggshell to meet AAFCO calcium minimum and keep Ca:P ≥ 1:1.
   let foodCalciumMg = 0;
   let foodPhosphorusMg = 0;
   for (const category of CATEGORIES) {
@@ -203,23 +207,16 @@ export function createRecipe(
     }
   }
 
-  const eggshell = ingredients.supplements.find((s) => s.name === 'Eggshell Powder (Calcium)');
-  if (eggshell?.calciumMgPerGram) {
-    const aafcoCalciumMg = calculateCalciumNeeds(totalMER);
-    const targetCalciumMg = Math.max(
-      aafcoCalciumMg,
-      foodPhosphorusMg * AAFCO_ADULT_PER_1000_KCAL.caPRatioMin,
-    );
-    const eggshellCalciumMg = Math.max(0, targetCalciumMg - foodCalciumMg);
-    const eggshellGrams = eggshellCalciumMg / eggshell.calciumMgPerGram;
-    const calories = round2((eggshellGrams * (eggshell.caloriesPer100g || 0)) / 100);
-    recipe.ingredients.supplements.push({
-      name: eggshell.name,
-      grams: round2(eggshellGrams),
-      calories,
-      gramsPerScoop: eggshell.gramsPerScoop || null,
-    });
-    totalSupplementCalories += calories;
+  const eggshellRow = doseEggshellRow(
+    totalMER,
+    foodCalciumMg,
+    foodPhosphorusMg,
+    extraCalciumMg,
+    supplements,
+  );
+  if (eggshellRow) {
+    recipe.ingredients.supplements.push(eggshellRow);
+    totalSupplementCalories += eggshellRow.calories;
   }
 
   recipe.totalCalories = round2(mainIngredientsCalories + totalSupplementCalories);
@@ -280,7 +277,6 @@ export function calculateMealPortions(
       }
     }
 
-    // Supplements are dosed by body weight, not energy share.
     for (const supplement of recipe.ingredients.supplements) {
       totalDailyGrams += supplement.grams * dogWeightShare;
     }
@@ -294,3 +290,6 @@ export function calculateMealPortions(
 
   return portions;
 }
+
+/** Re-export NRC constants for nutrition module convenience. */
+export { NRC_ADULT_PER_1000_KCAL };

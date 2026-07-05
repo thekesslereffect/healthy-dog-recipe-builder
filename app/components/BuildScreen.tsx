@@ -6,10 +6,11 @@ import {
   type CategoryCounts,
   type CategoryRatios,
 } from '../utils/constants';
-import type { Dog, Recipe } from '../utils/recipeCalculator';
+import type { Dog, Recipe, SupplementOptions } from '../utils/recipeCalculator';
 import { CategoryBar } from './CategoryBar';
 import { DailyRecipePanel } from './DailyRecipePanel';
 import { NutritionSnapshot } from './NutritionSnapshot';
+import { SupplementControlsPanel, enabledSupplementCount, enabledSupplementNames } from './SupplementControls';
 import { Sheet } from './Sheet';
 import { btnPrimary, btnSecondary, inputBase } from './ui';
 import { Shuffle } from 'lucide-react';
@@ -26,6 +27,8 @@ interface BuildScreenProps {
   hasInvalidDog: boolean;
   draftName: string;
   locked: Partial<Record<Category, string[]>>;
+  supplementOptions: SupplementOptions;
+  onSupplementOptionsChange: (options: SupplementOptions) => void;
   onRatioChange: (category: Category, value: number) => void;
   onCountChange: (category: Category, value: number) => void;
   onApplyRecommended: () => void;
@@ -50,6 +53,8 @@ export function BuildScreen({
   hasInvalidDog,
   draftName,
   locked,
+  supplementOptions,
+  onSupplementOptionsChange,
   onRatioChange,
   onCountChange,
   onApplyRecommended,
@@ -61,27 +66,50 @@ export function BuildScreen({
   onBalance,
 }: BuildScreenProps) {
   const [mixOpen, setMixOpen] = useState(false);
+  const [supplementsOpen, setSupplementsOpen] = useState(false);
   const sum = CATEGORIES.reduce((total, c) => total + ratios[c], 0);
+  const enabledSupplements = enabledSupplementNames(supplementOptions);
+  const supplementCount = enabledSupplementCount(supplementOptions);
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-2">
-      <button
-        type="button"
-        onClick={() => setMixOpen(true)}
-        className="shrink-0 rounded-2xl border border-zinc-100 bg-white p-3 text-left dark:border-zinc-800 dark:bg-zinc-900"
-      >
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <span className="text-sm font-medium text-black dark:text-zinc-50">Ingredient mix</span>
-          <span
-            className={`text-xs font-medium tabular-nums ${
-              Math.abs(sum - 1) < 0.001 ? 'text-zinc-400' : 'text-black dark:text-zinc-50'
-            }`}
-          >
-            {Math.round(sum * 100)}% · Edit
-          </span>
-        </div>
-        <CategoryBar ratios={ratios} />
-      </button>
+      <div className="grid shrink-0 grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => setMixOpen(true)}
+          className="flex min-w-0 flex-col rounded-2xl border border-zinc-100 bg-white p-3 text-left dark:border-zinc-800 dark:bg-zinc-900"
+        >
+          <div className="mb-2 flex items-center justify-between gap-1">
+            <span className="text-sm font-medium text-black dark:text-zinc-50">Ingredient mix</span>
+            <span
+              className={`shrink-0 text-[10px] font-medium tabular-nums sm:text-xs ${
+                Math.abs(sum - 1) < 0.001 ? 'text-zinc-400' : 'text-black dark:text-zinc-50'
+              }`}
+            >
+              {Math.round(sum * 100)}% · Edit
+            </span>
+          </div>
+          <CategoryBar ratios={ratios} />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setSupplementsOpen(true)}
+          className="flex min-w-0 flex-col rounded-2xl border border-zinc-100 bg-white p-3 text-left dark:border-zinc-800 dark:bg-zinc-900"
+        >
+          <div className="mb-2 flex items-center justify-between gap-1">
+            <span className="text-sm font-medium text-black dark:text-zinc-50">Supplements</span>
+            <span className="shrink-0 text-[10px] font-medium tabular-nums text-zinc-400 sm:text-xs">
+              {supplementCount} on · Edit
+            </span>
+          </div>
+          <p className="line-clamp-2 text-[11px] leading-snug text-zinc-500 dark:text-zinc-400 sm:text-xs">
+            {enabledSupplements.length > 0
+              ? enabledSupplements.join(', ')
+              : 'None selected'}
+          </p>
+        </button>
+      </div>
 
       {!draftRecipe ? (
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-200 bg-white px-4 text-center dark:border-zinc-700 dark:bg-zinc-900">
@@ -241,6 +269,22 @@ export function BuildScreen({
           </div>
 
           <button type="button" onClick={() => setMixOpen(false)} className={`${btnPrimary} w-full`}>
+            Done
+          </button>
+        </div>
+      </Sheet>
+
+      <Sheet open={supplementsOpen} title="Supplements" onClose={() => setSupplementsOpen(false)}>
+        <div className="space-y-5">
+          <SupplementControlsPanel
+            options={supplementOptions}
+            onChange={onSupplementOptionsChange}
+          />
+          <button
+            type="button"
+            onClick={() => setSupplementsOpen(false)}
+            className={`${btnPrimary} w-full`}
+          >
             Done
           </button>
         </div>

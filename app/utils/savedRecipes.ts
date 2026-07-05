@@ -1,5 +1,6 @@
 import type { Category, CategoryCounts, CategoryRatios } from './constants';
-import type { Dog, Recipe } from './recipeCalculator';
+import type { Dog, Recipe, SupplementOptions } from './recipeCalculator';
+import { DEFAULT_SUPPLEMENT_OPTIONS } from './recipeCalculator';
 
 // A full snapshot of a build so it can be reloaded and edited later.
 export interface SavedRecipe {
@@ -12,7 +13,12 @@ export interface SavedRecipe {
   numberOfDays: number;
   mealsPerDay: number;
   locked: Partial<Record<Category, string[]>>;
+  supplementOptions?: SupplementOptions;
   recipe: Recipe;
+}
+
+export function resolveSupplementOptions(entry?: SavedRecipe): SupplementOptions {
+  return entry?.supplementOptions ?? DEFAULT_SUPPLEMENT_OPTIONS;
 }
 
 export function createId(): string {

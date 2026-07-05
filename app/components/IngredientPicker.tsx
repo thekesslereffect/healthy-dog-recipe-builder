@@ -9,7 +9,7 @@ interface IngredientPickerProps {
 }
 
 /**
- * Mobile-friendly ingredient swap: bottom sheet with a scrollable list.
+ * Ingredient swap: bottom sheet on mobile, centered modal on desktop.
  * Optional filter uses text-base (16px) so iOS won't zoom on focus.
  */
 export function IngredientPicker({
@@ -27,7 +27,7 @@ export function IngredientPicker({
   }, [query, suggestions]);
 
   return (
-    <Sheet open title={`Replace ${current}`} onClose={onCancel}>
+    <Sheet open title={`Replace ${current}`} onClose={onCancel} size="md">
       <div className="space-y-3">
         <input
           type="search"

@@ -48,13 +48,13 @@ export function SavedRecipes({ saved, onLoad, onDelete, onRename }: SavedRecipes
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 overflow-y-auto overscroll-contain sm:grid-cols-2 xl:grid-cols-3">
         {saved.map((item) => {
           const dogNames = item.dogs.map((d) => d.name).filter(Boolean).join(', ');
           return (
             <div
               key={item.id}
-              className="rounded-2xl border border-zinc-100 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900"
+              className="h-fit rounded-2xl border border-zinc-100 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900"
             >
               {renamingId === item.id ? (
                 <input
@@ -113,6 +113,7 @@ export function SavedRecipes({ saved, onLoad, onDelete, onRename }: SavedRecipes
         open={!!pendingDelete}
         title="Delete plan?"
         onClose={() => setPendingDelete(null)}
+        size="md"
       >
         <p className="text-sm text-zinc-600">
           Delete{' '}

@@ -10,8 +10,8 @@ export interface AllowlistEntry {
   /** How the food is weighed in recipes. */
   basis: 'raw' | 'cooked' | 'drained' | 'oil';
   /**
-   * Used when the FDC API is unavailable so the app still builds.
-   * Replaced by live FDC values when `npm run sync:fdc` succeeds.
+   * Used when the FDC sync script cannot reach USDA (local dev / CI).
+   * Replaced by `npm run sync:fdc` output in `foods.generated.ts`.
    */
   fallback: {
     caloriesPer100g: number;

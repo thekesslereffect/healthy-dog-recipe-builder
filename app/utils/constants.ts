@@ -87,3 +87,19 @@ export const AAFCO_ADULT_PER_1000_KCAL = {
   caPRatioMin: 1,
   caPRatioMax: 2,
 } as const;
+
+/**
+ * NRC (2006) adult maintenance recommended allowances per 1,000 kcal ME.
+ * Used for micronutrient screening beyond AAFCO macro minerals.
+ */
+export const NRC_ADULT_PER_1000_KCAL = {
+  zincMg: 15,
+  copperMg: 1.5,
+  iodineMcg: 220,
+  /** 3.4 µg cholecalciferol ≈ 136 IU. */
+  vitaminDIU: 136,
+  vitaminEMg: 7.5,
+  cholineMg: 425,
+  /** Combined EPA + DHA. */
+  epaDhaMg: 110,
+} as const;

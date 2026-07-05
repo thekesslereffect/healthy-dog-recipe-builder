@@ -28,27 +28,35 @@
   {
     "name": "Beef (sirloin steak)",
     "category": "protein",
-    "fdcId": 174032,
+    "fdcId": 168728,
     "basis": "raw",
     "fallback": {
-      "caloriesPer100g": 201,
-      "proteinGPer100g": 20.3,
-      "fatGPer100g": 12.7,
-      "calciumMgPer100g": 20,
-      "phosphorusMgPer100g": 185
+      "caloriesPer100g": 214,
+      "proteinGPer100g": 19.9,
+      "fatGPer100g": 14.3,
+      "calciumMgPer100g": 25,
+      "phosphorusMgPer100g": 181,
+      "zincMgPer100g": 3.57,
+      "copperMgPer100g": 0.066,
+      "vitaminEMgPer100g": 0.37,
+      "cholineMgPer100g": 83.2
     }
   },
   {
     "name": "Buffalo/Bison",
     "category": "protein",
-    "fdcId": 173847,
+    "fdcId": 175293,
     "basis": "raw",
     "fallback": {
       "caloriesPer100g": 146,
       "proteinGPer100g": 20.2,
       "fatGPer100g": 7.2,
-      "calciumMgPer100g": 8,
-      "phosphorusMgPer100g": 187
+      "calciumMgPer100g": 11,
+      "phosphorusMgPer100g": 194,
+      "zincMgPer100g": 4.59,
+      "copperMgPer100g": 0.14,
+      "vitaminEMgPer100g": 0.19,
+      "cholineMgPer100g": 85.8
     }
   },
   {
@@ -67,14 +75,39 @@
   {
     "name": "Duck (meat without skin)",
     "category": "protein",
-    "fdcId": 172414,
+    "fdcId": 172410,
     "basis": "raw",
     "fallback": {
-      "caloriesPer100g": 185,
+      "caloriesPer100g": 135,
       "proteinGPer100g": 18.3,
-      "fatGPer100g": 11.2,
+      "fatGPer100g": 6,
       "calciumMgPer100g": 11,
-      "phosphorusMgPer100g": 203
+      "phosphorusMgPer100g": 203,
+      "zincMgPer100g": 1.9,
+      "copperMgPer100g": 0.253,
+      "vitaminDIUPer100g": 4,
+      "vitaminEMgPer100g": 0.7,
+      "cholineMgPer100g": 53.6
+    }
+  },
+  {
+    "name": "Egg (whole, raw)",
+    "category": "protein",
+    "fdcId": 171287,
+    "basis": "raw",
+    "fallback": {
+      "caloriesPer100g": 143,
+      "proteinGPer100g": 12.6,
+      "fatGPer100g": 9.5,
+      "calciumMgPer100g": 56,
+      "phosphorusMgPer100g": 198,
+      "zincMgPer100g": 1.29,
+      "copperMgPer100g": 0.072,
+      "vitaminDIUPer100g": 80,
+      "vitaminEMgPer100g": 1.05,
+      "cholineMgPer100g": 294,
+      "epaMgPer100g": 0,
+      "dhaMgPer100g": 58
     }
   },
   {
@@ -119,14 +152,19 @@
   {
     "name": "Pork (lean cuts)",
     "category": "protein",
-    "fdcId": 167812,
+    "fdcId": 168230,
     "basis": "raw",
     "fallback": {
       "caloriesPer100g": 143,
-      "proteinGPer100g": 21.2,
+      "proteinGPer100g": 21.4,
       "fatGPer100g": 5.7,
-      "calciumMgPer100g": 6,
-      "phosphorusMgPer100g": 210
+      "calciumMgPer100g": 17,
+      "phosphorusMgPer100g": 211,
+      "zincMgPer100g": 1.84,
+      "copperMgPer100g": 0.062,
+      "vitaminDIUPer100g": 20,
+      "vitaminEMgPer100g": 0.18,
+      "cholineMgPer100g": 75.6
     }
   },
   {
@@ -140,6 +178,26 @@
       "fatGPer100g": 13.4,
       "calciumMgPer100g": 9,
       "phosphorusMgPer100g": 240
+    }
+  },
+  {
+    "name": "Sardines (canned in water, no salt)",
+    "category": "protein",
+    "fdcId": 2706293,
+    "basis": "drained",
+    "fallback": {
+      "caloriesPer100g": 208,
+      "proteinGPer100g": 24.6,
+      "fatGPer100g": 11.4,
+      "calciumMgPer100g": 382,
+      "phosphorusMgPer100g": 490,
+      "zincMgPer100g": 1.31,
+      "copperMgPer100g": 0.186,
+      "vitaminDIUPer100g": 192,
+      "vitaminEMgPer100g": 2.04,
+      "cholineMgPer100g": 75,
+      "epaMgPer100g": 473,
+      "dhaMgPer100g": 509
     }
   },
   {
@@ -171,66 +229,90 @@
   {
     "name": "Tuna (canned in water)",
     "category": "protein",
-    "fdcId": 175157,
+    "fdcId": 171986,
     "basis": "drained",
     "fallback": {
       "caloriesPer100g": 116,
       "proteinGPer100g": 25.5,
       "fatGPer100g": 0.8,
       "calciumMgPer100g": 11,
-      "phosphorusMgPer100g": 178
+      "phosphorusMgPer100g": 163,
+      "zincMgPer100g": 0.77,
+      "copperMgPer100g": 0.051,
+      "epaMgPer100g": 47,
+      "dhaMgPer100g": 223
     }
   },
   {
     "name": "Turkey (breast, skinless)",
     "category": "protein",
-    "fdcId": 171088,
+    "fdcId": 171098,
     "basis": "raw",
     "fallback": {
       "caloriesPer100g": 114,
-      "proteinGPer100g": 23.6,
+      "proteinGPer100g": 23.7,
       "fatGPer100g": 1.5,
       "calciumMgPer100g": 11,
-      "phosphorusMgPer100g": 202
+      "phosphorusMgPer100g": 201,
+      "zincMgPer100g": 1.28,
+      "copperMgPer100g": 0.07,
+      "vitaminDIUPer100g": 4,
+      "vitaminEMgPer100g": 0.06,
+      "cholineMgPer100g": 61.3,
+      "dhaMgPer100g": 2
     }
   },
   {
     "name": "Turkey (ground, 85% lean)",
     "category": "protein",
-    "fdcId": 171506,
+    "fdcId": 174493,
     "basis": "raw",
     "fallback": {
-      "caloriesPer100g": 213,
-      "proteinGPer100g": 17.5,
-      "fatGPer100g": 15,
-      "calciumMgPer100g": 19,
-      "phosphorusMgPer100g": 177
+      "caloriesPer100g": 180,
+      "proteinGPer100g": 16.9,
+      "fatGPer100g": 12.5,
+      "calciumMgPer100g": 33,
+      "phosphorusMgPer100g": 179,
+      "zincMgPer100g": 2.75,
+      "copperMgPer100g": 0.123,
+      "vitaminDIUPer100g": 16,
+      "vitaminEMgPer100g": 0.08,
+      "cholineMgPer100g": 51.6,
+      "epaMgPer100g": 12,
+      "dhaMgPer100g": 9
     }
   },
   {
     "name": "Venison",
     "category": "protein",
-    "fdcId": 175304,
+    "fdcId": 173855,
     "basis": "raw",
     "fallback": {
-      "caloriesPer100g": 158,
-      "proteinGPer100g": 21.8,
-      "fatGPer100g": 7.1,
+      "caloriesPer100g": 120,
+      "proteinGPer100g": 23,
+      "fatGPer100g": 2.4,
       "calciumMgPer100g": 5,
-      "phosphorusMgPer100g": 202
+      "phosphorusMgPer100g": 202,
+      "zincMgPer100g": 2.09,
+      "copperMgPer100g": 0.253,
+      "vitaminEMgPer100g": 0.2
     }
   },
   {
     "name": "Beef Kidneys",
     "category": "organs",
-    "fdcId": 174332,
+    "fdcId": 169449,
     "basis": "raw",
     "fallback": {
       "caloriesPer100g": 99,
       "proteinGPer100g": 17.4,
       "fatGPer100g": 3.1,
       "calciumMgPer100g": 13,
-      "phosphorusMgPer100g": 257
+      "phosphorusMgPer100g": 257,
+      "zincMgPer100g": 1.92,
+      "copperMgPer100g": 0.426,
+      "vitaminDIUPer100g": 44,
+      "vitaminEMgPer100g": 0.22
     }
   },
   {
@@ -262,27 +344,32 @@
   {
     "name": "Pork Heart",
     "category": "organs",
-    "fdcId": 168277,
+    "fdcId": 168267,
     "basis": "raw",
     "fallback": {
       "caloriesPer100g": 118,
       "proteinGPer100g": 17.3,
       "fatGPer100g": 4.4,
       "calciumMgPer100g": 5,
-      "phosphorusMgPer100g": 169
+      "phosphorusMgPer100g": 169,
+      "zincMgPer100g": 2.8,
+      "copperMgPer100g": 0.408,
+      "vitaminEMgPer100g": 0.63
     }
   },
   {
     "name": "Pork Kidneys",
     "category": "organs",
-    "fdcId": 167863,
+    "fdcId": 168270,
     "basis": "raw",
     "fallback": {
       "caloriesPer100g": 100,
       "proteinGPer100g": 16.5,
       "fatGPer100g": 3.3,
       "calciumMgPer100g": 9,
-      "phosphorusMgPer100g": 246
+      "phosphorusMgPer100g": 204,
+      "zincMgPer100g": 2.75,
+      "copperMgPer100g": 0.622
     }
   },
   {
@@ -314,14 +401,19 @@
   {
     "name": "Quinoa (cooked)",
     "category": "carbs",
-    "fdcId": 168874,
+    "fdcId": 168917,
     "basis": "cooked",
     "fallback": {
       "caloriesPer100g": 120,
       "proteinGPer100g": 4.4,
       "fatGPer100g": 1.9,
       "calciumMgPer100g": 17,
-      "phosphorusMgPer100g": 152
+      "phosphorusMgPer100g": 152,
+      "zincMgPer100g": 1.09,
+      "copperMgPer100g": 0.192,
+      "vitaminEMgPer100g": 0.63,
+      "cholineMgPer100g": 23,
+      "dhaMgPer100g": 15
     }
   },
   {
@@ -574,14 +666,18 @@
   {
     "name": "Summer Squash",
     "category": "veggies",
-    "fdcId": 168457,
+    "fdcId": 170487,
     "basis": "raw",
     "fallback": {
       "caloriesPer100g": 16,
       "proteinGPer100g": 1.2,
       "fatGPer100g": 0.2,
       "calciumMgPer100g": 15,
-      "phosphorusMgPer100g": 38
+      "phosphorusMgPer100g": 38,
+      "zincMgPer100g": 0.29,
+      "copperMgPer100g": 0.051,
+      "vitaminEMgPer100g": 0.12,
+      "cholineMgPer100g": 6.7
     }
   },
   {

@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { CATEGORIES, type Category, type CategoryRatios } from '../utils/constants';
 import type { Recipe } from '../utils/recipeCalculator';
-import { ingredients } from '../data/ingredients';
+import { getIngredientCatalogOrThrow } from '../data/ingredients';
+import { isNutritionBoostRow } from '../utils/nutritionBoost';
 import { groupLabel, iconBtn } from './ui';
 import { ArrowLeftRight, Lock, LockOpen } from 'lucide-react';
 import { IngredientPicker } from './IngredientPicker';
@@ -31,7 +32,7 @@ export function DailyRecipePanel({
   const pickerOptions = useMemo(() => {
     if (!editing) return [];
     const usedNames = new Set(recipe.ingredients[editing.category].map((i) => i.name));
-    return ingredients[editing.category]
+    return getIngredientCatalogOrThrow()[editing.category]
       .filter((i) => (i.caloriesPer100g || 0) > 0)
       .map((i) => i.name)
       .filter((n) => !excluded.includes(n) && !usedNames.has(n));
@@ -56,41 +57,57 @@ export function DailyRecipePanel({
               <div className="space-y-0.5">
                 {items.map((ingredient) => {
                   const isLocked = lockedNames.includes(ingredient.name);
+                  const isBoost = isNutritionBoostRow(ingredient);
                   return (
                     <div
-                      key={ingredient.name}
+                      key={`${ingredient.name}-${isBoost ? 'boost' : 'base'}`}
                       className="flex items-center justify-between gap-2 rounded-lg py-1"
                     >
-                      <button
-                        type="button"
-                        onClick={() => setEditing({ category, name: ingredient.name })}
-                        className="min-w-0 truncate text-left text-sm text-black dark:text-zinc-50"
-                      >
-                        {ingredient.name}
-                      </button>
+                      <div className="min-w-0 truncate text-left text-sm text-black dark:text-zinc-50">
+                        {isBoost ? (
+                          <>
+                            <span className="text-zinc-500">{ingredient.name}</span>
+                            <span className="ml-1.5 text-[10px] font-medium uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                              + add
+                            </span>
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setEditing({ category, name: ingredient.name })}
+                            className="truncate text-left"
+                          >
+                            {ingredient.name}
+                          </button>
+                        )}
+                      </div>
                       <span className="flex shrink-0 items-center gap-0.5">
                         <span className="mr-1 text-sm tabular-nums text-zinc-600 dark:text-zinc-400">
                           <span className="font-medium text-black dark:text-zinc-50">
                             {ingredient.grams}g
                           </span>
                         </span>
-                        <button
-                          type="button"
-                          aria-label={`Swap ${ingredient.name}`}
-                          onClick={() => setEditing({ category, name: ingredient.name })}
-                          className={iconBtn}
-                        >
-                          <ArrowLeftRight size={14} />
-                        </button>
-                        <button
-                          type="button"
-                          aria-pressed={isLocked}
-                          aria-label={`${isLocked ? 'Unlock' : 'Lock'} ${ingredient.name}`}
-                          onClick={() => onToggleLock(category, ingredient.name)}
-                          className={`${iconBtn} ${isLocked ? 'text-black dark:text-zinc-50' : ''}`}
-                        >
-                          {isLocked ? <Lock size={14} /> : <LockOpen size={14} />}
-                        </button>
+                        {!isBoost && (
+                          <>
+                            <button
+                              type="button"
+                              aria-label={`Swap ${ingredient.name}`}
+                              onClick={() => setEditing({ category, name: ingredient.name })}
+                              className={iconBtn}
+                            >
+                              <ArrowLeftRight size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              aria-pressed={isLocked}
+                              aria-label={`${isLocked ? 'Unlock' : 'Lock'} ${ingredient.name}`}
+                              onClick={() => onToggleLock(category, ingredient.name)}
+                              className={`${iconBtn} ${isLocked ? 'text-black dark:text-zinc-50' : ''}`}
+                            >
+                              {isLocked ? <Lock size={14} /> : <LockOpen size={14} />}
+                            </button>
+                          </>
+                        )}
                       </span>
                     </div>
                   );
