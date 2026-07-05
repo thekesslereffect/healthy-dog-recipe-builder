@@ -118,7 +118,7 @@ export function NutritionSnapshot({
 
   const shellClass = embedded
     ? ''
-    : 'shrink-0 rounded-xl border border-zinc-100 bg-white px-2.5 py-2 dark:border-zinc-800 dark:bg-zinc-900';
+    : 'shrink-0 rounded-xl border border-border bg-surface px-2.5 py-2 shadow-[var(--shadow-sm)]';
 
   const balanceButton =
     onBalance && !allOk ? (
@@ -126,7 +126,7 @@ export function NutritionSnapshot({
         type="button"
         onClick={onBalance}
         disabled={balancing}
-        className="shrink-0 rounded-[10px] bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+        className="shrink-0 rounded-xl bg-accent px-3 py-1.5 text-sm font-semibold text-white transition-all hover:bg-[var(--accent-hover)] disabled:opacity-50"
       >
         {balancing ? 'Balancing…' : 'Balance %'}
       </button>
@@ -178,7 +178,7 @@ export function NutritionSnapshot({
 
   if (collapsible && !expanded) {
     return (
-      <div className={`${shellClass} ${embedded ? 'border-t border-zinc-100 px-3 py-2 dark:border-zinc-800' : ''}`}>
+      <div className={`${shellClass} ${embedded ? 'border-t border-border px-4 py-2.5' : ''}`}>
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -216,7 +216,7 @@ export function NutritionSnapshot({
 
   if (collapsible && expanded) {
     return (
-      <div className={`${shellClass} ${embedded ? 'border-t border-zinc-100 px-3 py-2 dark:border-zinc-800' : ''}`}>
+      <div className={`${shellClass} ${embedded ? 'border-t border-border px-4 py-2.5' : ''}`}>
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"

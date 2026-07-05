@@ -480,18 +480,17 @@ export default function Home() {
     planName || currentSaved?.name || (recipe ? 'Untitled plan' : '');
 
   return (
-    <div className="flex h-dvh flex-col bg-zinc-50 text-black dark:bg-zinc-950 dark:text-zinc-50 print:h-auto print:min-h-0 print:bg-white print:text-black">
-      {/* App header — single compact row */}
-      <header className="flex shrink-0 items-center justify-between gap-3 px-3 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6 print:px-2 print:py-2">
+    <div className="app-mesh flex h-dvh flex-col text-foreground print:h-auto print:min-h-0 print:bg-white print:text-black">
+      <header className="flex shrink-0 items-center justify-between gap-3 px-4 pb-3 pt-[max(0.875rem,env(safe-area-inset-top))] sm:px-6 print:px-2 print:py-2">
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 print:hidden">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted print:hidden">
             {activeTab === 'home' && activePlanName
-              ? 'Plan'
+              ? 'Active plan'
               : activeTab === 'edit'
-                ? 'Edit'
-                : 'Dog recipes'}
+                ? 'Editing'
+                : 'Paws & Portions'}
           </p>
-          <h1 className="truncate text-lg font-semibold tracking-tight text-black dark:text-zinc-50 sm:text-xl print:text-2xl print:text-black">
+          <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl print:text-2xl print:text-black">
             {activeTab === 'home' && activePlanName
               ? activePlanName
               : activeTab === 'edit' && activePlanName
@@ -499,7 +498,7 @@ export default function Home() {
                 : PAGE_TITLE[activeTab]}
           </h1>
         </div>
-        <div className="flex shrink-0 items-center gap-1 print:hidden sm:gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 print:hidden sm:gap-2">
           <TopTabs tabs={TABS} active={activeTab} onChange={goToTab} />
           <button
             type="button"
@@ -507,23 +506,23 @@ export default function Home() {
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             className={iconBtn}
           >
-            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
           <button
             type="button"
             onClick={() => goToTab('profile')}
             aria-label="Profile"
             aria-current={activeTab === 'profile' ? 'page' : undefined}
-            className={`${iconBtn} ${activeTab === 'profile' ? 'bg-zinc-100 text-black dark:bg-zinc-800 dark:text-zinc-50' : ''}`}
+            className={`${iconBtn} ${activeTab === 'profile' ? 'bg-accent-soft text-accent' : ''}`}
           >
-            <User size={20} />
+            <User size={18} />
           </button>
         </div>
       </header>
 
-      {/* Main stage — only inner lists scroll */}
-      <main className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col px-3 sm:max-w-5xl sm:px-6 print:max-w-none print:overflow-visible print:px-2">
+      <main className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col overflow-visible px-4 sm:max-w-5xl sm:px-6 print:max-w-none print:overflow-visible print:px-2">
         {activeTab === 'home' && (
+          <div key="home" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
           <HomePlan
             recipe={recipe}
             hasDraft={!!draftRecipe}
@@ -549,9 +548,11 @@ export default function Home() {
             onGoProfile={() => goToTab('profile')}
             onGoSaved={() => goToTab('saved')}
           />
+          </div>
         )}
 
         {activeTab === 'build' && (
+          <div key="build" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
           <BuildScreen
             ratios={ratios}
             counts={counts}
@@ -576,9 +577,11 @@ export default function Home() {
             onSwap={swapDraftIngredient}
             onBalance={balanceDraft}
           />
+          </div>
         )}
 
         {activeTab === 'edit' && editRecipe && (
+          <div key="edit" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
           <EditScreen
             planName={activePlanName}
             editRecipe={editRecipe}
@@ -592,18 +595,22 @@ export default function Home() {
             onCancel={cancelEdit}
             onBalance={balanceEdit}
           />
+          </div>
         )}
 
         {activeTab === 'saved' && (
+          <div key="saved" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
           <SavedRecipes
             saved={saved}
             onLoad={loadSavedRecipe}
             onDelete={deleteSavedRecipe}
             onRename={renameSavedRecipe}
           />
+          </div>
         )}
 
         {activeTab === 'profile' && (
+          <div key="profile" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
           <ProfileScreen
             dogs={dogs}
             unit={unit}
@@ -612,6 +619,7 @@ export default function Home() {
             onRemoveDog={removeDog}
             onUpdateDog={updateDog}
           />
+          </div>
         )}
       </main>
 

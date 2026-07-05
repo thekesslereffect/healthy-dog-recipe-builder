@@ -71,17 +71,17 @@ export function DogCard({ dog, index, unit, dailyCalories, onChange }: DogCardPr
           }}
         />
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-black dark:text-zinc-50">
+          <p className="truncate text-sm font-semibold text-foreground">
             {displayName}
           </p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs text-muted">
             {dog.weight > 0 ? `${Math.round(dailyCalories)} cal/day` : 'Add weight for calories'}
           </p>
           {dog.avatar ? (
             <button
               type="button"
               onClick={() => onChange('avatar', undefined)}
-              className="mt-1 text-xs font-medium text-zinc-400 hover:text-black dark:hover:text-zinc-50"
+              className="mt-1 text-xs font-semibold text-muted hover:text-accent"
             >
               Remove photo
             </button>
@@ -89,7 +89,7 @@ export function DogCard({ dog, index, unit, dailyCalories, onChange }: DogCardPr
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="mt-1 text-xs font-medium text-zinc-400 hover:text-black dark:hover:text-zinc-50"
+              className="mt-1 text-xs font-semibold text-muted hover:text-accent"
             >
               Add photo
             </button>
@@ -132,7 +132,7 @@ export function DogCard({ dog, index, unit, dailyCalories, onChange }: DogCardPr
 
       <div>
         <span className={fieldLabel}>Daily calories</span>
-        <div className="w-full rounded-xl bg-zinc-50 px-3.5 py-2.5 text-sm font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+        <div className="w-full rounded-xl bg-surface-muted px-3.5 py-2.5 text-sm font-semibold text-muted">
           {dog.weight > 0 ? `${Math.round(dailyCalories)} cal` : '—'}
         </div>
       </div>
@@ -163,7 +163,7 @@ export function DogCard({ dog, index, unit, dailyCalories, onChange }: DogCardPr
           onAdd={addAllergy}
           onRemove={removeAllergy}
         />
-        <p className="mt-1.5 text-xs text-zinc-400">Excluded from recipes for the whole pack.</p>
+        <p className="mt-1.5 text-xs text-muted">Excluded from recipes for the whole pack.</p>
       </div>
     </div>
   );

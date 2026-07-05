@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import { Nunito } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-// Nunito reads heavier than geometric sans at the same numeric weight —
-// we load 400–700 and prefer medium/semibold in the UI.
-const nunito = Nunito({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-nunito",
+  variable: "--font-jakarta",
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
@@ -15,11 +13,11 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "Healthy Dog Recipe Builder",
+  title: "Paws & Portions — Healthy Dog Recipe Builder",
   description:
     "Build balanced, vet-informed homemade meals for your dogs — calorie, portion and shopping calculations included.",
   openGraph: {
-    title: "Healthy Dog Recipe Builder",
+    title: "Paws & Portions",
     description:
       "Balanced meals, portions & shopping lists for your dogs.",
     type: "website",
@@ -45,7 +43,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${nunito.variable} font-sans antialiased`}>
+      <body className={`${jakarta.variable} font-sans antialiased`}>
         {children}
       </body>
     </html>

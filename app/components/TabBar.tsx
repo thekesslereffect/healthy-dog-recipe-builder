@@ -18,7 +18,7 @@ export function TopTabs({ tabs, active, onChange }: TabBarProps) {
   return (
     <nav
       aria-label="Sections"
-      className="hidden shrink-0 rounded-xl bg-zinc-100 p-0.5 dark:bg-zinc-800 sm:inline-flex print:hidden"
+      className="hidden shrink-0 rounded-2xl bg-surface-muted p-1 shadow-[var(--shadow-sm)] sm:inline-flex print:hidden"
     >
       {tabs.map((tab) => {
         const Icon = tab.icon;
@@ -29,13 +29,13 @@ export function TopTabs({ tabs, active, onChange }: TabBarProps) {
             type="button"
             aria-current={isActive ? 'page' : undefined}
             onClick={() => onChange(tab.id)}
-            className={`inline-flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-semibold transition-all ${
               isActive
-                ? 'bg-white text-black shadow-sm dark:bg-zinc-700 dark:text-zinc-50 dark:shadow-none'
-                : 'text-zinc-500 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50'
+                ? 'bg-surface text-foreground shadow-[var(--shadow-sm)]'
+                : 'text-muted hover:text-foreground'
             }`}
           >
-            <Icon size={15} />
+            <Icon size={15} strokeWidth={isActive ? 2.5 : 2} />
             {tab.label}
           </button>
         );
@@ -48,10 +48,9 @@ export function BottomTabs({ tabs, active, onChange }: TabBarProps) {
   return (
     <nav
       aria-label="Sections"
-      className="shrink-0 border-t border-zinc-200/80 bg-white/95 backdrop-blur-lg dark:border-zinc-800 dark:bg-zinc-950/95 sm:hidden print:hidden"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      className="shrink-0 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 sm:hidden print:hidden"
     >
-      <div className="flex">
+      <div className="flex items-center justify-around rounded-2xl border border-border bg-surface/90 px-2 py-1.5 shadow-[var(--shadow-float)] backdrop-blur-xl">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = tab.id === active;
@@ -61,12 +60,19 @@ export function BottomTabs({ tabs, active, onChange }: TabBarProps) {
               type="button"
               aria-current={isActive ? 'page' : undefined}
               onClick={() => onChange(tab.id)}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium ${
-                isActive ? 'text-black dark:text-zinc-50' : 'text-zinc-400'
+              className={`relative flex flex-1 flex-col items-center gap-0.5 rounded-xl py-2 text-[10px] font-semibold transition-all ${
+                isActive ? 'text-accent' : 'text-muted'
               }`}
             >
-              <Icon size={20} strokeWidth={isActive ? 2.4 : 2} />
-              {tab.label}
+              {isActive && (
+                <span className="absolute inset-0 rounded-xl bg-accent-soft" aria-hidden />
+              )}
+              <Icon
+                size={20}
+                strokeWidth={isActive ? 2.5 : 2}
+                className="relative z-10"
+              />
+              <span className="relative z-10">{tab.label}</span>
             </button>
           );
         })}

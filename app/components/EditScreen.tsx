@@ -17,7 +17,6 @@ interface EditScreenProps {
   onBalance?: () => void;
 }
 
-/** Edit an existing plan — swap ingredients, then Save. No reroll. */
 export function EditScreen({
   planName,
   editRecipe,
@@ -32,8 +31,8 @@ export function EditScreen({
   onBalance,
 }: EditScreenProps) {
   return (
-    <div className="flex h-full min-h-0 flex-col gap-2">
-      <div className="min-h-0 flex-1 overflow-hidden">
+    <div className="flex h-full min-h-0 flex-col gap-3">
+      <div className="min-h-0 flex-1 px-0.5">
         <DailyRecipePanel
           recipe={editRecipe}
           ratios={ratios}
@@ -47,20 +46,20 @@ export function EditScreen({
         />
       </div>
 
-      <div className="shrink-0 space-y-2 rounded-2xl border border-zinc-100 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="shrink-0 space-y-2.5 rounded-2xl border border-border bg-surface p-4 shadow-[var(--shadow-md)]">
         <input
           type="text"
           value={planName}
           disabled
           aria-label="Plan name"
-          className={`${inputBase} disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-600 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-400`}
+          className={`${inputBase} disabled:cursor-not-allowed disabled:opacity-60`}
         />
         <div className="flex gap-2">
           <button type="button" onClick={onCancel} className={`${btnSecondary} flex-1`}>
             Cancel
           </button>
           <button type="button" onClick={onSave} className={`${btnPrimary} flex-[1.4]`}>
-            Save
+            Save changes
           </button>
         </div>
       </div>

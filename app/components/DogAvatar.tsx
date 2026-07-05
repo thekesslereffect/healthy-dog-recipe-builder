@@ -22,7 +22,7 @@ export function DogAvatar({ name, avatar, size = 'md', className = '' }: DogAvat
       <img
         src={avatar}
         alt=""
-        className={`${dim} shrink-0 rounded-full object-cover ring-2 ring-white ${className}`}
+        className={`${dim} shrink-0 rounded-full object-cover ring-2 ring-surface shadow-[var(--shadow-sm)] ${className}`}
       />
     );
   }
@@ -30,7 +30,7 @@ export function DogAvatar({ name, avatar, size = 'md', className = '' }: DogAvat
   return (
     <span
       aria-hidden="true"
-      className={`${dim} inline-flex shrink-0 items-center justify-center rounded-full font-medium ring-2 ring-white dark:ring-zinc-900 ${avatarColorClass(label)} ${className}`}
+      className={`${dim} inline-flex shrink-0 items-center justify-center rounded-full font-semibold shadow-[var(--shadow-sm)] ring-2 ring-surface ${avatarColorClass(label)} ${className}`}
     >
       {initials(label)}
     </span>

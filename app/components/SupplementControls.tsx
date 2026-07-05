@@ -28,12 +28,12 @@ function ToggleRow({
   return (
     <label
       htmlFor={id}
-      className={`flex cursor-pointer items-start gap-2.5 rounded-xl border px-2.5 py-2 ${
+      className={`flex cursor-pointer items-start gap-2.5 rounded-xl border px-3 py-2.5 transition-colors ${
         disabled
-          ? 'cursor-not-allowed border-zinc-100 opacity-50 dark:border-zinc-800'
+          ? 'cursor-not-allowed border-border opacity-50'
           : checked
-            ? 'border-zinc-300 bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800/60'
-            : 'border-zinc-100 dark:border-zinc-800'
+            ? 'border-accent/30 bg-accent-soft'
+            : 'border-border hover:border-accent/20'
       }`}
     >
       <input
@@ -42,12 +42,12 @@ function ToggleRow({
         checked={checked}
         disabled={disabled}
         onChange={onToggle}
-        className="mt-0.5 accent-black dark:accent-zinc-100"
+        className="mt-0.5 accent-accent"
       />
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-medium text-black dark:text-zinc-50">{label}</span>
+        <span className="block text-sm font-semibold text-foreground">{label}</span>
         {description && (
-          <span className="mt-0.5 block text-[11px] leading-snug text-zinc-500 dark:text-zinc-400">
+          <span className="mt-0.5 block text-[11px] leading-snug text-muted">
             {description}
           </span>
         )}

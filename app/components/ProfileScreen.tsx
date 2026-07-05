@@ -2,8 +2,8 @@ import { useState } from 'react';
 import type { Dog } from '../utils/recipeCalculator';
 import { calculateDailyCalories } from '../utils/recipeCalculator';
 import { weightUnitLabel, type WeightUnit } from '../utils/format';
-import { btnPrimary, btnSecondary, segmentBtn, segmentTrack } from './ui';
-import { Plus } from 'lucide-react';
+import { btnPrimary, btnSecondary, cardElevated, scrollShadowRoom, segmentBtn, segmentTrack } from './ui';
+import { ChevronRight, Plus } from 'lucide-react';
 import { DogCard } from './DogCard';
 import { DogAvatar } from './DogAvatar';
 import { Disclaimer } from './Disclaimer';
@@ -36,10 +36,14 @@ export function ProfileScreen({
     (editingIndex !== null ? `Dog ${editingIndex + 1}` : 'Dog');
 
   const closeEditor = () => setEditingIndex(null);
+  const totalCalories = dogs.reduce(
+    (sum, d) => sum + (d.weight > 0 ? calculateDailyCalories(d) : 0),
+    0,
+  );
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex shrink-0 items-center justify-between gap-2 pb-2">
+      <div className="flex shrink-0 items-center justify-between gap-2 pb-3">
         <div className={segmentTrack}>
           {(['lb', 'kg'] as const).map((u) => (
             <button
@@ -55,15 +59,24 @@ export function ProfileScreen({
         <button
           type="button"
           onClick={onAddDog}
-          className="inline-flex items-center gap-1 rounded-xl bg-black px-3 py-2 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-3.5 py-2 text-sm font-semibold text-white shadow-[var(--shadow-sm)] transition-all hover:bg-[var(--accent-hover)] active:scale-[0.98]"
         >
           <Plus size={14} />
-          Add
+          Add dog
         </button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        <div className="grid grid-cols-2 gap-2">
+      {dogs.length > 0 && totalCalories > 0 && (
+        <div className="mb-3 flex shrink-0 items-center justify-between rounded-2xl bg-sage-soft px-4 py-3">
+          <span className="text-xs font-semibold text-sage">Pack daily calories</span>
+          <span className="text-lg font-bold tabular-nums text-sage">
+            {Math.round(totalCalories)}
+          </span>
+        </div>
+      )}
+
+      <div className={`${scrollShadowRoom} min-h-0 flex-1`}>
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {dogs.map((dog, index) => {
             const name = dog.name?.trim() || `Dog ${index + 1}`;
             const cal = dog.weight > 0 ? Math.round(calculateDailyCalories(dog)) : null;
@@ -73,18 +86,19 @@ export function ProfileScreen({
                 key={dog.id ?? index}
                 type="button"
                 onClick={() => setEditingIndex(index)}
-                className="flex min-w-0 items-center gap-2.5 rounded-2xl border border-zinc-100 bg-white px-3 py-3 text-left dark:border-zinc-800 dark:bg-zinc-900"
+                className={`${cardElevated} flex min-w-0 items-center gap-3 text-left active:scale-[0.98]`}
               >
                 <DogAvatar name={name} avatar={dog.avatar} size="md" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-black dark:text-zinc-50">
+                  <p className="truncate text-sm font-semibold text-foreground">
                     {name}
                   </p>
-                  <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="truncate text-xs text-muted">
                     {cal !== null ? `${cal} cal/day` : 'Needs weight'}
                     {allergyCount > 0 ? ` · ${allergyCount} avoid` : ''}
                   </p>
                 </div>
+                <ChevronRight size={16} className="shrink-0 text-muted" />
               </button>
             );
           })}
@@ -93,9 +107,10 @@ export function ProfileScreen({
         <button
           type="button"
           onClick={() => setAboutOpen(true)}
-          className="mt-2 w-full rounded-2xl border border-zinc-100 bg-white px-3 py-3 text-left text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
+          className={`${cardElevated} mt-3 flex w-full items-center justify-between px-4 py-3.5 text-left text-sm text-muted`}
         >
-          About this tool ›
+          <span>About this tool</span>
+          <ChevronRight size={16} />
         </button>
       </div>
 
@@ -112,7 +127,7 @@ export function ProfileScreen({
                   onRemoveDog(editingIndex);
                   closeEditor();
                 }}
-                className="mr-auto text-sm font-medium text-red-600 hover:text-red-700"
+                className="mr-auto text-sm font-semibold text-red-500 hover:text-red-600"
               >
                 Remove dog
               </button>
@@ -139,11 +154,11 @@ export function ProfileScreen({
 
       <Sheet open={aboutOpen} title="About this tool" onClose={() => setAboutOpen(false)} size="md">
         <Disclaimer />
-        <p className="mt-4 text-xs leading-relaxed text-zinc-400">
+        <p className="mt-4 text-xs leading-relaxed text-muted">
           Calories: RER = 70 × kg<sup>0.75</sup> × activity factor. Calcium: 1.25 mg/kcal (AAFCO
           2016). Food values from USDA FoodData Central.
         </p>
-        <p className="mt-2 text-sm text-zinc-400">Created by — Your Husband</p>
+        <p className="mt-2 text-sm text-muted">Created by — Your Husband</p>
         <button
           type="button"
           onClick={() => setAboutOpen(false)}

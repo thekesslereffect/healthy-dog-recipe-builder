@@ -55,18 +55,18 @@ export function AllergyInput({ value, suggestions, onAdd, onRemove }: AllergyInp
 
   return (
     <div className="relative">
-      <div className="flex flex-wrap items-center gap-1.5 rounded-lg bg-zinc-50 px-2 py-2 focus-within:bg-white focus-within:ring-1 focus-within:ring-zinc-300 dark:bg-zinc-800 dark:focus-within:bg-zinc-900 dark:focus-within:ring-zinc-600">
+      <div className="flex flex-wrap items-center gap-1.5 rounded-xl bg-surface-muted px-2.5 py-2 focus-within:bg-surface focus-within:ring-2 focus-within:ring-accent/15">
         {value.map((name) => (
           <span
             key={name}
-            className="inline-flex items-center gap-1 rounded-md bg-zinc-200 py-0.5 pl-2 pr-1 text-xs font-medium text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100"
+            className="inline-flex items-center gap-1 rounded-lg bg-accent-soft py-0.5 pl-2 pr-1 text-xs font-semibold text-accent"
           >
             {name}
             <button
               type="button"
               onClick={() => onRemove(name)}
               aria-label={`Remove ${name}`}
-              className="inline-flex h-4 w-4 items-center justify-center rounded text-zinc-500 hover:bg-zinc-300 hover:text-black dark:hover:bg-zinc-600 dark:hover:text-zinc-50"
+              className="inline-flex h-4 w-4 items-center justify-center rounded text-accent/70 hover:bg-accent/10 hover:text-accent"
             >
               <X size={11} />
             </button>
@@ -80,7 +80,7 @@ export function AllergyInput({ value, suggestions, onAdd, onRemove }: AllergyInp
           aria-controls={listId}
           aria-autocomplete="list"
           placeholder={value.length ? 'Add another…' : 'Type an ingredient…'}
-          className="min-w-[7rem] flex-1 bg-transparent px-1 py-0.5 text-base text-black outline-none placeholder:text-zinc-400 dark:text-zinc-50"
+          className="min-w-[7rem] flex-1 bg-transparent px-1 py-0.5 text-base text-foreground outline-none placeholder:text-muted/60"
           onChange={(e) => {
             setQuery(e.target.value);
             setOpen(true);
@@ -98,7 +98,7 @@ export function AllergyInput({ value, suggestions, onAdd, onRemove }: AllergyInp
         <ul
           id={listId}
           role="listbox"
-          className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
+          className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-xl border border-border bg-surface py-1 shadow-[var(--shadow-lg)]"
           onMouseDown={() => {
             if (blurTimer.current) clearTimeout(blurTimer.current);
           }}
@@ -111,8 +111,8 @@ export function AllergyInput({ value, suggestions, onAdd, onRemove }: AllergyInp
                 onMouseEnter={() => setHighlight(index)}
                 className={`block w-full px-3 py-1.5 text-left text-sm ${
                   index === highlight
-                    ? 'bg-zinc-100 text-black dark:bg-zinc-800 dark:text-zinc-50'
-                    : 'text-zinc-700 dark:text-zinc-300'
+                    ? 'bg-accent-soft text-foreground'
+                    : 'text-muted'
                 }`}
               >
                 {name}
