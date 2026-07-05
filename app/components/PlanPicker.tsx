@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { formatSavedAt, type SavedRecipe } from '../utils/savedRecipes';
-import { btnSecondary } from './ui';
+import { Button, ButtonRow } from './ui';
 import { Check, ChevronDown, Plus, Trash2 } from 'lucide-react';
 import { Sheet } from './Sheet';
 
@@ -190,22 +190,14 @@ export function PlanPicker({
           Delete <span className="font-semibold text-foreground">"{pendingDelete?.name}"</span>?
           This can't be undone.
         </p>
-        <div className="mt-5 flex gap-2">
-          <button
-            type="button"
-            onClick={() => setPendingDelete(null)}
-            className={`${btnSecondary} flex-1`}
-          >
+        <ButtonRow className="mt-5">
+          <Button variant="secondary" onClick={() => setPendingDelete(null)} className="flex-1">
             Cancel
-          </button>
-          <button
-            type="button"
-            onClick={confirmDelete}
-            className="flex-1 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-red-600 active:scale-[0.98]"
-          >
+          </Button>
+          <Button variant="danger" onClick={confirmDelete} className="flex-1">
             Delete
-          </button>
-        </div>
+          </Button>
+        </ButtonRow>
       </Sheet>
     </>
   );

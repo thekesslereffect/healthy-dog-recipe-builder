@@ -12,17 +12,12 @@ import { defaultMassUnit, MASS_UNITS, massUnitLabel } from '../utils/format';
 import type { ShoppingMassUnitMode } from '../utils/shoppingMassUnit';
 
 import {
-  btnPrimary,
-  btnSecondary,
-  emptyIconWrap,
-  iconBtn,
-  segmentBtn,
-  segmentTrack,
-  stepperBtn,
-  stepperReadout,
-  stepperReadoutLabel,
-  stepperReadoutValue,
-  toolbarUnitSelect,
+  Button,
+  EmptyState,
+  Segment,
+  SegmentControl,
+  Select,
+  Stepper,
 } from './ui';
 
 import {
@@ -100,21 +95,16 @@ export function HomePlan({
   const [pane, setPane] = useState<PlanPane>('shop');
   if (!recipe) {
     return (
-      <div className="flex h-full min-h-0 flex-col items-center justify-center px-4 text-center print:hidden">
-        <div className={emptyIconWrap}>
-          {hasDraft ? <Sparkles size={28} /> : <CookingPot size={28} />}
-        </div>
-
-        <h2 className="mt-5 text-xl font-bold tracking-tight text-foreground">
-          {hasDraft ? 'Almost there!' : 'Your kitchen awaits'}
-        </h2>
-
-        <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted">
-          {hasDraft
+      <EmptyState
+        className="h-full min-h-0 print:hidden"
+        icon={hasDraft ? <Sparkles size={28} /> : <CookingPot size={28} />}
+        title={hasDraft ? 'Almost there!' : 'Your kitchen awaits'}
+        description={
+          hasDraft
             ? 'Name and confirm your draft to unlock shopping and feeding guides.'
-            : 'Pick a saved plan from the menu above, or create a new one.'}
-        </p>
-
+            : 'Pick a saved plan from the menu above, or create a new one.'
+        }
+      >
         {dogsWithMER.length > 0 && (
           <div className="mt-6 flex items-center -space-x-2">
             {dogsWithMER.slice(0, 4).map((dog) => (
@@ -136,26 +126,23 @@ export function HomePlan({
         )}
 
         <div className="mt-8 flex w-full max-w-xs flex-col gap-2.5">
-          <button
-            type="button"
+          <Button
             onClick={onGoBuild}
             disabled={!canGenerate && !hasDraft}
-            className={`${btnPrimary} inline-flex items-center justify-center gap-2 py-3`}
+            className="inline-flex items-center justify-center gap-2 py-3"
           >
             <SlidersHorizontal size={16} />
-
             {hasDraft ? 'Finish draft' : 'Build a plan'}
-
             <ArrowRight size={14} className="opacity-70" />
-          </button>
+          </Button>
 
           {hasInvalidDog && (
-            <button type="button" onClick={onGoProfile} className={btnSecondary}>
+            <Button variant="secondary" onClick={onGoProfile}>
               Set up your dogs first
-            </button>
+            </Button>
           )}
         </div>
-      </div>
+      </EmptyState>
     );
   }
   const shoppingList = calculateShoppingList(recipe, numberOfDays);
@@ -183,57 +170,33 @@ export function HomePlan({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 items-center gap-1.5 pb-1.5 print:hidden">
-        <div className={segmentTrack}>
-          <button
-            type="button"
-            className={segmentBtn(pane === 'shop')}
-            onClick={() => setPane('shop')}
-          >
+        <SegmentControl>
+          <Segment active={pane === 'shop'} onClick={() => setPane('shop')}>
             Shop
-          </button>
-
-          <button
-            type="button"
-            className={segmentBtn(pane === 'feed')}
-            onClick={() => setPane('feed')}
-          >
+          </Segment>
+          <Segment active={pane === 'feed'} onClick={() => setPane('feed')}>
             Feed
-          </button>
-        </div>
+          </Segment>
+        </SegmentControl>
 
         <div className="ml-auto flex flex-wrap items-center justify-end gap-1.5">
           {pane === 'shop' ? (
             <>
-              <div className={segmentTrack}>
-                <button
-                  type="button"
-                  aria-label="Fewer days"
-                  className={stepperBtn}
-                  onClick={() => onDaysChange(Math.max(1, numberOfDays - 1))}
-                >
-                  −
-                </button>
+              <Stepper
+                value={numberOfDays}
+                label="Days"
+                min={1}
+                max={30}
+                decrementLabel="Fewer days"
+                incrementLabel="More days"
+                onChange={onDaysChange}
+              />
 
-                <span className={stepperReadout}>
-                  <span className={stepperReadoutValue}>{numberOfDays}</span>
-                  <span className={stepperReadoutLabel}>Days</span>
-                </span>
-
-                <button
-                  type="button"
-                  aria-label="More days"
-                  className={stepperBtn}
-                  onClick={() => onDaysChange(Math.min(30, numberOfDays + 1))}
-                >
-                  +
-                </button>
-              </div>
-
-              <select
+              <Select
+                variant="toolbar"
                 value={shoppingUnitMode}
                 onChange={(e) => applyShoppingUnitMode(e.target.value as ShoppingMassUnitMode)}
                 aria-label="Shopping list units"
-                className={toolbarUnitSelect}
               >
                 <option value="auto">Auto</option>
                 {MASS_UNITS.map((massUnit) => (
@@ -241,47 +204,32 @@ export function HomePlan({
                     {massUnitLabel(massUnit)}
                   </option>
                 ))}
-              </select>
+              </Select>
             </>
           ) : (
             <>
-              <div className={segmentTrack}>
-                <button
-                  type="button"
-                  aria-label="Fewer meals per day"
-                  className={stepperBtn}
-                  onClick={() => onMealsChange(Math.max(1, mealsPerDay - 1))}
-                >
-                  −
-                </button>
+              <Stepper
+                value={mealsPerDay}
+                label="Meals / Day"
+                min={1}
+                max={3}
+                decrementLabel="Fewer meals per day"
+                incrementLabel="More meals per day"
+                onChange={onMealsChange}
+              />
 
-                <span className={stepperReadout}>
-                  <span className={stepperReadoutValue}>{mealsPerDay}</span>
-                  <span className={stepperReadoutLabel}>Meals / Day</span>
-                </span>
-
-                <button
-                  type="button"
-                  aria-label="More meals per day"
-                  className={stepperBtn}
-                  onClick={() => onMealsChange(Math.min(3, mealsPerDay + 1))}
-                >
-                  +
-                </button>
-              </div>
-
-              <select
+              <Select
+                variant="toolbar"
                 value={portionGlobalUnit}
                 onChange={(e) => setAllPortionUnits(e.target.value as MassUnit)}
                 aria-label="Portion units"
-                className={toolbarUnitSelect}
               >
                 {MASS_UNITS.map((massUnit) => (
                   <option key={massUnit} value={massUnit}>
                     {massUnitLabel(massUnit)}
                   </option>
                 ))}
-              </select>
+              </Select>
             </>
           )}
         </div>
@@ -311,28 +259,23 @@ export function HomePlan({
           )}
 
           <div className="flex shrink-0 items-center gap-0.5">
-            <button type="button" onClick={onGoEdit} className={iconBtn} aria-label="Edit plan">
+            <Button variant="icon" onClick={onGoEdit} aria-label="Edit plan">
               <Pencil size={16} />
-            </button>
+            </Button>
 
-            <button
-              type="button"
+            <Button
+              variant="icon"
               onClick={onCopy}
-              className={`${iconBtn} ${copied ? 'bg-sage-soft text-sage' : ''}`}
+              className={copied ? 'bg-sage-soft text-sage' : undefined}
               aria-label={copied ? 'Copied' : 'Copy'}
               title={copied ? 'Copied!' : 'Copy recipe'}
             >
               {copied ? <Check size={16} /> : <Copy size={16} />}
-            </button>
+            </Button>
 
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className={iconBtn}
-              aria-label="Print"
-            >
+            <Button variant="icon" onClick={() => window.print()} aria-label="Print">
               <Printer size={16} />
-            </button>
+            </Button>
           </div>
         </div>
       )}

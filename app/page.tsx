@@ -33,8 +33,8 @@ import { EditScreen } from './components/EditScreen';
 import { ProfileScreen } from './components/ProfileScreen';
 import { PlanPicker } from './components/PlanPicker';
 import type { ScreenId } from './components/TabBar';
-import { User, Sun, Moon, ArrowLeft } from 'lucide-react';
-import { iconBtn } from './components/ui';
+import { ArrowLeft, Sun, Moon, User } from 'lucide-react';
+import { Button } from './components/ui';
 
 type Theme = 'light' | 'dark';
 
@@ -530,9 +530,9 @@ export default function Home() {
         <div className="min-w-0 flex-1">
           {activeScreen === 'profile' ? (
             <div className="flex items-center gap-1">
-              <button type="button" onClick={closeProfile} className={iconBtn} aria-label="Back">
+              <Button variant="icon" onClick={closeProfile} aria-label="Back">
                 <ArrowLeft size={18} />
-              </button>
+              </Button>
               <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl print:text-2xl print:text-black">
                 Profile
               </h1>
@@ -554,23 +554,22 @@ export default function Home() {
           </h1>
         </div>
         <div className="flex shrink-0 items-center gap-1.5 print:hidden sm:gap-2">
-          <button
-            type="button"
+          <Button
+            variant="icon"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            className={iconBtn}
           >
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="icon"
             onClick={() => (activeScreen === 'profile' ? closeProfile() : openProfile())}
             aria-label={activeScreen === 'profile' ? 'Close profile' : 'Profile'}
             aria-current={activeScreen === 'profile' ? 'page' : undefined}
-            className={`${iconBtn} ${activeScreen === 'profile' ? 'bg-accent-soft text-accent' : ''}`}
+            className={activeScreen === 'profile' ? 'bg-accent-soft text-accent' : undefined}
           >
             <User size={18} />
-          </button>
+          </Button>
         </div>
       </header>
 

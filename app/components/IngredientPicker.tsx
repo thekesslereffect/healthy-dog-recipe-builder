@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Sheet } from './Sheet';
-import { inputBase } from './ui';
+import { Input } from './ui';
 
 export interface IngredientPickerOption {
   name: string;
@@ -73,7 +73,7 @@ export function IngredientPicker({
           </p>
         )}
 
-        <input
+        <Input
           type="search"
           value={query}
           enterKeyHint="search"
@@ -83,7 +83,7 @@ export function IngredientPicker({
           spellCheck={false}
           placeholder="Filter ingredients…"
           aria-label="Filter ingredients"
-          className={`${inputBase} shrink-0 text-base`}
+          className="shrink-0 text-base"
           onChange={(e) => setQuery(e.target.value)}
         />
 

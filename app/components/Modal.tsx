@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { Button } from './ui';
 
 interface ModalProps {
   open: boolean;
@@ -42,14 +43,9 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
       >
         <div className="flex shrink-0 items-center justify-between px-5 py-4">
           <h2 className="text-lg font-bold tracking-tight text-foreground">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-muted transition-all hover:bg-surface-muted hover:text-foreground"
-            aria-label="Close"
-          >
+          <Button variant="icon" onClick={onClose} aria-label="Close">
             <X size={18} />
-          </button>
+          </Button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5">{children}</div>
         {footer && (

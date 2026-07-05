@@ -1,6 +1,6 @@
 import type { Dog } from '../utils/recipeCalculator';
 import { convertMass, defaultMassUnit, MASS_UNITS, massUnitLabel, type MassUnit, type WeightUnit } from '../utils/format';
-import { scrollShadowRoom, massUnitSelect, segmentTrack, stepperBtn, stepperReadout, stepperReadoutLabel, stepperReadoutValue, toolbarUnitSelect } from './ui';
+import { scrollShadowRoom, Select, Stepper } from './ui';
 import { DogAvatar } from './DogAvatar';
 
 interface Portion {
@@ -47,42 +47,27 @@ export function MealPortionsPanel({
     <div className="flex h-full min-h-0 flex-col">
       {showToolbar && (
         <div className="flex shrink-0 items-center justify-between gap-2 pb-3 print:hidden">
-          <div className={segmentTrack}>
-            <button
-              type="button"
-              aria-label="Fewer meals per day"
-              className={stepperBtn}
-              onClick={() => onMealsChange(Math.max(1, mealsPerDay - 1))}
-            >
-              −
-            </button>
-
-            <span className={stepperReadout}>
-              <span className={stepperReadoutValue}>{mealsPerDay}</span>
-              <span className={stepperReadoutLabel}>Meals / Day</span>
-            </span>
-
-            <button
-              type="button"
-              aria-label="More meals per day"
-              className={stepperBtn}
-              onClick={() => onMealsChange(Math.min(3, mealsPerDay + 1))}
-            >
-              +
-            </button>
-          </div>
-          <select
+          <Stepper
+            value={mealsPerDay}
+            label="Meals / Day"
+            min={1}
+            max={3}
+            decrementLabel="Fewer meals per day"
+            incrementLabel="More meals per day"
+            onChange={onMealsChange}
+          />
+          <Select
+            variant="toolbar"
             value={globalUnit}
             onChange={(e) => setAllPortionUnits(e.target.value as MassUnit)}
             aria-label="Portion units"
-            className={toolbarUnitSelect}
           >
             {MASS_UNITS.map((u) => (
               <option key={u} value={u}>
                 {massUnitLabel(u)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       )}
 
@@ -124,7 +109,8 @@ export function MealPortionsPanel({
                     </span>
                   </div>
                 </div>
-                <select
+                <Select
+                  variant="mass"
                   value={pu}
                   onChange={(e) =>
                     onPortionUnitsChange({
@@ -133,14 +119,14 @@ export function MealPortionsPanel({
                     })
                   }
                   aria-label={`Units for ${dogName}`}
-                  className={`${massUnitSelect} shrink-0`}
+                  className="shrink-0"
                 >
                   {MASS_UNITS.map((option) => (
                     <option key={option} value={option}>
                       {massUnitLabel(option)}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
             </div>
           );

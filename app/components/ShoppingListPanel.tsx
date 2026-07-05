@@ -10,7 +10,7 @@ import {
 
 import { resolveShoppingMassUnit, type ShoppingMassUnitMode } from '../utils/shoppingMassUnit';
 
-import { scrollShadowRoom, massUnitSelect, segmentTrack, stepperBtn, stepperReadout, stepperReadoutLabel, stepperReadoutValue, toolbarUnitSelect } from './ui';
+import { scrollShadowRoom, Select, Stepper } from './ui';
 
 interface ShoppingListPanelProps {
   shoppingList: ShoppingList;
@@ -58,36 +58,21 @@ export function ShoppingListPanel({
     <div className="flex h-full min-h-0 flex-col">
       {showToolbar && (
         <div className="flex shrink-0 items-center justify-between gap-2 pb-3 print:hidden">
-          <div className={segmentTrack}>
-            <button
-              type="button"
-              aria-label="Fewer days"
-              className={stepperBtn}
-              onClick={() => onDaysChange(Math.max(1, numberOfDays - 1))}
-            >
-              −
-            </button>
+          <Stepper
+            value={numberOfDays}
+            label="Days"
+            min={1}
+            max={30}
+            decrementLabel="Fewer days"
+            incrementLabel="More days"
+            onChange={onDaysChange}
+          />
 
-            <span className={stepperReadout}>
-              <span className={stepperReadoutValue}>{numberOfDays}</span>
-              <span className={stepperReadoutLabel}>Days</span>
-            </span>
-
-            <button
-              type="button"
-              aria-label="More days"
-              className={stepperBtn}
-              onClick={() => onDaysChange(Math.min(30, numberOfDays + 1))}
-            >
-              +
-            </button>
-          </div>
-
-          <select
+          <Select
+            variant="toolbar"
             value={shoppingUnitMode}
             onChange={(e) => applyUnitMode(e.target.value as ShoppingMassUnitMode)}
             aria-label="Shopping list units"
-            className={toolbarUnitSelect}
           >
             <option value="auto">Auto</option>
             {MASS_UNITS.map((u) => (
@@ -95,7 +80,7 @@ export function ShoppingListPanel({
                 {massUnitLabel(u)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       )}
 
@@ -162,18 +147,18 @@ export function ShoppingListPanel({
                   </span>
                 </span>
 
-                <select
+                <Select
+                  variant="mass"
                   value={u}
                   onChange={(e) => setUnitFor(name, e.target.value as MassUnit)}
                   aria-label={`Units for ${name}`}
-                  className={massUnitSelect}
                 >
                   {MASS_UNITS.map((option) => (
                     <option key={option} value={option}>
                       {massUnitLabel(option)}
                     </option>
                   ))}
-                </select>
+                </Select>
               </span>
             </div>
           );

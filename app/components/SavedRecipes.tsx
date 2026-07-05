@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { formatSavedAt, type SavedRecipe } from '../utils/savedRecipes';
 import {
-  btnPrimary,
-  btnSecondary,
-  cardElevated,
-  emptyIconWrap,
-  inputBase,
+  Button,
+  ButtonRow,
+  Card,
+  EmptyState,
+  Input,
   scrollShadowRoom,
 } from './ui';
 import { Bookmark, Calendar, Pencil, Trash2, Users } from 'lucide-react';
@@ -38,17 +38,12 @@ export function SavedRecipes({ saved, onLoad, onDelete, onRename }: SavedRecipes
   };
   if (saved.length === 0) {
     return (
-      <div className="flex h-full flex-col items-center justify-center px-4 text-center">
-        <div className={emptyIconWrap}>
-          <Bookmark size={28} />
-        </div>
-        <h2 className="mt-5 text-xl font-bold tracking-tight text-foreground">
-          No saved plans yet
-        </h2>
-        <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted">
-          Build a draft and confirm it to save your first meal plan here.
-        </p>
-      </div>
+      <EmptyState
+        className="h-full"
+        icon={<Bookmark size={28} />}
+        title="No saved plans yet"
+        description="Build a draft and confirm it to save your first meal plan here."
+      />
     );
   }
   return (
@@ -65,9 +60,9 @@ export function SavedRecipes({ saved, onLoad, onDelete, onRename }: SavedRecipes
             .filter(Boolean)
             .join(', ');
           return (
-            <div key={item.id} className={`${cardElevated} flex h-fit flex-col`}>
+            <Card key={item.id} variant="elevated" className="flex h-fit flex-col">
               {renamingId === item.id ? (
-                <input
+                <Input
                   type="text"
                   value={draft}
                   autoFocus
@@ -78,7 +73,7 @@ export function SavedRecipes({ saved, onLoad, onDelete, onRename }: SavedRecipes
                     else if (e.key === 'Escape') setRenamingId(null);
                   }}
                   aria-label="Recipe name"
-                  className={`${inputBase} font-semibold`}
+                  className="font-semibold"
                 />
               ) : (
                 <button
@@ -105,23 +100,19 @@ export function SavedRecipes({ saved, onLoad, onDelete, onRename }: SavedRecipes
                 {Math.round(item.recipe.totalCalories)} cal/day
               </p>
               <div className="mt-3 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => onLoad(item.id)}
-                  className={`${btnPrimary} flex-1 py-2`}
-                >
+                <Button onClick={() => onLoad(item.id)} className="flex-1 py-2">
                   Open
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  variant="secondary"
                   onClick={() => setPendingDelete(item)}
                   aria-label={`Delete ${item.name}`}
-                  className="inline-flex items-center justify-center rounded-xl bg-surface-muted px-3 text-muted transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30"
+                  className="px-3 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30"
                 >
                   <Trash2 size={15} />
-                </button>
+                </Button>
               </div>
-            </div>
+            </Card>
           );
         })}
       </div>
@@ -141,22 +132,14 @@ export function SavedRecipes({ saved, onLoad, onDelete, onRename }: SavedRecipes
             </span>
           )}
         </p>
-        <div className="mt-5 flex gap-2">
-          <button
-            type="button"
-            onClick={() => setPendingDelete(null)}
-            className={`${btnSecondary} flex-1`}
-          >
+        <ButtonRow className="mt-5">
+          <Button variant="secondary" onClick={() => setPendingDelete(null)} className="flex-1">
             Cancel
-          </button>
-          <button
-            type="button"
-            onClick={confirmDelete}
-            className="flex-1 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-red-600 active:scale-[0.98]"
-          >
+          </Button>
+          <Button variant="danger" onClick={confirmDelete} className="flex-1">
             Delete
-          </button>
-        </div>
+          </Button>
+        </ButtonRow>
       </Sheet>
     </div>
   );

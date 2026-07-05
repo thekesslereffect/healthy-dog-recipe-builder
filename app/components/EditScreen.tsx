@@ -1,7 +1,7 @@
 import type { Category, CategoryRatios } from '../utils/constants';
 import type { Dog, Recipe } from '../utils/recipeCalculator';
 import { DailyRecipePanel } from './DailyRecipePanel';
-import { btnPrimary, btnSecondary, inputBase } from './ui';
+import { Button, ButtonRow, Input } from './ui';
 
 interface EditScreenProps {
   planName: string;
@@ -55,22 +55,21 @@ export function EditScreen({
       </div>
 
       <div className="shrink-0 space-y-2.5 rounded-2xl border border-border bg-surface p-4 shadow-[var(--shadow-md)]">
-        <input
+        <Input
           type="text"
           value={planName}
           onChange={(e) => onPlanNameChange(e.target.value)}
           placeholder="Name your plan…"
           aria-label="Plan name"
-          className={inputBase}
         />
-        <div className="flex gap-2">
-          <button type="button" onClick={onCancel} className={`${btnSecondary} flex-1`}>
+        <ButtonRow>
+          <Button variant="secondary" onClick={onCancel} className="flex-1">
             Cancel
-          </button>
-          <button type="button" onClick={onSave} className={`${btnPrimary} flex-[1.4]`}>
+          </Button>
+          <Button onClick={onSave} className="flex-[1.4]">
             Save changes
-          </button>
-        </div>
+          </Button>
+        </ButtonRow>
       </div>
     </div>
   );

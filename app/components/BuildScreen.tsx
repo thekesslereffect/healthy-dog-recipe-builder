@@ -11,8 +11,8 @@ import { CategoryBar } from './CategoryBar';
 import { DailyRecipePanel } from './DailyRecipePanel';
 import { SupplementControlsPanel, enabledSupplementCount } from './SupplementControls';
 import { Sheet } from './Sheet';
-import { btnPrimary, btnSecondary, inputBase } from './ui';
-import { ChevronRight, Shuffle, Sparkles } from 'lucide-react';
+import { Button, ButtonRow, ConfigChip, Input } from './ui';
+import { Shuffle, Sparkles } from 'lucide-react';
 
 interface BuildScreenProps {
   ratios: CategoryRatios;
@@ -39,30 +39,6 @@ interface BuildScreenProps {
   onRemoveBoost?: (category: Category, name: string) => void;
   onSwapBoost?: (category: Category, oldName: string, newName: string) => void;
   onBalance?: () => void;
-}
-
-function ConfigChip({
-  label,
-  detail,
-  onClick,
-}: {
-  label: string;
-  detail: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex h-9 min-w-0 flex-1 items-center justify-between gap-2 rounded-xl border border-border bg-surface px-3 text-left shadow-[var(--shadow-sm)] active:scale-[0.98]"
-    >
-      <span className="truncate text-sm font-semibold text-foreground">{label}</span>
-      <span className="inline-flex shrink-0 items-center gap-0.5 text-xs font-medium text-muted">
-        {detail}
-        <ChevronRight size={12} />
-      </span>
-    </button>
-  );
 }
 
 export function BuildScreen({
@@ -133,15 +109,14 @@ export function BuildScreen({
               Avoiding: {allergyList.join(', ')}
             </p>
           )}
-          <button
-            type="button"
+          <Button
             onClick={onGenerate}
             disabled={!canGenerate}
-            className={`${btnPrimary} mt-4 inline-flex w-full max-w-xs items-center justify-center gap-2 py-3 sm:mt-6 sm:w-auto`}
+            className="mt-4 inline-flex w-full max-w-xs items-center justify-center gap-2 py-3 sm:mt-6 sm:w-auto"
           >
             <Shuffle size={16} />
             Generate draft
-          </button>
+          </Button>
           {!canGenerate && (
             <p className="mt-2 text-xs text-muted">
               {!isPercentageValid
@@ -171,7 +146,7 @@ export function BuildScreen({
           </div>
 
           <div className="shrink-0 space-y-2 rounded-2xl border border-border bg-surface p-3 shadow-[var(--shadow-md)] sm:space-y-2.5 sm:p-4">
-            <input
+            <Input
               type="text"
               value={draftName}
               onChange={(e) => onDraftNameChange(e.target.value)}
@@ -180,22 +155,21 @@ export function BuildScreen({
               }}
               placeholder="Name your plan…"
               aria-label="Plan name"
-              className={inputBase}
             />
-            <div className="flex gap-2">
-              <button
-                type="button"
+            <ButtonRow>
+              <Button
+                variant="secondary"
                 onClick={onGenerate}
                 disabled={!canGenerate}
-                className={`${btnSecondary} inline-flex flex-1 items-center justify-center gap-1.5`}
+                className="inline-flex flex-1 items-center justify-center gap-1.5"
               >
                 <Shuffle size={15} />
                 Reroll
-              </button>
-              <button type="button" onClick={onConfirm} className={`${btnPrimary} flex-[1.4]`}>
+              </Button>
+              <Button onClick={onConfirm} className="flex-[1.4]">
                 Use this plan
-              </button>
-            </div>
+              </Button>
+            </ButtonRow>
           </div>
         </>
       )}
@@ -272,13 +246,9 @@ export function BuildScreen({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setMixOpen(false)}
-            className={`${btnPrimary} w-full`}
-          >
+          <Button onClick={() => setMixOpen(false)} className="w-full">
             Done
-          </button>
+          </Button>
         </div>
       </Sheet>
 
@@ -288,13 +258,9 @@ export function BuildScreen({
             options={supplementOptions}
             onChange={onSupplementOptionsChange}
           />
-          <button
-            type="button"
-            onClick={() => setSupplementsOpen(false)}
-            className={`${btnPrimary} w-full`}
-          >
+          <Button onClick={() => setSupplementsOpen(false)} className="w-full">
             Done
-          </button>
+          </Button>
         </div>
       </Sheet>
     </div>

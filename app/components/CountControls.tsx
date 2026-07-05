@@ -1,5 +1,5 @@
 import { CATEGORIES, type Category, type CategoryCounts } from '../utils/constants';
-import { card, sectionTitle } from './ui';
+import { Section } from './ui';
 
 interface CountControlsProps {
   counts: CategoryCounts;
@@ -8,9 +8,10 @@ interface CountControlsProps {
 
 export function CountControls({ counts, onChange }: CountControlsProps) {
   return (
-    <section className={card}>
-      <h2 className={sectionTitle}>Ingredients per Category</h2>
-      <p className="mt-1 mb-4 text-sm text-zinc-500">How many items to pick from each group.</p>
+    <Section
+      title="Ingredients per Category"
+      description="How many items to pick from each group."
+    >
       <div className="space-y-4">
         {CATEGORIES.map((category) => {
           const value = counts[category];
@@ -37,6 +38,6 @@ export function CountControls({ counts, onChange }: CountControlsProps) {
           );
         })}
       </div>
-    </section>
+    </Section>
   );
 }

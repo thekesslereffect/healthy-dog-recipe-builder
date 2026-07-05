@@ -3,13 +3,11 @@ import type { Dog } from '../utils/recipeCalculator';
 import { calculateDailyCalories } from '../utils/recipeCalculator';
 import { weightUnitLabel, type WeightUnit } from '../utils/format';
 import {
-  btnPrimary,
-  btnSecondary,
-  cardElevated,
+  Button,
+  CardButton,
   scrollShadowRoom,
-  segmentBtn,
-  segmentTrack,
-  toolbarEditBtn,
+  Segment,
+  SegmentControl,
 } from './ui';
 import { ChevronRight, Plus } from 'lucide-react';
 import { DogCard } from './DogCard';
@@ -52,28 +50,23 @@ export function ProfileScreen({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 items-center gap-2 pb-2">
-        <div className={segmentTrack}>
+        <SegmentControl>
           {(['lb', 'kg'] as const).map((u) => (
-            <button
-              key={u}
-              type="button"
-              className={segmentBtn(unit === u)}
-              onClick={() => onUnitChange(u)}
-            >
+            <Segment key={u} active={unit === u} onClick={() => onUnitChange(u)}>
               {weightUnitLabel(u)}
-            </button>
+            </Segment>
           ))}
-        </div>
+        </SegmentControl>
         {dogs.length > 0 && totalCalories > 0 && (
           <span className="inline-flex h-9 items-center rounded-xl bg-sage-soft px-2.5 text-xs font-semibold tabular-nums text-sage">
             {Math.round(totalCalories)} cal/day
           </span>
         )}
-        <button type="button" onClick={onAddDog} className={`${toolbarEditBtn} ml-auto`}>
+        <Button variant="toolbar" onClick={onAddDog} className="ml-auto">
           <Plus size={14} />
           <span className="hidden sm:inline">Add dog</span>
           <span className="sm:hidden">Add</span>
-        </button>
+        </Button>
       </div>
 
       <div className={`${scrollShadowRoom} min-h-0 flex-1`}>
@@ -83,11 +76,10 @@ export function ProfileScreen({
             const cal = dog.weight > 0 ? Math.round(calculateDailyCalories(dog)) : null;
             const allergyCount = dog.allergies?.length ?? 0;
             return (
-              <button
+              <CardButton
                 key={dog.id ?? index}
-                type="button"
                 onClick={() => setEditingIndex(index)}
-                className={`${cardElevated} flex min-w-0 items-center gap-3 text-left active:scale-[0.98]`}
+                className="flex min-w-0 items-center gap-3 text-left active:scale-[0.98]"
               >
                 <DogAvatar name={name} avatar={dog.avatar} size="md" />
                 <div className="min-w-0 flex-1">
@@ -98,19 +90,18 @@ export function ProfileScreen({
                   </p>
                 </div>
                 <ChevronRight size={16} className="shrink-0 text-muted" />
-              </button>
+              </CardButton>
             );
           })}
         </div>
 
-        <button
-          type="button"
+        <CardButton
           onClick={() => setAboutOpen(true)}
-          className={`${cardElevated} mt-3 flex w-full items-center justify-between px-4 py-3.5 text-left text-sm text-muted`}
+          className="mt-3 flex w-full items-center justify-between px-4 py-3.5 text-left text-sm text-muted"
         >
           <span>About this tool</span>
           <ChevronRight size={16} />
-        </button>
+        </CardButton>
       </div>
 
       <Modal
@@ -131,12 +122,10 @@ export function ProfileScreen({
                 Remove dog
               </button>
             )}
-            <button type="button" onClick={closeEditor} className={btnSecondary}>
+            <Button variant="secondary" onClick={closeEditor}>
               Cancel
-            </button>
-            <button type="button" onClick={closeEditor} className={btnPrimary}>
-              Done
-            </button>
+            </Button>
+            <Button onClick={closeEditor}>Done</Button>
           </>
         }
       >
@@ -158,13 +147,9 @@ export function ProfileScreen({
           2016). Food values from USDA FoodData Central.
         </p>
         <p className="mt-2 text-sm text-muted">Created by — Your Husband</p>
-        <button
-          type="button"
-          onClick={() => setAboutOpen(false)}
-          className={`${btnPrimary} mt-4 w-full`}
-        >
+        <Button onClick={() => setAboutOpen(false)} className="mt-4 w-full">
           Close
-        </button>
+        </Button>
       </Sheet>
     </div>
   );

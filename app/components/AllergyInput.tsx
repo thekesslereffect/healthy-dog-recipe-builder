@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { Sheet } from './Sheet';
-import { inputBase } from './ui';
+import { Input } from './ui';
 
 interface AllergyInputProps {
   value: string[];
@@ -77,7 +77,7 @@ export function AllergyInput({ value, suggestions, onAdd, onRemove }: AllergyInp
         scroll="child"
       >
         <div className="flex min-h-0 flex-1 flex-col gap-3">
-          <input
+          <Input
             type="search"
             value={query}
             enterKeyHint="search"
@@ -87,7 +87,7 @@ export function AllergyInput({ value, suggestions, onAdd, onRemove }: AllergyInp
             spellCheck={false}
             placeholder="Filter ingredients…"
             aria-label="Filter ingredients to avoid"
-            className={`${inputBase} shrink-0`}
+            className="shrink-0"
             onChange={(e) => setQuery(e.target.value)}
           />
 

@@ -9,7 +9,7 @@ import {
   weightUnitLabel,
   type WeightUnit,
 } from '../utils/format';
-import { fieldLabel, inputBase } from './ui';
+import { Field, Input, ReadonlyField, Select } from './ui';
 import { AllergyInput } from './AllergyInput';
 import { DogAvatar } from './DogAvatar';
 
@@ -95,25 +95,18 @@ export function DogCard({ dog, index, unit, dailyCalories, onChange }: DogCardPr
         </div>
       </div>
 
-      <div>
-        <label className={fieldLabel} htmlFor={`dog-name-${index}`}>
-          Name
-        </label>
-        <input
+      <Field label="Name" htmlFor={`dog-name-${index}`}>
+        <Input
           id={`dog-name-${index}`}
           type="text"
           value={dog.name}
           onChange={(e) => onChange('name', e.target.value)}
-          className={inputBase}
           placeholder="Dog name"
         />
-      </div>
+      </Field>
 
-      <div>
-        <label className={fieldLabel} htmlFor={`dog-weight-${index}`}>
-          Weight ({weightUnitLabel(unit)})
-        </label>
-        <input
+      <Field label={`Weight (${weightUnitLabel(unit)})`} htmlFor={`dog-weight-${index}`}>
+        <Input
           id={`dog-weight-${index}`}
           type="number"
           inputMode="decimal"
@@ -123,46 +116,40 @@ export function DogCard({ dog, index, unit, dailyCalories, onChange }: DogCardPr
             const entered = parseFloat(e.target.value);
             onChange('weight', Number.isFinite(entered) ? fromDisplayWeight(entered, unit) : 0);
           }}
-          className={inputBase}
           placeholder={unit === 'kg' ? '16' : '35'}
         />
-      </div>
+      </Field>
 
-      <div>
-        <span className={fieldLabel}>Daily calories</span>
-        <div className="w-full rounded-xl bg-surface-muted px-3.5 py-2.5 text-sm font-semibold text-muted">
-          {dog.weight > 0 ? `${Math.round(dailyCalories)} cal` : '—'}
-        </div>
-      </div>
+      <ReadonlyField
+        label="Daily calories"
+        value={dog.weight > 0 ? `${Math.round(dailyCalories)} cal` : '—'}
+      />
 
-      <div>
-        <label className={fieldLabel} htmlFor={`dog-activity-${index}`}>
-          Activity Level
-        </label>
-        <select
+      <Field label="Activity Level" htmlFor={`dog-activity-${index}`}>
+        <Select
           id={`dog-activity-${index}`}
           value={dog.activityMultiplier}
           onChange={(e) => onChange('activityMultiplier', parseFloat(e.target.value))}
-          className={inputBase}
         >
           {ACTIVITY_LEVELS.map((level) => (
             <option key={level.value} value={level.value}>
               {level.label}
             </option>
           ))}
-        </select>
-      </div>
+        </Select>
+      </Field>
 
-      <div>
-        <span className={fieldLabel}>Allergies / avoid</span>
+      <Field
+        label="Allergies / avoid"
+        hint="Excluded from recipes for the whole pack."
+      >
         <AllergyInput
           value={allergies}
           suggestions={getAllFoodNames()}
           onAdd={addAllergy}
           onRemove={removeAllergy}
         />
-        <p className="mt-1.5 text-xs text-muted">Excluded from recipes for the whole pack.</p>
-      </div>
+      </Field>
     </div>
   );
 }

@@ -7,7 +7,7 @@ import {
   getBoostNutrientGaps,
   isNutritionBoostRow,
 } from '../utils/nutritionBoost';
-import { groupLabel, iconBtn } from './ui';
+import { groupLabel, Button } from './ui';
 import { ArrowLeftRight, Lock, LockOpen, Trash2 } from 'lucide-react';
 import { IngredientPicker, type IngredientPickerOption } from './IngredientPicker';
 import { NutritionSnapshot } from './NutritionSnapshot';
@@ -160,49 +160,49 @@ export function DailyRecipePanel({
                         {isBoost ? (
                           <>
                             {onSwapBoost && (
-                              <button
-                                type="button"
+                              <Button
+                                variant="icon"
                                 aria-label={`Swap ${ingredient.name} boost`}
                                 onClick={() =>
                                   setEditing({ category, name: ingredient.name, boost: true })
                                 }
-                                className={`${iconBtn} h-8 w-8 sm:h-9 sm:w-9`}
+                                className="h-8 w-8 sm:h-9 sm:w-9"
                               >
                                 <ArrowLeftRight size={14} />
-                              </button>
+                              </Button>
                             )}
                             {onRemoveBoost && (
-                              <button
-                                type="button"
+                              <Button
+                                variant="icon"
                                 aria-label={`Remove ${ingredient.name} boost`}
                                 onClick={() => onRemoveBoost(category, ingredient.name)}
-                                className={`${iconBtn} h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600 sm:h-9 sm:w-9`}
+                                className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600 sm:h-9 sm:w-9 dark:hover:bg-red-950/30"
                               >
                                 <Trash2 size={14} />
-                              </button>
+                              </Button>
                             )}
                           </>
                         ) : (
                           <>
-                            <button
-                              type="button"
+                            <Button
+                              variant="icon"
                               aria-label={`Swap ${ingredient.name}`}
                               onClick={() =>
                                 setEditing({ category, name: ingredient.name, boost: false })
                               }
-                              className={`${iconBtn} h-8 w-8 sm:h-9 sm:w-9`}
+                              className="h-8 w-8 sm:h-9 sm:w-9"
                             >
                               <ArrowLeftRight size={14} />
-                            </button>
-                            <button
-                              type="button"
+                            </Button>
+                            <Button
+                              variant="icon"
                               aria-pressed={isLocked}
                               aria-label={`${isLocked ? 'Unlock' : 'Lock'} ${ingredient.name}`}
                               onClick={() => onToggleLock(category, ingredient.name)}
-                              className={`${iconBtn} h-8 w-8 sm:h-9 sm:w-9 ${isLocked ? 'text-accent' : ''}`}
+                              className={`h-8 w-8 sm:h-9 sm:w-9 ${isLocked ? 'text-accent' : ''}`}
                             >
                               {isLocked ? <Lock size={14} /> : <LockOpen size={14} />}
-                            </button>
+                            </Button>
                           </>
                         )}
                       </span>
