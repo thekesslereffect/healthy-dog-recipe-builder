@@ -9,7 +9,7 @@ import {
 
 import type { MassUnit, WeightUnit } from '../utils/format';
 import { defaultMassUnit, MASS_UNITS, massUnitLabel } from '../utils/format';
-import { resolveShoppingMassUnit, type ShoppingMassUnitMode } from '../utils/shoppingMassUnit';
+import type { ShoppingMassUnitMode } from '../utils/shoppingMassUnit';
 
 import {
   btnPrimary,
@@ -19,7 +19,11 @@ import {
   segmentBtn,
   segmentTrack,
   stepperBtn,
+  stepperReadout,
+  stepperReadoutLabel,
+  stepperReadoutValue,
   stepperValue,
+  toolbarUnitSelect,
 } from './ui';
 
 import {
@@ -160,13 +164,16 @@ export function HomePlan({
   const shopEntries = Object.entries(shoppingList);
   const portionEntries = Object.entries(portions);
   const fallbackMassUnit = defaultMassUnit(unit);
-  const shopUnitFor = (name: string): MassUnit =>
-    resolveShoppingMassUnit(name, shoppingUnitMode, shoppingUnits, unit);
-  const portionUnitFor = (name: string): MassUnit => portionUnits[name] ?? fallbackMassUnit;
   const applyShoppingUnitMode = (mode: ShoppingMassUnitMode) => {
     onShoppingUnitModeChange(mode);
     onShoppingUnitsChange({});
   };
+  const portionUnitFor = (name: string): MassUnit => portionUnits[name] ?? fallbackMassUnit;
+  const portionGlobalUnit =
+    portionEntries.length > 0 &&
+    portionEntries.every(([name]) => portionUnitFor(name) === portionUnitFor(portionEntries[0][0]))
+      ? portionUnitFor(portionEntries[0][0])
+      : fallbackMassUnit;
   const setAllPortionUnits = (massUnit: MassUnit) => {
     const next: Record<string, MassUnit> = { ...portionUnits };
     for (const [name] of portionEntries) next[name] = massUnit;
@@ -208,7 +215,10 @@ export function HomePlan({
                   −
                 </button>
 
-                <span className={stepperValue}>{numberOfDays}</span>
+                <span className={stepperReadout}>
+                  <span className={stepperReadoutValue}>{numberOfDays}</span>
+                  <span className={stepperReadoutLabel}>Days</span>
+                </span>
 
                 <button
                   type="button"
@@ -220,59 +230,59 @@ export function HomePlan({
                 </button>
               </div>
 
-              <div className={segmentTrack}>
-                <button
-                  type="button"
-                  className={segmentBtn(shoppingUnitMode === 'auto')}
-                  onClick={() => applyShoppingUnitMode('auto')}
-                >
-                  Auto
-                </button>
-
+              <select
+                value={shoppingUnitMode}
+                onChange={(e) => applyShoppingUnitMode(e.target.value as ShoppingMassUnitMode)}
+                aria-label="Shopping list units"
+                className={toolbarUnitSelect}
+              >
+                <option value="auto">Auto</option>
                 {MASS_UNITS.map((massUnit) => (
-                  <button
-                    key={massUnit}
-                    type="button"
-                    className={segmentBtn(shoppingUnitMode === massUnit)}
-                    onClick={() => applyShoppingUnitMode(massUnit)}
-                  >
+                  <option key={massUnit} value={massUnit}>
                     {massUnitLabel(massUnit)}
-                  </button>
+                  </option>
                 ))}
-              </div>
+              </select>
             </>
           ) : (
             <>
               <div className={segmentTrack}>
-                {[1, 2, 3].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    className={segmentBtn(mealsPerDay === n)}
-                    onClick={() => onMealsChange(n)}
-                  >
-                    {n}
-                  </button>
-                ))}
+                <button
+                  type="button"
+                  aria-label="Fewer meals per day"
+                  className={stepperBtn}
+                  onClick={() => onMealsChange(Math.max(1, mealsPerDay - 1))}
+                >
+                  −
+                </button>
+
+                <span className={stepperReadout}>
+                  <span className={stepperReadoutValue}>{mealsPerDay}</span>
+                  <span className={stepperReadoutLabel}>Meals / Day</span>
+                </span>
+
+                <button
+                  type="button"
+                  aria-label="More meals per day"
+                  className={stepperBtn}
+                  onClick={() => onMealsChange(Math.min(3, mealsPerDay + 1))}
+                >
+                  +
+                </button>
               </div>
 
-              <div className={segmentTrack}>
-                {MASS_UNITS.map((massUnit) => {
-                  const allMatch =
-                    portionEntries.length > 0 &&
-                    portionEntries.every(([name]) => portionUnitFor(name) === massUnit);
-                  return (
-                    <button
-                      key={massUnit}
-                      type="button"
-                      className={segmentBtn(allMatch)}
-                      onClick={() => setAllPortionUnits(massUnit)}
-                    >
-                      {massUnitLabel(massUnit)}
-                    </button>
-                  );
-                })}
-              </div>
+              <select
+                value={portionGlobalUnit}
+                onChange={(e) => setAllPortionUnits(e.target.value as MassUnit)}
+                aria-label="Portion units"
+                className={toolbarUnitSelect}
+              >
+                {MASS_UNITS.map((massUnit) => (
+                  <option key={massUnit} value={massUnit}>
+                    {massUnitLabel(massUnit)}
+                  </option>
+                ))}
+              </select>
             </>
           )}
         </div>
@@ -359,6 +369,7 @@ export function HomePlan({
             portions={portions}
             dogsWithMER={dogsWithMER}
             mealsPerDay={mealsPerDay}
+            unit={unit}
             portionUnits={portionUnits}
             onPortionUnitsChange={onPortionUnitsChange}
             onMealsChange={onMealsChange}
@@ -385,6 +396,7 @@ export function HomePlan({
           portions={portions}
           dogsWithMER={dogsWithMER}
           mealsPerDay={mealsPerDay}
+          unit={unit}
           portionUnits={portionUnits}
           onPortionUnitsChange={onPortionUnitsChange}
           onMealsChange={onMealsChange}

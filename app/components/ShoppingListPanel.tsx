@@ -10,7 +10,7 @@ import {
 
 import { resolveShoppingMassUnit, type ShoppingMassUnitMode } from '../utils/shoppingMassUnit';
 
-import { scrollShadowRoom, segmentBtn, segmentTrack } from './ui';
+import { scrollShadowRoom, massUnitSelect, segmentTrack, stepperBtn, stepperReadout, stepperReadoutLabel, stepperReadoutValue, toolbarUnitSelect } from './ui';
 
 interface ShoppingListPanelProps {
   shoppingList: ShoppingList;
@@ -58,54 +58,44 @@ export function ShoppingListPanel({
     <div className="flex h-full min-h-0 flex-col">
       {showToolbar && (
         <div className="flex shrink-0 items-center justify-between gap-2 pb-3 print:hidden">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-muted">Days</span>
-
-            <div className="inline-flex items-center rounded-xl bg-surface-muted">
-              <button
-                type="button"
-                aria-label="Fewer days"
-                className="px-3 py-1.5 text-sm font-semibold text-muted transition-colors hover:text-foreground"
-                onClick={() => onDaysChange(Math.max(1, numberOfDays - 1))}
-              >
-                −
-              </button>
-
-              <span className="min-w-[1.75rem] text-center text-sm font-bold tabular-nums text-foreground">
-                {numberOfDays}
-              </span>
-
-              <button
-                type="button"
-                aria-label="More days"
-                className="px-3 py-1.5 text-sm font-semibold text-muted transition-colors hover:text-foreground"
-                onClick={() => onDaysChange(Math.min(30, numberOfDays + 1))}
-              >
-                +
-              </button>
-            </div>
-          </div>
-
           <div className={segmentTrack}>
             <button
               type="button"
-              className={segmentBtn(shoppingUnitMode === 'auto')}
-              onClick={() => applyUnitMode('auto')}
+              aria-label="Fewer days"
+              className={stepperBtn}
+              onClick={() => onDaysChange(Math.max(1, numberOfDays - 1))}
             >
-              Auto
+              −
             </button>
 
-            {MASS_UNITS.map((u) => (
-              <button
-                key={u}
-                type="button"
-                className={segmentBtn(shoppingUnitMode === u)}
-                onClick={() => applyUnitMode(u)}
-              >
-                {massUnitLabel(u)}
-              </button>
-            ))}
+            <span className={stepperReadout}>
+              <span className={stepperReadoutValue}>{numberOfDays}</span>
+              <span className={stepperReadoutLabel}>Days</span>
+            </span>
+
+            <button
+              type="button"
+              aria-label="More days"
+              className={stepperBtn}
+              onClick={() => onDaysChange(Math.min(30, numberOfDays + 1))}
+            >
+              +
+            </button>
           </div>
+
+          <select
+            value={shoppingUnitMode}
+            onChange={(e) => applyUnitMode(e.target.value as ShoppingMassUnitMode)}
+            aria-label="Shopping list units"
+            className={toolbarUnitSelect}
+          >
+            <option value="auto">Auto</option>
+            {MASS_UNITS.map((u) => (
+              <option key={u} value={u}>
+                {massUnitLabel(u)}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 
@@ -176,7 +166,7 @@ export function ShoppingListPanel({
                   value={u}
                   onChange={(e) => setUnitFor(name, e.target.value as MassUnit)}
                   aria-label={`Units for ${name}`}
-                  className="rounded-lg border-0 bg-surface-muted py-1 pl-1.5 pr-1 text-[11px] font-medium text-muted print:hidden"
+                  className={massUnitSelect}
                 >
                   {MASS_UNITS.map((option) => (
                     <option key={option} value={option}>

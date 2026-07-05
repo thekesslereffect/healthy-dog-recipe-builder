@@ -1,6 +1,6 @@
 import type { Dog } from '../utils/recipeCalculator';
-import { convertMass, MASS_UNITS, massUnitLabel, type MassUnit } from '../utils/format';
-import { scrollShadowRoom, segmentBtn, segmentTrack } from './ui';
+import { convertMass, defaultMassUnit, MASS_UNITS, massUnitLabel, type MassUnit, type WeightUnit } from '../utils/format';
+import { scrollShadowRoom, massUnitSelect, segmentTrack, stepperBtn, stepperReadout, stepperReadoutLabel, stepperReadoutValue, toolbarUnitSelect } from './ui';
 import { DogAvatar } from './DogAvatar';
 
 interface Portion {
@@ -13,6 +13,7 @@ interface MealPortionsPanelProps {
   portions: Record<string, Portion>;
   dogsWithMER: Dog[];
   mealsPerDay: number;
+  unit: WeightUnit;
   portionUnits: Record<string, MassUnit>;
   onPortionUnitsChange: (next: Record<string, MassUnit>) => void;
   onMealsChange: (meals: number) => void;
@@ -23,52 +24,65 @@ export function MealPortionsPanel({
   portions,
   dogsWithMER,
   mealsPerDay,
+  unit,
   portionUnits,
   onPortionUnitsChange,
   onMealsChange,
   showToolbar = true,
 }: MealPortionsPanelProps) {
-  const portionUnitFor = (name: string): MassUnit => portionUnits[name] ?? 'g';
+  const fallbackUnit = defaultMassUnit(unit);
+  const portionUnitFor = (name: string): MassUnit => portionUnits[name] ?? fallbackUnit;
   const entries = Object.entries(portions);
+  const globalUnit =
+    entries.length > 0 &&
+    entries.every(([name]) => portionUnitFor(name) === portionUnitFor(entries[0][0]))
+      ? portionUnitFor(entries[0][0])
+      : fallbackUnit;
+  const setAllPortionUnits = (massUnit: MassUnit) => {
+    const next: Record<string, MassUnit> = { ...portionUnits };
+    for (const [name] of entries) next[name] = massUnit;
+    onPortionUnitsChange(next);
+  };
   return (
     <div className="flex h-full min-h-0 flex-col">
       {showToolbar && (
         <div className="flex shrink-0 items-center justify-between gap-2 pb-3 print:hidden">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-muted">Meals/day</span>
-            <div className={segmentTrack}>
-              {[1, 2, 3].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  className={segmentBtn(mealsPerDay === n)}
-                  onClick={() => onMealsChange(n)}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
-          </div>
           <div className={segmentTrack}>
-            {MASS_UNITS.map((u) => {
-              const allMatch =
-                entries.length > 0 && entries.every(([name]) => portionUnitFor(name) === u);
-              return (
-                <button
-                  key={u}
-                  type="button"
-                  className={segmentBtn(allMatch)}
-                  onClick={() => {
-                    const next: Record<string, MassUnit> = { ...portionUnits };
-                    for (const [name] of entries) next[name] = u;
-                    onPortionUnitsChange(next);
-                  }}
-                >
-                  {massUnitLabel(u)}
-                </button>
-              );
-            })}
+            <button
+              type="button"
+              aria-label="Fewer meals per day"
+              className={stepperBtn}
+              onClick={() => onMealsChange(Math.max(1, mealsPerDay - 1))}
+            >
+              −
+            </button>
+
+            <span className={stepperReadout}>
+              <span className={stepperReadoutValue}>{mealsPerDay}</span>
+              <span className={stepperReadoutLabel}>Meals / Day</span>
+            </span>
+
+            <button
+              type="button"
+              aria-label="More meals per day"
+              className={stepperBtn}
+              onClick={() => onMealsChange(Math.min(3, mealsPerDay + 1))}
+            >
+              +
+            </button>
           </div>
+          <select
+            value={globalUnit}
+            onChange={(e) => setAllPortionUnits(e.target.value as MassUnit)}
+            aria-label="Portion units"
+            className={toolbarUnitSelect}
+          >
+            {MASS_UNITS.map((u) => (
+              <option key={u} value={u}>
+                {massUnitLabel(u)}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 
@@ -119,7 +133,7 @@ export function MealPortionsPanel({
                     })
                   }
                   aria-label={`Units for ${dogName}`}
-                  className="shrink-0 rounded-lg border-0 bg-surface-muted py-1 pl-1.5 pr-1 text-[11px] font-medium text-muted print:hidden"
+                  className={`${massUnitSelect} shrink-0`}
                 >
                   {MASS_UNITS.map((option) => (
                     <option key={option} value={option}>
