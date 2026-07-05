@@ -52,7 +52,7 @@ export function EditScreen({
         onBalance={onBalance}
       />
 
-      <div className="shrink-0 space-y-2 rounded-2xl border border-zinc-100 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
+      <div className="shrink-0 space-y-2 rounded-2xl border border-zinc-100 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
         <input
           type="text"
           value={planName}

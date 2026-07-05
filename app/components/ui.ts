@@ -2,7 +2,7 @@
 // Nunito reads a bit heavier than geometric sans, so we favor 500/600 over 700.
 
 export const card =
-  'rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm sm:p-5 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none print:border-0 print:p-0 print:shadow-none print:rounded-none';
+  'rounded-2xl border border-zinc-100 bg-white p-4 sm:p-5 dark:border-zinc-800 dark:bg-zinc-900 print:border-0 print:p-0 print:rounded-none';
 
 export const sectionTitle =
   'text-base font-semibold tracking-tight text-black dark:text-zinc-50';

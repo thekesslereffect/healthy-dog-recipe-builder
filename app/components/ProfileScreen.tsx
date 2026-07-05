@@ -73,7 +73,7 @@ export function ProfileScreen({
                 key={dog.id ?? index}
                 type="button"
                 onClick={() => setEditingIndex(index)}
-                className="flex min-w-0 items-center gap-2.5 rounded-2xl border border-zinc-100 bg-white px-3 py-3 text-left shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none"
+                className="flex min-w-0 items-center gap-2.5 rounded-2xl border border-zinc-100 bg-white px-3 py-3 text-left dark:border-zinc-800 dark:bg-zinc-900"
               >
                 <DogAvatar name={name} avatar={dog.avatar} size="md" />
                 <div className="min-w-0 flex-1">
@@ -93,7 +93,7 @@ export function ProfileScreen({
         <button
           type="button"
           onClick={() => setAboutOpen(true)}
-          className="mt-2 w-full rounded-2xl border border-zinc-100 bg-white px-3 py-3 text-left text-sm text-zinc-500 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 dark:shadow-none"
+          className="mt-2 w-full rounded-2xl border border-zinc-100 bg-white px-3 py-3 text-left text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
         >
           About this tool ›
         </button>

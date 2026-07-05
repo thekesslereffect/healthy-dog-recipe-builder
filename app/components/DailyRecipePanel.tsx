@@ -145,7 +145,7 @@ export function DailyRecipePanel({
   if (compact) {
     return (
       <>
-        <div className="flex h-full min-h-0 flex-col rounded-2xl border border-zinc-100 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
+        <div className="flex h-full min-h-0 flex-col rounded-2xl border border-zinc-100 bg-white dark:border-zinc-800 dark:bg-zinc-900">
           <div className="shrink-0 border-b border-zinc-50 px-3 py-2 dark:border-zinc-800">
             <p className="text-sm font-medium text-black dark:text-zinc-50">Daily ingredients</p>
             <p className="text-[11px] text-zinc-400">Tap to swap · lock to keep on reroll</p>
@@ -159,7 +159,7 @@ export function DailyRecipePanel({
 
   return (
     <>
-      <div className="rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
+      <div className="rounded-2xl border border-zinc-100 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
         {body}
       </div>
       {picker}
