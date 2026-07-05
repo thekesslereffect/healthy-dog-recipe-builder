@@ -2,10 +2,10 @@ import { useMemo, useState } from 'react';
 import { CATEGORIES, type Category, type CategoryRatios } from '../utils/constants';
 import type { Dog, Recipe } from '../utils/recipeCalculator';
 import { getIngredientCatalogOrThrow } from '../data/ingredients';
-import { getBoostSwapCandidates, isNutritionBoostRow } from '../utils/nutritionBoost';
+import { getBoostSwapCandidates, getBoostNutrientGaps, isNutritionBoostRow } from '../utils/nutritionBoost';
 import { groupLabel, iconBtn } from './ui';
 import { ArrowLeftRight, Lock, LockOpen, Trash2 } from 'lucide-react';
-import { IngredientPicker } from './IngredientPicker';
+import { IngredientPicker, type IngredientPickerOption } from './IngredientPicker';
 import { NutritionSnapshot } from './NutritionSnapshot';
 
 interface DailyRecipePanelProps {
@@ -65,16 +65,38 @@ export function DailyRecipePanel({
   }, [recipe, ratios]);
 
   const pickerOptions = useMemo(() => {
-    if (!editing) return [];
+    if (!editing) return { suggestions: [] as string[], options: [] as IngredientPickerOption[], subtitle: undefined as string | undefined };
     if (editing.boost) {
-      if (!dogsWithMER) return [];
-      return getBoostSwapCandidates(recipe, editing.category, editing.name, dogsWithMER, excluded);
+      if (!dogsWithMER) {
+        return { suggestions: [], options: [], subtitle: undefined };
+      }
+      const gaps = getBoostNutrientGaps(recipe, dogsWithMER);
+      const candidates = getBoostSwapCandidates(
+        recipe,
+        editing.category,
+        editing.name,
+        dogsWithMER,
+        excluded,
+      );
+      const options: IngredientPickerOption[] = candidates.map((candidate) => ({
+        name: candidate.name,
+        detail:
+          candidate.category !== editing.category
+            ? `${candidate.category} category`
+            : undefined,
+      }));
+      return {
+        suggestions: candidates.map((candidate) => candidate.name),
+        options,
+        subtitle: gaps.length > 0 ? gaps.join(', ') : undefined,
+      };
     }
     const usedNames = new Set(recipe.ingredients[editing.category].map((i) => i.name));
-    return getIngredientCatalogOrThrow()[editing.category]
+    const suggestions = getIngredientCatalogOrThrow()[editing.category]
       .filter((i) => (i.caloriesPer100g || 0) > 0)
       .map((i) => i.name)
       .filter((n) => !excluded.includes(n) && !usedNames.has(n));
+    return { suggestions, options: undefined, subtitle: undefined };
   }, [editing, recipe, excluded, dogsWithMER]);
 
   const body = (
@@ -104,12 +126,18 @@ export function DailyRecipePanel({
                     >
                       <div className="min-w-0 truncate text-left text-sm text-foreground">
                         {isBoost ? (
-                          <>
-                            <span className="text-muted">{ingredient.name}</span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setEditing({ category, name: ingredient.name, boost: true })
+                            }
+                            className="truncate text-left font-medium transition-colors hover:text-accent"
+                          >
+                            {ingredient.name}
                             <span className="ml-1.5 text-[10px] font-semibold uppercase tracking-wide text-sage">
                               + add
                             </span>
-                          </>
+                          </button>
                         ) : (
                           <button
                             type="button"
@@ -216,8 +244,11 @@ export function DailyRecipePanel({
   const picker = editing ? (
     <IngredientPicker
       current={editing.name}
-      suggestions={pickerOptions}
-      title={editing.boost ? `Swap ${editing.name}` : undefined}
+      suggestions={pickerOptions.suggestions}
+      options={pickerOptions.options}
+      subtitle={pickerOptions.subtitle}
+      boost={editing.boost}
+      title={editing.boost ? `Replace ${editing.name}` : undefined}
       onSelect={(name) => {
         if (editing.boost) {
           onSwapBoost?.(editing.category, editing.name, name);

@@ -18,10 +18,10 @@ import {
   type Recipe,
   type SupplementOptions,
 } from './utils/recipeCalculator';
-import { normalizeSupplementOptions, getIngredientCatalogOrThrow } from './data/ingredients';
+import { getIngredientCatalogOrThrow, findFoodByName } from './data/ingredients';
 import { recipeToText } from './utils/export';
 import { balanceRecipeMix, applyRatiosToRecipe } from './utils/rebalance';
-import { removeNutritionBoost } from './utils/nutritionBoost';
+import { removeNutritionBoost, hasNutritionBoostInCategory } from './utils/nutritionBoost';
 import { type MassUnit, type WeightUnit } from './utils/format';
 import { createId, resolveSupplementOptions, type SavedRecipe } from './utils/savedRecipes';
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -317,25 +317,54 @@ export default function Home() {
     newName: string,
   ) => {
     if (oldName === newName) return;
-    const data = getIngredientCatalogOrThrow()[category].find((i) => i.name === newName);
-    if (!data) return;
+    const food = findFoodByName(newName);
+    if (!food) return;
+    const newCategory = food.category;
     const round2 = (n: number) => Math.round(n * 100) / 100;
-    const cpg = data.caloriesPer100g || 0;
+    const cpg = food.caloriesPer100g || 0;
 
-    const nextCategoryItems = source.ingredients[category].map((row) => {
-      if (row.name !== oldName || !row.additional) return row;
-      const grams = cpg > 0 ? round2((row.calories / cpg) * 100) : 0;
-      return {
-        name: newName,
-        grams,
-        calories: round2((grams * cpg) / 100),
-        additional: true as const,
-      };
-    });
+    const oldRow = source.ingredients[category].find(
+      (row) => row.name === oldName && row.additional,
+    );
+    if (!oldRow) return;
+
+    if (newCategory !== category && hasNutritionBoostInCategory(source, newCategory)) {
+      return;
+    }
+
+    const grams = cpg > 0 ? round2((oldRow.calories / cpg) * 100) : 0;
+    const newRow = {
+      name: newName,
+      grams,
+      calories: round2((grams * cpg) / 100),
+      additional: true as const,
+    };
+
+    const nextIngredients = {
+      protein: [...source.ingredients.protein],
+      organs: [...source.ingredients.organs],
+      fruits: [...source.ingredients.fruits],
+      veggies: [...source.ingredients.veggies],
+      carbs: [...source.ingredients.carbs],
+      fats: [...source.ingredients.fats],
+      supplements: source.ingredients.supplements.map((row) => ({ ...row })),
+    };
+
+    if (newCategory === category) {
+      nextIngredients[category] = nextIngredients[category].map((row) => {
+        if (row.name !== oldName || !row.additional) return row;
+        return newRow;
+      });
+    } else {
+      nextIngredients[category] = nextIngredients[category].filter(
+        (row) => !(row.additional && row.name === oldName),
+      );
+      nextIngredients[newCategory] = [...nextIngredients[newCategory], newRow];
+    }
 
     const swapped: Recipe = {
       ...source,
-      ingredients: { ...source.ingredients, [category]: nextCategoryItems },
+      ingredients: nextIngredients,
     };
     setSource(recalculateRecipe(swapped));
   };

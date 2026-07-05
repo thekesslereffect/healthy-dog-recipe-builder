@@ -194,8 +194,8 @@ describe('nutrition boosts', () => {
       dogs,
       [],
     );
-    const sardineIndex = candidates.findIndex((name) => /sardine/i.test(name));
-    const mackerelIndex = candidates.findIndex((name) => /^mackerel$/i.test(name));
+    const sardineIndex = candidates.findIndex((entry) => /sardine/i.test(entry.name));
+    const mackerelIndex = candidates.findIndex((entry) => /^mackerel$/i.test(entry.name));
     if (sardineIndex >= 0 && mackerelIndex >= 0) {
       expect(sardineIndex).toBeLessThan(mackerelIndex);
     }

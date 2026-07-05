@@ -27,7 +27,7 @@ export interface FoodNutrients extends ExtendedNutrients {
   phosphorusMgPer100g: number;
 }
 
-/** Dog-safe food ingredient enriched from FDC (or allowlist fallback). */
+/** Dog-safe food ingredient enriched from USDA FDC via sync. */
 export interface FoodIngredient extends FoodNutrients {
   name: string;
   category: Category;

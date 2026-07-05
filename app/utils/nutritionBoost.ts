@@ -24,7 +24,8 @@ const BOOST_CATEGORIES: Record<string, Category[]> = {
   calcium: ['veggies', 'protein'],
 };
 
-const FISH_PATTERN = /mackerel|sardine|salmon|tilapia|trout|tuna/i;
+const FISH_PATTERN =
+  /mackerel|sardine|salmon|tilapia|trout|tuna|herring|anchov|cod|shrimp|clam|oyster|mussel/i;
 const MUSCLE_MEAT_PATTERN =
   /beef|bison|buffalo|turkey|chicken|duck|venison|pork|lamb|ground/i;
 const ORGAN_PATTERN = /liver|heart|kidney|organ/i;
@@ -366,27 +367,59 @@ function nutrientChecksForBoostSwap(
   return lows.length > 0 ? lows : failed;
 }
 
-/** Rank alternative boost ingredients for the swap sheet. */
+export interface BoostSwapCandidate {
+  name: string;
+  category: Category;
+  score: number;
+}
+
+/** Nutrient labels still below target — used to explain boost swap recommendations. */
+export function getBoostNutrientGaps(recipe: Recipe, dogsWithMER: Dog[]): string[] {
+  return nutrientChecksForBoostSwap(recipe, dogsWithMER).map((check) => check.label);
+}
+/** Rank alternative boost ingredients across categories that can address current gaps. */
 export function getBoostSwapCandidates(
   recipe: Recipe,
   category: Category,
   boostName: string,
   dogsWithMER: Dog[],
   excluded: string[] = [],
-): string[] {
+): BoostSwapCandidate[] {
   const catalog = getIngredientCatalogOrThrow();
   const usedNames = recipeIngredientNames(recipe);
   const checks = nutrientChecksForBoostSwap(recipe, dogsWithMER);
-  const ranked: { name: string; score: number }[] = [];
+  const searchCategories = new Set<Category>([
+    category,
+    ...candidateCategories(checks),
+  ]);
+  const ranked: BoostSwapCandidate[] = [];
 
-  for (const food of catalog[category]) {
-    if (food.name === boostName) continue;
-    if (!isAllowedBoostFood(food, recipe, usedNames, excluded, boostName)) continue;
-    const score = compositeBoostScore(food, checks, recipe);
-    if (score <= 0) continue;
-    ranked.push({ name: food.name, score });
+  for (const searchCategory of CATEGORIES) {
+    if (!searchCategories.has(searchCategory)) continue;
+    if (
+      searchCategory !== category &&
+      hasNutritionBoostInCategory(recipe, searchCategory)
+    ) {
+      continue;
+    }
+
+    for (const food of catalog[searchCategory]) {
+      if (food.name === boostName) continue;
+      if (!isAllowedBoostFood(food, recipe, usedNames, excluded, boostName)) continue;
+      const score = compositeBoostScore(food, checks, recipe);
+      if (score <= 0) continue;
+      ranked.push({ name: food.name, category: searchCategory, score });
+    }
   }
 
-  ranked.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
-  return ranked.map((entry) => entry.name);
+  ranked.sort(
+    (a, b) => b.score - a.score || a.name.localeCompare(b.name),
+  );
+
+  const seen = new Set<string>();
+  return ranked.filter((entry) => {
+    if (seen.has(entry.name)) return false;
+    seen.add(entry.name);
+    return true;
+  });
 }

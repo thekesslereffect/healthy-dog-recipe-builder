@@ -3,936 +3,534 @@
     "name": "Beef (ground, 75% lean)",
     "category": "protein",
     "fdcId": 174037,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 293,
-      "proteinGPer100g": 15.8,
-      "fatGPer100g": 25,
-      "calciumMgPer100g": 21,
-      "phosphorusMgPer100g": 145
-    }
+    "basis": "raw"
   },
   {
     "name": "Beef (ground, 85% lean)",
     "category": "protein",
     "fdcId": 174036,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 215,
-      "proteinGPer100g": 18.6,
-      "fatGPer100g": 15,
-      "calciumMgPer100g": 15,
-      "phosphorusMgPer100g": 158
-    }
+    "basis": "raw"
   },
   {
     "name": "Beef (sirloin steak)",
     "category": "protein",
     "fdcId": 168728,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 214,
-      "proteinGPer100g": 19.9,
-      "fatGPer100g": 14.3,
-      "calciumMgPer100g": 25,
-      "phosphorusMgPer100g": 181,
-      "zincMgPer100g": 3.57,
-      "copperMgPer100g": 0.066,
-      "vitaminEMgPer100g": 0.37,
-      "cholineMgPer100g": 83.2
-    }
+    "basis": "raw"
   },
   {
     "name": "Buffalo/Bison",
     "category": "protein",
     "fdcId": 175293,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 146,
-      "proteinGPer100g": 20.2,
-      "fatGPer100g": 7.2,
-      "calciumMgPer100g": 11,
-      "phosphorusMgPer100g": 194,
-      "zincMgPer100g": 4.59,
-      "copperMgPer100g": 0.14,
-      "vitaminEMgPer100g": 0.19,
-      "cholineMgPer100g": 85.8
-    }
+    "basis": "raw"
   },
   {
     "name": "Chicken (ground)",
     "category": "protein",
     "fdcId": 171116,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 143,
-      "proteinGPer100g": 17.4,
-      "fatGPer100g": 8.1,
-      "calciumMgPer100g": 6,
-      "phosphorusMgPer100g": 178
-    }
+    "basis": "raw"
+  },
+  {
+    "name": "Chicken (breast, skinless)",
+    "category": "protein",
+    "fdcId": 171077,
+    "basis": "raw"
+  },
+  {
+    "name": "Chicken (thigh, skinless)",
+    "category": "protein",
+    "fdcId": 2646171,
+    "basis": "raw"
   },
   {
     "name": "Duck (meat without skin)",
     "category": "protein",
     "fdcId": 172410,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 135,
-      "proteinGPer100g": 18.3,
-      "fatGPer100g": 6,
-      "calciumMgPer100g": 11,
-      "phosphorusMgPer100g": 203,
-      "zincMgPer100g": 1.9,
-      "copperMgPer100g": 0.253,
-      "vitaminDIUPer100g": 4,
-      "vitaminEMgPer100g": 0.7,
-      "cholineMgPer100g": 53.6
-    }
+    "basis": "raw"
   },
   {
     "name": "Egg (whole, raw)",
     "category": "protein",
     "fdcId": 171287,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 143,
-      "proteinGPer100g": 12.6,
-      "fatGPer100g": 9.5,
-      "calciumMgPer100g": 56,
-      "phosphorusMgPer100g": 198,
-      "zincMgPer100g": 1.29,
-      "copperMgPer100g": 0.072,
-      "vitaminDIUPer100g": 80,
-      "vitaminEMgPer100g": 1.05,
-      "cholineMgPer100g": 294,
-      "epaMgPer100g": 0,
-      "dhaMgPer100g": 58
-    }
+    "basis": "raw"
+  },
+  {
+    "name": "Cottage Cheese (lowfat)",
+    "category": "protein",
+    "fdcId": 173417,
+    "basis": "raw"
+  },
+  {
+    "name": "Plain Yogurt (whole milk)",
+    "category": "protein",
+    "fdcId": 171284,
+    "basis": "raw"
+  },
+  {
+    "name": "Goat",
+    "category": "protein",
+    "fdcId": 175303,
+    "basis": "raw"
   },
   {
     "name": "Lamb (ground)",
     "category": "protein",
     "fdcId": 174370,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 282,
-      "proteinGPer100g": 16.6,
-      "fatGPer100g": 23.4,
-      "calciumMgPer100g": 16,
-      "phosphorusMgPer100g": 157
-    }
+    "basis": "raw"
   },
   {
     "name": "Mackerel",
     "category": "protein",
     "fdcId": 175119,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 205,
-      "proteinGPer100g": 18.6,
-      "fatGPer100g": 13.9,
-      "calciumMgPer100g": 12,
-      "phosphorusMgPer100g": 217
-    }
+    "basis": "raw"
   },
   {
     "name": "Anchovies (canned, drained)",
     "category": "protein",
     "fdcId": 174183,
-    "basis": "drained",
-    "fallback": {
-      "caloriesPer100g": 210,
-      "proteinGPer100g": 28.9,
-      "fatGPer100g": 9.7,
-      "calciumMgPer100g": 147,
-      "phosphorusMgPer100g": 178,
-      "zincMgPer100g": 1.72,
-      "copperMgPer100g": 0.344,
-      "vitaminDIUPer100g": 40,
-      "vitaminEMgPer100g": 1.57,
-      "cholineMgPer100g": 85,
-      "epaMgPer100g": 538,
-      "dhaMgPer100g": 911
-    }
+    "basis": "drained"
   },
   {
     "name": "Cod (Atlantic, raw)",
     "category": "protein",
     "fdcId": 171955,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 82,
-      "proteinGPer100g": 17.8,
-      "fatGPer100g": 0.7,
-      "calciumMgPer100g": 16,
-      "phosphorusMgPer100g": 203,
-      "epaMgPer100g": 28,
-      "dhaMgPer100g": 154
-    }
+    "basis": "raw"
   },
   {
     "name": "Herring (Atlantic, raw)",
     "category": "protein",
     "fdcId": 175116,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 158,
-      "proteinGPer100g": 17.9,
-      "fatGPer100g": 9.0,
-      "calciumMgPer100g": 57,
-      "phosphorusMgPer100g": 240,
-      "zincMgPer100g": 0.99,
-      "copperMgPer100g": 0.092,
-      "vitaminDIUPer100g": 680,
-      "vitaminEMgPer100g": 1.07,
-      "cholineMgPer100g": 65,
-      "epaMgPer100g": 709,
-      "dhaMgPer100g": 1045
-    }
+    "basis": "raw"
   },
   {
     "name": "Oysters (raw)",
     "category": "protein",
     "fdcId": 175172,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 68,
-      "proteinGPer100g": 7.0,
-      "fatGPer100g": 2.5,
-      "calciumMgPer100g": 59,
-      "phosphorusMgPer100g": 97,
-      "zincMgPer100g": 90.95,
-      "copperMgPer100g": 4.29,
-      "vitaminDIUPer100g": 320,
-      "vitaminEMgPer100g": 1.0,
-      "cholineMgPer100g": 65
-    }
+    "basis": "raw"
   },
   {
     "name": "Blue Mussels (raw)",
     "category": "protein",
     "fdcId": 174216,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 86,
-      "proteinGPer100g": 11.9,
-      "fatGPer100g": 2.2,
-      "calciumMgPer100g": 26,
-      "phosphorusMgPer100g": 146,
-      "zincMgPer100g": 2.27,
-      "copperMgPer100g": 0.247,
-      "iodineMcgPer100g": 140,
-      "vitaminDIUPer100g": 0,
-      "vitaminEMgPer100g": 0.85,
-      "cholineMgPer100g": 65
-    }
+    "basis": "raw"
   },
   {
     "name": "Pork (ground)",
     "category": "protein",
     "fdcId": 167902,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 263,
-      "proteinGPer100g": 16.9,
-      "fatGPer100g": 21.2,
-      "calciumMgPer100g": 14,
-      "phosphorusMgPer100g": 175
-    }
+    "basis": "raw"
   },
   {
     "name": "Pork (lean cuts)",
     "category": "protein",
     "fdcId": 168230,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 143,
-      "proteinGPer100g": 21.4,
-      "fatGPer100g": 5.7,
-      "calciumMgPer100g": 17,
-      "phosphorusMgPer100g": 211,
-      "zincMgPer100g": 1.84,
-      "copperMgPer100g": 0.062,
-      "vitaminDIUPer100g": 20,
-      "vitaminEMgPer100g": 0.18,
-      "cholineMgPer100g": 75.6
-    }
+    "basis": "raw"
+  },
+  {
+    "name": "Rabbit",
+    "category": "protein",
+    "fdcId": 172521,
+    "basis": "raw"
+  },
+  {
+    "name": "Shrimp (raw)",
+    "category": "protein",
+    "fdcId": 175179,
+    "basis": "raw"
+  },
+  {
+    "name": "Clams (raw)",
+    "category": "protein",
+    "fdcId": 174214,
+    "basis": "raw"
   },
   {
     "name": "Salmon (Atlantic, farmed)",
     "category": "protein",
     "fdcId": 175167,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 208,
-      "proteinGPer100g": 20.4,
-      "fatGPer100g": 13.4,
-      "calciumMgPer100g": 9,
-      "phosphorusMgPer100g": 240
-    }
+    "basis": "raw"
+  },
+  {
+    "name": "Salmon (Atlantic, wild)",
+    "category": "protein",
+    "fdcId": 173686,
+    "basis": "raw"
   },
   {
     "name": "Sardines (canned in water, no salt)",
     "category": "protein",
     "fdcId": 2706293,
-    "basis": "drained",
-    "fallback": {
-      "caloriesPer100g": 208,
-      "proteinGPer100g": 24.6,
-      "fatGPer100g": 11.4,
-      "calciumMgPer100g": 382,
-      "phosphorusMgPer100g": 490,
-      "zincMgPer100g": 1.31,
-      "copperMgPer100g": 0.186,
-      "vitaminDIUPer100g": 192,
-      "vitaminEMgPer100g": 2.04,
-      "cholineMgPer100g": 75,
-      "epaMgPer100g": 473,
-      "dhaMgPer100g": 509
-    }
+    "basis": "drained"
   },
   {
     "name": "Tilapia",
     "category": "protein",
     "fdcId": 175176,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 96,
-      "proteinGPer100g": 20.1,
-      "fatGPer100g": 1.7,
-      "calciumMgPer100g": 10,
-      "phosphorusMgPer100g": 170
-    }
+    "basis": "raw"
   },
   {
     "name": "Trout",
     "category": "protein",
     "fdcId": 175154,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 141,
-      "proteinGPer100g": 19.9,
-      "fatGPer100g": 6.2,
-      "calciumMgPer100g": 43,
-      "phosphorusMgPer100g": 226
-    }
+    "basis": "raw"
   },
   {
     "name": "Tuna (canned in water)",
     "category": "protein",
     "fdcId": 171986,
-    "basis": "drained",
-    "fallback": {
-      "caloriesPer100g": 116,
-      "proteinGPer100g": 25.5,
-      "fatGPer100g": 0.8,
-      "calciumMgPer100g": 11,
-      "phosphorusMgPer100g": 163,
-      "zincMgPer100g": 0.77,
-      "copperMgPer100g": 0.051,
-      "epaMgPer100g": 47,
-      "dhaMgPer100g": 223
-    }
+    "basis": "drained"
   },
   {
     "name": "Turkey (breast, skinless)",
     "category": "protein",
     "fdcId": 171098,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 114,
-      "proteinGPer100g": 23.7,
-      "fatGPer100g": 1.5,
-      "calciumMgPer100g": 11,
-      "phosphorusMgPer100g": 201,
-      "zincMgPer100g": 1.28,
-      "copperMgPer100g": 0.07,
-      "vitaminDIUPer100g": 4,
-      "vitaminEMgPer100g": 0.06,
-      "cholineMgPer100g": 61.3,
-      "dhaMgPer100g": 2
-    }
+    "basis": "raw"
   },
   {
     "name": "Turkey (ground, 85% lean)",
     "category": "protein",
     "fdcId": 174493,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 180,
-      "proteinGPer100g": 16.9,
-      "fatGPer100g": 12.5,
-      "calciumMgPer100g": 33,
-      "phosphorusMgPer100g": 179,
-      "zincMgPer100g": 2.75,
-      "copperMgPer100g": 0.123,
-      "vitaminDIUPer100g": 16,
-      "vitaminEMgPer100g": 0.08,
-      "cholineMgPer100g": 51.6,
-      "epaMgPer100g": 12,
-      "dhaMgPer100g": 9
-    }
+    "basis": "raw"
   },
   {
     "name": "Venison",
     "category": "protein",
     "fdcId": 173855,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 120,
-      "proteinGPer100g": 23,
-      "fatGPer100g": 2.4,
-      "calciumMgPer100g": 5,
-      "phosphorusMgPer100g": 202,
-      "zincMgPer100g": 2.09,
-      "copperMgPer100g": 0.253,
-      "vitaminEMgPer100g": 0.2
-    }
+    "basis": "raw"
   },
   {
     "name": "Beef Kidneys",
     "category": "organs",
     "fdcId": 169449,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 99,
-      "proteinGPer100g": 17.4,
-      "fatGPer100g": 3.1,
-      "calciumMgPer100g": 13,
-      "phosphorusMgPer100g": 257,
-      "zincMgPer100g": 1.92,
-      "copperMgPer100g": 0.426,
-      "vitaminDIUPer100g": 44,
-      "vitaminEMgPer100g": 0.22
-    }
+    "basis": "raw"
   },
   {
     "name": "Beef Liver",
     "category": "organs",
     "fdcId": 169451,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 135,
-      "proteinGPer100g": 20.4,
-      "fatGPer100g": 3.6,
-      "calciumMgPer100g": 5,
-      "phosphorusMgPer100g": 387
-    }
+    "basis": "raw"
   },
   {
     "name": "Chicken Heart",
     "category": "organs",
     "fdcId": 171458,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 153,
-      "proteinGPer100g": 15.6,
-      "fatGPer100g": 9.3,
-      "calciumMgPer100g": 12,
-      "phosphorusMgPer100g": 177
-    }
+    "basis": "raw"
   },
   {
     "name": "Chicken Liver",
     "category": "organs",
     "fdcId": 171060,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 119,
-      "proteinGPer100g": 16.9,
-      "fatGPer100g": 4.8,
-      "calciumMgPer100g": 8,
-      "phosphorusMgPer100g": 387,
-      "zincMgPer100g": 1.75,
-      "copperMgPer100g": 0.496,
-      "cholineMgPer100g": 85.5
-    }
+    "basis": "raw"
   },
   {
     "name": "Turkey Liver",
     "category": "organs",
     "fdcId": 171486,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 128,
-      "proteinGPer100g": 17.2,
-      "fatGPer100g": 5.5,
-      "calciumMgPer100g": 14,
-      "phosphorusMgPer100g": 228,
-      "zincMgPer100g": 2.93,
-      "copperMgPer100g": 0.626,
-      "cholineMgPer100g": 93
-    }
+    "basis": "raw"
   },
   {
     "name": "Beef Heart",
     "category": "organs",
     "fdcId": 168625,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 112,
-      "proteinGPer100g": 17.7,
-      "fatGPer100g": 3.9,
-      "calciumMgPer100g": 7,
-      "phosphorusMgPer100g": 212,
-      "zincMgPer100g": 1.7,
-      "copperMgPer100g": 0.176,
-      "cholineMgPer100g": 82.6
-    }
+    "basis": "raw"
+  },
+  {
+    "name": "Duck Liver",
+    "category": "organs",
+    "fdcId": 174467,
+    "basis": "raw"
+  },
+  {
+    "name": "Lamb Liver",
+    "category": "organs",
+    "fdcId": 172531,
+    "basis": "raw"
+  },
+  {
+    "name": "Lamb Kidneys",
+    "category": "organs",
+    "fdcId": 174354,
+    "basis": "raw"
+  },
+  {
+    "name": "Turkey Heart",
+    "category": "organs",
+    "fdcId": 171484,
+    "basis": "raw"
+  },
+  {
+    "name": "Turkey Gizzard",
+    "category": "organs",
+    "fdcId": 171085,
+    "basis": "raw"
   },
   {
     "name": "Pork Heart",
     "category": "organs",
     "fdcId": 168267,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 118,
-      "proteinGPer100g": 17.3,
-      "fatGPer100g": 4.4,
-      "calciumMgPer100g": 5,
-      "phosphorusMgPer100g": 169,
-      "zincMgPer100g": 2.8,
-      "copperMgPer100g": 0.408,
-      "vitaminEMgPer100g": 0.63
-    }
+    "basis": "raw"
   },
   {
     "name": "Pork Kidneys",
     "category": "organs",
     "fdcId": 168270,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 100,
-      "proteinGPer100g": 16.5,
-      "fatGPer100g": 3.3,
-      "calciumMgPer100g": 9,
-      "phosphorusMgPer100g": 204,
-      "zincMgPer100g": 2.75,
-      "copperMgPer100g": 0.622
-    }
+    "basis": "raw"
   },
   {
     "name": "Pork Liver",
     "category": "organs",
     "fdcId": 167862,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 134,
-      "proteinGPer100g": 21.4,
-      "fatGPer100g": 3.7,
-      "calciumMgPer100g": 9,
-      "phosphorusMgPer100g": 288
-    }
+    "basis": "raw"
   },
   {
     "name": "White Rice (cooked)",
     "category": "carbs",
     "fdcId": 168878,
-    "basis": "cooked",
-    "fallback": {
-      "caloriesPer100g": 130,
-      "proteinGPer100g": 2.7,
-      "fatGPer100g": 0.3,
-      "calciumMgPer100g": 10,
-      "phosphorusMgPer100g": 43
-    }
+    "basis": "cooked"
+  },
+  {
+    "name": "Brown Rice (cooked)",
+    "category": "carbs",
+    "fdcId": 169704,
+    "basis": "cooked"
+  },
+  {
+    "name": "Oats (cooked)",
+    "category": "carbs",
+    "fdcId": 173905,
+    "basis": "cooked"
+  },
+  {
+    "name": "Potato (cooked)",
+    "category": "carbs",
+    "fdcId": 170440,
+    "basis": "cooked"
   },
   {
     "name": "Sweet Potato (cooked)",
     "category": "carbs",
     "fdcId": 168483,
-    "basis": "cooked",
-    "fallback": {
-      "caloriesPer100g": 86,
-      "proteinGPer100g": 1.6,
-      "fatGPer100g": 0.1,
-      "calciumMgPer100g": 30,
-      "phosphorusMgPer100g": 47,
-      "vitaminEMgPer100g": 0.71,
-      "cholineMgPer100g": 12.3
-    }
+    "basis": "cooked"
   },
   {
     "name": "Quinoa (cooked)",
     "category": "carbs",
     "fdcId": 168917,
-    "basis": "cooked",
-    "fallback": {
-      "caloriesPer100g": 120,
-      "proteinGPer100g": 4.4,
-      "fatGPer100g": 1.9,
-      "calciumMgPer100g": 17,
-      "phosphorusMgPer100g": 152,
-      "zincMgPer100g": 1.09,
-      "copperMgPer100g": 0.192,
-      "vitaminEMgPer100g": 0.63,
-      "cholineMgPer100g": 23,
-      "dhaMgPer100g": 15
-    }
+    "basis": "cooked"
   },
   {
     "name": "Apple",
     "category": "fruits",
     "fdcId": 171688,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 52,
-      "proteinGPer100g": 0.3,
-      "fatGPer100g": 0.2,
-      "calciumMgPer100g": 6,
-      "phosphorusMgPer100g": 11
-    }
+    "basis": "raw"
+  },
+  {
+    "name": "Banana",
+    "category": "fruits",
+    "fdcId": 173944,
+    "basis": "raw"
+  },
+  {
+    "name": "Pear",
+    "category": "fruits",
+    "fdcId": 169118,
+    "basis": "raw"
+  },
+  {
+    "name": "Cranberry",
+    "category": "fruits",
+    "fdcId": 171722,
+    "basis": "raw"
   },
   {
     "name": "Blueberry",
     "category": "fruits",
     "fdcId": 171711,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 57,
-      "proteinGPer100g": 0.7,
-      "fatGPer100g": 0.3,
-      "calciumMgPer100g": 6,
-      "phosphorusMgPer100g": 12
-    }
+    "basis": "raw"
   },
   {
     "name": "Cantaloupe",
     "category": "fruits",
     "fdcId": 169092,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 34,
-      "proteinGPer100g": 0.8,
-      "fatGPer100g": 0.2,
-      "calciumMgPer100g": 9,
-      "phosphorusMgPer100g": 15
-    }
+    "basis": "raw"
   },
   {
     "name": "Strawberries",
     "category": "fruits",
     "fdcId": 167762,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 32,
-      "proteinGPer100g": 0.7,
-      "fatGPer100g": 0.3,
-      "calciumMgPer100g": 16,
-      "phosphorusMgPer100g": 24
-    }
+    "basis": "raw"
   },
   {
     "name": "Watermelon",
     "category": "fruits",
     "fdcId": 167765,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 30,
-      "proteinGPer100g": 0.6,
-      "fatGPer100g": 0.2,
-      "calciumMgPer100g": 7,
-      "phosphorusMgPer100g": 11
-    }
+    "basis": "raw"
+  },
+  {
+    "name": "Asparagus",
+    "category": "veggies",
+    "fdcId": 168389,
+    "basis": "raw"
+  },
+  {
+    "name": "Beets",
+    "category": "veggies",
+    "fdcId": 169145,
+    "basis": "raw"
+  },
+  {
+    "name": "Bell Pepper (red)",
+    "category": "veggies",
+    "fdcId": 2258590,
+    "basis": "raw"
   },
   {
     "name": "Bok Choy",
     "category": "veggies",
     "fdcId": 170390,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 13,
-      "proteinGPer100g": 1.5,
-      "fatGPer100g": 0.2,
-      "calciumMgPer100g": 105,
-      "phosphorusMgPer100g": 37
-    }
+    "basis": "raw"
   },
   {
     "name": "Broccoli",
     "category": "veggies",
     "fdcId": 170379,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 34,
-      "proteinGPer100g": 2.8,
-      "fatGPer100g": 0.4,
-      "calciumMgPer100g": 47,
-      "phosphorusMgPer100g": 66
-    }
+    "basis": "raw"
   },
   {
     "name": "Brussels Sprouts",
     "category": "veggies",
     "fdcId": 170383,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 43,
-      "proteinGPer100g": 3.4,
-      "fatGPer100g": 0.3,
-      "calciumMgPer100g": 42,
-      "phosphorusMgPer100g": 69
-    }
+    "basis": "raw"
   },
   {
     "name": "Cabbage",
     "category": "veggies",
     "fdcId": 169975,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 25,
-      "proteinGPer100g": 1.3,
-      "fatGPer100g": 0.1,
-      "calciumMgPer100g": 40,
-      "phosphorusMgPer100g": 26
-    }
+    "basis": "raw"
   },
   {
     "name": "Carrots",
     "category": "veggies",
     "fdcId": 170393,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 41,
-      "proteinGPer100g": 0.9,
-      "fatGPer100g": 0.2,
-      "calciumMgPer100g": 33,
-      "phosphorusMgPer100g": 35
-    }
+    "basis": "raw"
   },
   {
     "name": "Cauliflower",
     "category": "veggies",
     "fdcId": 169986,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 25,
-      "proteinGPer100g": 1.9,
-      "fatGPer100g": 0.3,
-      "calciumMgPer100g": 22,
-      "phosphorusMgPer100g": 44
-    }
+    "basis": "raw"
   },
   {
     "name": "Celery",
     "category": "veggies",
     "fdcId": 169988,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 14,
-      "proteinGPer100g": 0.7,
-      "fatGPer100g": 0.2,
-      "calciumMgPer100g": 40,
-      "phosphorusMgPer100g": 24
-    }
+    "basis": "raw"
   },
   {
     "name": "Collard Greens",
     "category": "veggies",
     "fdcId": 170406,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 32,
-      "proteinGPer100g": 3,
-      "fatGPer100g": 0.6,
-      "calciumMgPer100g": 232,
-      "phosphorusMgPer100g": 25
-    }
+    "basis": "raw"
   },
   {
     "name": "Cucumber",
     "category": "veggies",
     "fdcId": 168409,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 16,
-      "proteinGPer100g": 0.7,
-      "fatGPer100g": 0.1,
-      "calciumMgPer100g": 16,
-      "phosphorusMgPer100g": 24
-    }
+    "basis": "raw"
   },
   {
     "name": "Green Beans",
     "category": "veggies",
     "fdcId": 169961,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 31,
-      "proteinGPer100g": 1.8,
-      "fatGPer100g": 0.1,
-      "calciumMgPer100g": 37,
-      "phosphorusMgPer100g": 38
-    }
+    "basis": "raw"
   },
   {
     "name": "Green Peas",
     "category": "veggies",
     "fdcId": 170419,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 81,
-      "proteinGPer100g": 5.4,
-      "fatGPer100g": 0.4,
-      "calciumMgPer100g": 25,
-      "phosphorusMgPer100g": 108
-    }
+    "basis": "raw"
   },
   {
     "name": "Kale",
     "category": "veggies",
     "fdcId": 168421,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 49,
-      "proteinGPer100g": 4.3,
-      "fatGPer100g": 0.9,
-      "calciumMgPer100g": 150,
-      "phosphorusMgPer100g": 92
-    }
+    "basis": "raw"
   },
   {
     "name": "Kelp",
     "category": "veggies",
     "fdcId": 168457,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 43,
-      "proteinGPer100g": 1.7,
-      "fatGPer100g": 0.6,
-      "calciumMgPer100g": 168,
-      "phosphorusMgPer100g": 42,
-      "iodineMcgPer100g": 2984,
-      "vitaminDIUPer100g": 0,
-      "vitaminEMgPer100g": 0.87,
-      "cholineMgPer100g": 12.8
-    }
+    "basis": "raw"
+  },
+  {
+    "name": "Parsley",
+    "category": "veggies",
+    "fdcId": 170416,
+    "basis": "raw"
   },
   {
     "name": "Pumpkin",
     "category": "veggies",
     "fdcId": 168448,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 26,
-      "proteinGPer100g": 1,
-      "fatGPer100g": 0.1,
-      "calciumMgPer100g": 21,
-      "phosphorusMgPer100g": 44
-    }
+    "basis": "raw"
   },
   {
     "name": "Spinach",
     "category": "veggies",
     "fdcId": 168462,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 23,
-      "proteinGPer100g": 2.9,
-      "fatGPer100g": 0.4,
-      "calciumMgPer100g": 99,
-      "phosphorusMgPer100g": 49
-    }
+    "basis": "raw"
   },
   {
     "name": "Summer Squash",
     "category": "veggies",
     "fdcId": 170487,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 16,
-      "proteinGPer100g": 1.2,
-      "fatGPer100g": 0.2,
-      "calciumMgPer100g": 15,
-      "phosphorusMgPer100g": 38,
-      "zincMgPer100g": 0.29,
-      "copperMgPer100g": 0.051,
-      "vitaminEMgPer100g": 0.12,
-      "cholineMgPer100g": 6.7
-    }
+    "basis": "raw"
   },
   {
     "name": "Winter Squash",
     "category": "veggies",
     "fdcId": 169295,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 39,
-      "proteinGPer100g": 1,
-      "fatGPer100g": 0.1,
-      "calciumMgPer100g": 28,
-      "phosphorusMgPer100g": 28
-    }
+    "basis": "raw"
   },
   {
     "name": "Zucchini",
     "category": "veggies",
     "fdcId": 169291,
-    "basis": "raw",
-    "fallback": {
-      "caloriesPer100g": 17,
-      "proteinGPer100g": 1.2,
-      "fatGPer100g": 0.3,
-      "calciumMgPer100g": 16,
-      "phosphorusMgPer100g": 38
-    }
+    "basis": "raw"
   },
   {
     "name": "Olive Oil",
     "category": "fats",
     "fdcId": 171413,
-    "basis": "oil",
-    "fallback": {
-      "caloriesPer100g": 884,
-      "proteinGPer100g": 0,
-      "fatGPer100g": 100,
-      "calciumMgPer100g": 1,
-      "phosphorusMgPer100g": 0
-    }
+    "basis": "oil"
   },
   {
     "name": "Coconut Oil",
     "category": "fats",
     "fdcId": 171412,
-    "basis": "oil",
-    "fallback": {
-      "caloriesPer100g": 862,
-      "proteinGPer100g": 0,
-      "fatGPer100g": 100,
-      "calciumMgPer100g": 0,
-      "phosphorusMgPer100g": 0
-    }
+    "basis": "oil"
   },
   {
     "name": "Cod Liver Oil",
     "category": "fats",
     "fdcId": 173577,
-    "basis": "oil",
-    "fallback": {
-      "caloriesPer100g": 902,
-      "proteinGPer100g": 0,
-      "fatGPer100g": 100,
-      "calciumMgPer100g": 0,
-      "phosphorusMgPer100g": 0,
-      "vitaminDIUPer100g": 10000,
-      "vitaminEMgPer100g": 30,
-      "epaMgPer100g": 9355,
-      "dhaMgPer100g": 10820
-    }
+    "basis": "oil"
   },
   {
     "name": "Flaxseed Oil",
     "category": "fats",
     "fdcId": 167702,
-    "basis": "oil",
-    "fallback": {
-      "caloriesPer100g": 884,
-      "proteinGPer100g": 0,
-      "fatGPer100g": 100,
-      "calciumMgPer100g": 0,
-      "phosphorusMgPer100g": 0,
-      "vitaminEMgPer100g": 0.47
-    }
+    "basis": "oil"
+  },
+  {
+    "name": "Ground Flaxseed",
+    "category": "fats",
+    "fdcId": 169414,
+    "basis": "raw"
+  },
+  {
+    "name": "Pumpkin Seeds",
+    "category": "fats",
+    "fdcId": 170556,
+    "basis": "raw"
   }
 ]
