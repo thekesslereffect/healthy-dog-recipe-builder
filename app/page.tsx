@@ -472,7 +472,7 @@ export default function Home() {
           : activePlanName || 'Select a plan';
 
   return (
-    <div className="app-mesh flex h-dvh flex-col text-foreground print:h-auto print:min-h-0 print:bg-white print:text-black">
+    <div className="flex h-dvh flex-col bg-background text-foreground print:h-auto print:min-h-0 print:bg-white print:text-black">
       <header className="flex shrink-0 items-center justify-between gap-3 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6 print:px-2 print:py-2">
         <div className="min-w-0 flex-1">
           {activeScreen === 'profile' ? (
