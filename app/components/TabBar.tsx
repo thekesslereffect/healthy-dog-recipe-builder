@@ -1,1 +1,1 @@
-export type ScreenId = 'plan' | 'build' | 'edit' | 'profile';
+export type ScreenId = 'setup' | 'plan' | 'build' | 'edit' | 'profile';

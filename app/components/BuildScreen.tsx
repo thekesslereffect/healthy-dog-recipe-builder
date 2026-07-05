@@ -122,7 +122,7 @@ export function BuildScreen({
               {!isPercentageValid
                 ? 'Mix must total 100%.'
                 : hasInvalidDog
-                  ? 'Set up dogs in Profile first.'
+                  ? 'Finish dog setup first.'
                   : ''}
             </p>
           )}

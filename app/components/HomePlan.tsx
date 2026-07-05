@@ -53,6 +53,7 @@ interface HomePlanProps {
   portionUnits: Record<string, MassUnit>;
   copied: boolean;
   canGenerate: boolean;
+  needsSetup: boolean;
   hasInvalidDog: boolean;
   onDaysChange: (days: number) => void;
   onMealsChange: (meals: number) => void;
@@ -64,6 +65,7 @@ interface HomePlanProps {
   onGoEdit: () => void;
   onGoBuild: () => void;
   onGoProfile: () => void;
+  onGoSetup: () => void;
 }
 
 export function HomePlan({
@@ -80,6 +82,7 @@ export function HomePlan({
   portionUnits,
   copied,
   canGenerate,
+  needsSetup,
   hasInvalidDog,
   onDaysChange,
   onMealsChange,
@@ -91,6 +94,7 @@ export function HomePlan({
   onGoEdit,
   onGoBuild,
   onGoProfile,
+  onGoSetup,
 }: HomePlanProps) {
   const [pane, setPane] = useState<PlanPane>('shop');
   if (!recipe) {
@@ -98,11 +102,13 @@ export function HomePlan({
       <EmptyState
         className="h-full min-h-0 print:hidden"
         icon={hasDraft ? <Sparkles size={28} /> : <CookingPot size={28} />}
-        title={hasDraft ? 'Almost there!' : 'Your kitchen awaits'}
+        title={needsSetup ? 'Set up your dogs' : hasDraft ? 'Almost there!' : 'Your kitchen awaits'}
         description={
-          hasDraft
-            ? 'Name and confirm your draft to unlock shopping and feeding guides.'
-            : 'Pick a saved plan from the menu above, or create a new one.'
+          needsSetup
+            ? 'Add at least one dog with a name and weight before building a meal plan.'
+            : hasDraft
+              ? 'Name and confirm your draft to unlock shopping and feeding guides.'
+              : 'Pick a saved plan from the menu above, or create a new one.'
         }
       >
         {dogsWithMER.length > 0 && (
@@ -126,19 +132,26 @@ export function HomePlan({
         )}
 
         <div className="mt-8 flex w-full max-w-xs flex-col gap-2.5">
-          <Button
-            onClick={onGoBuild}
-            disabled={!canGenerate && !hasDraft}
-            className="inline-flex items-center justify-center gap-2 py-3"
-          >
-            <SlidersHorizontal size={16} />
-            {hasDraft ? 'Finish draft' : 'Build a plan'}
-            <ArrowRight size={14} className="opacity-70" />
-          </Button>
+          {needsSetup ? (
+            <Button onClick={onGoSetup} className="inline-flex items-center justify-center gap-2 py-3">
+              Set up dogs
+              <ArrowRight size={14} className="opacity-70" />
+            </Button>
+          ) : (
+            <Button
+              onClick={onGoBuild}
+              disabled={!canGenerate && !hasDraft}
+              className="inline-flex items-center justify-center gap-2 py-3"
+            >
+              <SlidersHorizontal size={16} />
+              {hasDraft ? 'Finish draft' : 'Build a plan'}
+              <ArrowRight size={14} className="opacity-70" />
+            </Button>
+          )}
 
-          {hasInvalidDog && (
-            <Button variant="secondary" onClick={onGoProfile}>
-              Set up your dogs first
+          {!needsSetup && hasInvalidDog && (
+            <Button variant="secondary" onClick={onGoSetup}>
+              Finish dog setup
             </Button>
           )}
         </div>

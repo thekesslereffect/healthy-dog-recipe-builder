@@ -110,7 +110,7 @@ export function ProfileScreen({
         onClose={closeEditor}
         footer={
           <>
-            {editingIndex !== null && dogs.length > 1 && (
+            {editingIndex !== null && (
               <button
                 type="button"
                 onClick={() => {

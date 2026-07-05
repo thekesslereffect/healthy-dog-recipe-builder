@@ -31,6 +31,7 @@ import { HomePlan } from './components/HomePlan';
 import { BuildScreen } from './components/BuildScreen';
 import { EditScreen } from './components/EditScreen';
 import { ProfileScreen } from './components/ProfileScreen';
+import { SetupScreen } from './components/SetupScreen';
 import { PlanPicker } from './components/PlanPicker';
 import type { ScreenId } from './components/TabBar';
 import { ArrowLeft, Sun, Moon, User } from 'lucide-react';
@@ -38,14 +39,9 @@ import { Button } from './components/ui';
 
 type Theme = 'light' | 'dark';
 
-const DEFAULT_DOGS: Dog[] = [
-  { id: 'default-jackson', name: 'Jackson', weight: 30, activityMultiplier: 1.3, allergies: [] },
-  { id: 'default-joey', name: 'Joey', weight: 12, activityMultiplier: 1.0, allergies: [] },
-];
-
 export default function Home() {
   const [unit, setUnit] = useLocalStorage<WeightUnit>('hdrb.unit', 'lb');
-  const [dogs, setDogs] = useLocalStorage<Dog[]>('hdrb.dogs', DEFAULT_DOGS);
+  const [dogs, setDogs, dogsLoaded] = useLocalStorage<Dog[]>('hdrb.dogs', []);
   const [numberOfDays, setNumberOfDays] = useLocalStorage('hdrb.days', 7);
   const [mealsPerDay, setMealsPerDay] = useLocalStorage('hdrb.meals', 2);
   const [ratios, setRatios] = useLocalStorage<CategoryRatios>('hdrb.ratios', RECOMMENDED_RATIOS);
@@ -130,10 +126,19 @@ export default function Home() {
       setCheckedItems({});
     }
   }, [saved.length, recipe, planName, setRecipe, setPlanName, setCheckedItems]);
+
   const percentageSum = CATEGORIES.reduce((sum, c) => sum + ratios[c], 0);
   const isPercentageValid = Math.abs(percentageSum - 1) < 0.001;
   const hasInvalidDog = dogs.some((d) => !d.name?.trim() || d.weight <= 0);
-  const canGenerate = isPercentageValid && !hasInvalidDog;
+  const needsSetup = dogs.length === 0 || hasInvalidDog;
+  const canGenerate = isPercentageValid && !needsSetup;
+
+  useEffect(() => {
+    if (!dogsLoaded) return;
+    if (needsSetup && activeScreen !== 'setup' && activeScreen !== 'profile') {
+      setActiveScreen('setup');
+    }
+  }, [dogsLoaded, needsSetup, activeScreen]);
   const dogsWithMER = dogs.map((dog) => ({ ...dog, MER: calculateDailyCalories(dog) }));
   const allergyList = Array.from(new Set(dogs.flatMap((d) => d.allergies ?? [])));
   const computeRecipe = (
@@ -200,7 +205,7 @@ export default function Home() {
       { id: createId(), name: '', weight: 0, activityMultiplier: 1.6, allergies: [] },
     ]);
   const removeDog = (index: number) => {
-    if (dogs.length > 1) setDogs(dogs.filter((_, i) => i !== index));
+    setDogs(dogs.filter((_, i) => i !== index));
   };
   const updateDog = (
     index: number,
@@ -489,15 +494,28 @@ export default function Home() {
     setActiveScreen('plan');
   };
   const startNewPlan = () => {
+    if (needsSetup) {
+      setActiveScreen('setup');
+      return;
+    }
     setEditRecipe(null);
     setActiveScreen('build');
   };
+  const finishSetup = () => {
+    if (needsSetup) return;
+    setActiveScreen('build');
+  };
+  const goToSetup = () => setActiveScreen('setup');
   const openProfile = () => {
     if (activeScreen === 'profile') return;
     setReturnScreen(activeScreen);
     setActiveScreen('profile');
   };
   const closeProfile = () => {
+    if (needsSetup) {
+      setActiveScreen('setup');
+      return;
+    }
     setActiveScreen(returnScreen === 'profile' ? 'plan' : returnScreen);
   };
   const deleteSavedRecipe = (id: string) => {
@@ -517,24 +535,28 @@ export default function Home() {
   };
   const activePlanName = planName || currentSaved?.name || (recipe ? 'Untitled plan' : '');
   const pickerLabel =
-    activeScreen === 'profile'
-      ? 'Profile'
-      : activeScreen === 'build'
-        ? draftName.trim() || 'New plan'
-        : activeScreen === 'edit'
-          ? editPlanName.trim() || activePlanName || 'Edit plan'
-          : activePlanName || 'Select a plan';
+    activeScreen === 'setup'
+      ? 'Get started'
+      : activeScreen === 'profile'
+        ? 'Profile'
+        : activeScreen === 'build'
+          ? draftName.trim() || 'New plan'
+          : activeScreen === 'edit'
+            ? editPlanName.trim() || activePlanName || 'Edit plan'
+            : activePlanName || 'Select a plan';
   return (
     <div className="flex h-dvh flex-col bg-background text-foreground print:h-auto print:min-h-0 print:bg-white print:text-black">
       <header className="flex shrink-0 items-center justify-between gap-3 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6 print:px-2 print:py-2">
         <div className="min-w-0 flex-1">
-          {activeScreen === 'profile' ? (
+          {activeScreen === 'profile' || activeScreen === 'setup' ? (
             <div className="flex items-center gap-1">
-              <Button variant="icon" onClick={closeProfile} aria-label="Back">
-                <ArrowLeft size={18} />
-              </Button>
+              {activeScreen === 'profile' && (
+                <Button variant="icon" onClick={closeProfile} aria-label="Back">
+                  <ArrowLeft size={18} />
+                </Button>
+              )}
               <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl print:text-2xl print:text-black">
-                Profile
+                {activeScreen === 'setup' ? 'Get started' : 'Profile'}
               </h1>
             </div>
           ) : (
@@ -574,6 +596,24 @@ export default function Home() {
       </header>
 
       <main className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col overflow-visible px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:max-w-5xl sm:px-6 print:max-w-none print:overflow-visible print:px-2">
+        {activeScreen === 'setup' && (
+          <div
+            key="setup"
+            className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible"
+          >
+            <SetupScreen
+              dogs={dogs}
+              unit={unit}
+              canContinue={canGenerate}
+              onUnitChange={setUnit}
+              onAddDog={addDog}
+              onRemoveDog={removeDog}
+              onUpdateDog={updateDog}
+              onContinue={finishSetup}
+            />
+          </div>
+        )}
+
         {activeScreen === 'plan' && (
           <div key="plan" className="animate-fade-in flex min-h-0 flex-1 flex-col overflow-visible">
             <HomePlan
@@ -590,6 +630,7 @@ export default function Home() {
               portionUnits={portionUnits}
               copied={copied}
               canGenerate={canGenerate}
+              needsSetup={needsSetup}
               hasInvalidDog={hasInvalidDog}
               onDaysChange={changeDays}
               onMealsChange={changeMeals}
@@ -601,6 +642,7 @@ export default function Home() {
               onGoEdit={startEdit}
               onGoBuild={startNewPlan}
               onGoProfile={openProfile}
+              onGoSetup={goToSetup}
             />
           </div>
         )}
