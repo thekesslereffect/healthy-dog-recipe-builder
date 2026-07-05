@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Nunito } from "next/font/google";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -7,6 +7,11 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   weight: ["400", "500", "600", "700"],
   display: "swap",
+});
+
+const nunito = Nunito({
+  subsets: ["latin"],
+  variable: "--font-nunito"
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -34,7 +39,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
+  return ( 
     <html lang="en" suppressHydrationWarning>
       <head>
         <script
@@ -43,7 +48,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${jakarta.variable} font-sans antialiased`}>
+      <body className={`${jakarta.variable} ${nunito.variable} font-sans antialiased`}>
         {children}
       </body>
     </html>
