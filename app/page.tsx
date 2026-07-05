@@ -30,7 +30,7 @@ import { EditScreen } from './components/EditScreen';
 import { ProfileScreen } from './components/ProfileScreen';
 import { PlanPicker } from './components/PlanPicker';
 import type { ScreenId } from './components/TabBar';
-import { User, Sun, Moon } from 'lucide-react';
+import { User, Sun, Moon, ArrowLeft } from 'lucide-react';
 import { iconBtn } from './components/ui';
 
 type Theme = 'light' | 'dark';
@@ -70,6 +70,7 @@ export default function Home() {
   );
   const [theme, setTheme] = useLocalStorage<Theme>('hdrb.theme', 'light');
   const [activeScreen, setActiveScreen] = useState<ScreenId>('plan');
+  const [returnScreen, setReturnScreen] = useState<ScreenId>('plan');
   const [copied, setCopied] = useState(false);
   const [draftName, setDraftName] = useState('');
   /** Working copy while on the Edit screen (never used by Build). */
@@ -432,9 +433,14 @@ export default function Home() {
     setActiveScreen('build');
   };
 
-  const goToScreen = (id: ScreenId) => {
-    if (id !== 'edit') setEditRecipe(null);
-    setActiveScreen(id);
+  const openProfile = () => {
+    if (activeScreen === 'profile') return;
+    setReturnScreen(activeScreen);
+    setActiveScreen('profile');
+  };
+
+  const closeProfile = () => {
+    setActiveScreen(returnScreen === 'profile' ? 'plan' : returnScreen);
   };
 
   const deleteSavedRecipe = (id: string) => {
@@ -465,26 +471,24 @@ export default function Home() {
           ? activePlanName || 'Edit plan'
           : activePlanName || 'Select a plan';
 
-  const headerEyebrow =
-    activeScreen === 'profile'
-      ? 'Settings'
-      : activeScreen === 'build'
-        ? 'Building'
-        : activeScreen === 'edit'
-          ? 'Editing'
-          : 'Paws & Portions';
-
   return (
     <div className="app-mesh flex h-dvh flex-col text-foreground print:h-auto print:min-h-0 print:bg-white print:text-black">
-      <header className="flex shrink-0 items-center justify-between gap-3 px-4 pb-3 pt-[max(0.875rem,env(safe-area-inset-top))] sm:px-6 print:px-2 print:py-2">
+      <header className="flex shrink-0 items-center justify-between gap-3 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6 print:px-2 print:py-2">
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted print:hidden">
-            {headerEyebrow}
-          </p>
           {activeScreen === 'profile' ? (
-            <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl print:text-2xl print:text-black">
-              Profile
-            </h1>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={closeProfile}
+                className={iconBtn}
+                aria-label="Back"
+              >
+                <ArrowLeft size={18} />
+              </button>
+              <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl print:text-2xl print:text-black">
+                Profile
+              </h1>
+            </div>
           ) : (
             <div className="print:hidden">
               <PlanPicker
@@ -512,8 +516,8 @@ export default function Home() {
           </button>
           <button
             type="button"
-            onClick={() => goToScreen('profile')}
-            aria-label="Profile"
+            onClick={() => (activeScreen === 'profile' ? closeProfile() : openProfile())}
+            aria-label={activeScreen === 'profile' ? 'Close profile' : 'Profile'}
             aria-current={activeScreen === 'profile' ? 'page' : undefined}
             className={`${iconBtn} ${activeScreen === 'profile' ? 'bg-accent-soft text-accent' : ''}`}
           >
@@ -547,7 +551,7 @@ export default function Home() {
             onCopy={copyRecipe}
             onGoEdit={startEdit}
             onGoBuild={startNewPlan}
-            onGoProfile={() => goToScreen('profile')}
+            onGoProfile={openProfile}
           />
           </div>
         )}

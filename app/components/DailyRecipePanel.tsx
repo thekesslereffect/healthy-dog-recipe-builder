@@ -170,11 +170,7 @@ export function DailyRecipePanel({
     return (
       <>
         <div className="flex h-full min-h-0 flex-col rounded-2xl border border-border bg-surface shadow-[var(--shadow-sm)]">
-          <div className="shrink-0 border-b border-border px-3 py-2 sm:px-4 sm:py-3">
-            <p className="text-sm font-semibold text-foreground">Daily ingredients</p>
-            <p className="hidden text-[11px] text-muted sm:block">Tap to swap · lock to keep on reroll</p>
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-1.5 sm:px-4 sm:py-2">{body}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-2 sm:px-4">{body}</div>
           {dogsWithMER && (
             <NutritionSnapshot
               recipe={recipe}

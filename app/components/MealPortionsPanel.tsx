@@ -21,6 +21,7 @@ interface MealPortionsPanelProps {
   portionUnits: Record<string, MassUnit>;
   onPortionUnitsChange: (next: Record<string, MassUnit>) => void;
   onMealsChange: (meals: number) => void;
+  showToolbar?: boolean;
 }
 
 export function MealPortionsPanel({
@@ -30,12 +31,14 @@ export function MealPortionsPanel({
   portionUnits,
   onPortionUnitsChange,
   onMealsChange,
+  showToolbar = true,
 }: MealPortionsPanelProps) {
   const portionUnitFor = (name: string): MassUnit => portionUnits[name] ?? 'g';
   const entries = Object.entries(portions);
 
   return (
     <div className="flex h-full min-h-0 flex-col">
+      {showToolbar && (
       <div className="flex shrink-0 items-center justify-between gap-2 pb-3 print:hidden">
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold text-muted">Meals/day</span>
@@ -73,6 +76,7 @@ export function MealPortionsPanel({
           })}
         </div>
       </div>
+      )}
 
       <div className={`${scrollShadowRoom} min-h-0 flex-1 space-y-2.5 print:overflow-visible`}>
         {entries.map(([dogName, portion]) => {

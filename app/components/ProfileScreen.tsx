@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Dog } from '../utils/recipeCalculator';
 import { calculateDailyCalories } from '../utils/recipeCalculator';
 import { weightUnitLabel, type WeightUnit } from '../utils/format';
-import { btnPrimary, btnSecondary, cardElevated, scrollShadowRoom, segmentBtn, segmentTrack } from './ui';
+import { btnPrimary, btnSecondary, cardElevated, scrollShadowRoom, segmentBtn, segmentTrack, toolbarEditBtn } from './ui';
 import { ChevronRight, Plus } from 'lucide-react';
 import { DogCard } from './DogCard';
 import { DogAvatar } from './DogAvatar';
@@ -43,7 +43,7 @@ export function ProfileScreen({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex shrink-0 items-center justify-between gap-2 pb-3">
+      <div className="flex shrink-0 items-center gap-2 pb-2">
         <div className={segmentTrack}>
           {(['lb', 'kg'] as const).map((u) => (
             <button
@@ -56,24 +56,21 @@ export function ProfileScreen({
             </button>
           ))}
         </div>
+        {dogs.length > 0 && totalCalories > 0 && (
+          <span className="inline-flex h-9 items-center rounded-xl bg-sage-soft px-2.5 text-xs font-semibold tabular-nums text-sage">
+            {Math.round(totalCalories)} cal/day
+          </span>
+        )}
         <button
           type="button"
           onClick={onAddDog}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-3.5 py-2 text-sm font-semibold text-white shadow-[var(--shadow-sm)] transition-all hover:bg-[var(--accent-hover)] active:scale-[0.98]"
+          className={`${toolbarEditBtn} ml-auto`}
         >
           <Plus size={14} />
-          Add dog
+          <span className="hidden sm:inline">Add dog</span>
+          <span className="sm:hidden">Add</span>
         </button>
       </div>
-
-      {dogs.length > 0 && totalCalories > 0 && (
-        <div className="mb-3 flex shrink-0 items-center justify-between rounded-2xl bg-sage-soft px-4 py-3">
-          <span className="text-xs font-semibold text-sage">Pack daily calories</span>
-          <span className="text-lg font-bold tabular-nums text-sage">
-            {Math.round(totalCalories)}
-          </span>
-        </div>
-      )}
 
       <div className={`${scrollShadowRoom} min-h-0 flex-1`}>
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">

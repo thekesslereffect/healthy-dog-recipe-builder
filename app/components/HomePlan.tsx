@@ -13,8 +13,13 @@ import {
 } from '../utils/recipeCalculator';
 
 import type { MassUnit, WeightUnit } from '../utils/format';
+import {
+  defaultMassUnit,
+  MASS_UNITS,
+  massUnitLabel,
+} from '../utils/format';
 
-import { btnPrimary, btnSecondary, emptyIconWrap, iconBtn, segmentBtn, segmentTrack } from './ui';
+import { btnPrimary, btnSecondary, emptyIconWrap, iconBtn, segmentBtn, segmentTrack, stepperBtn, stepperValue } from './ui';
 
 import {
   ArrowRight,
@@ -245,13 +250,49 @@ export function HomePlan({
 
   const portions = calculateMealPortions(recipe, dogsWithMER, mealsPerDay);
 
+  const shopEntries = Object.entries(shoppingList);
+
+  const portionEntries = Object.entries(portions);
+
+  const fallbackMassUnit = defaultMassUnit(unit);
+
+  const shopUnitFor = (name: string): MassUnit => shoppingUnits[name] ?? fallbackMassUnit;
+
+  const portionUnitFor = (name: string): MassUnit => portionUnits[name] ?? fallbackMassUnit;
+
+  const setAllShoppingUnits = (massUnit: MassUnit) => {
+
+    const next: Record<string, MassUnit> = { ...shoppingUnits };
+
+    for (const [name] of shopEntries) next[name] = massUnit;
+
+    onShoppingUnitsChange(next);
+
+  };
+
+  const setAllPortionUnits = (massUnit: MassUnit) => {
+
+    const next: Record<string, MassUnit> = { ...portionUnits };
+
+    for (const [name] of portionEntries) next[name] = massUnit;
+
+    onPortionUnitsChange(next);
+
+  };
+
+  const checkedCount = shopEntries.filter(([name]) => checkedItems[name]).length;
+
+  const shopProgress =
+
+    shopEntries.length > 0 ? (checkedCount / shopEntries.length) * 100 : 0;
+
 
 
   return (
 
     <div className="flex h-full min-h-0 flex-col">
 
-      <div className="flex shrink-0 items-center justify-between gap-2 pb-3 print:hidden">
+      <div className="flex shrink-0 items-center gap-1.5 pb-1.5 print:hidden">
 
         <div className={segmentTrack}>
 
@@ -285,7 +326,196 @@ export function HomePlan({
 
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-1.5">
+
+        {pane === 'shop' ? (
+
+          <>
+
+            <div className={segmentTrack}>
+
+              <button
+
+                type="button"
+
+                aria-label="Fewer days"
+
+                className={stepperBtn}
+
+                onClick={() => onDaysChange(Math.max(1, numberOfDays - 1))}
+
+              >
+
+                −
+
+              </button>
+
+              <span className={stepperValue}>{numberOfDays}</span>
+
+              <button
+
+                type="button"
+
+                aria-label="More days"
+
+                className={stepperBtn}
+
+                onClick={() => onDaysChange(Math.min(30, numberOfDays + 1))}
+
+              >
+
+                +
+
+              </button>
+
+            </div>
+
+            <div className={segmentTrack}>
+
+              {MASS_UNITS.map((massUnit) => {
+
+                const allMatch =
+
+                  shopEntries.length > 0 &&
+
+                  shopEntries.every(([name]) => shopUnitFor(name) === massUnit);
+
+                return (
+
+                  <button
+
+                    key={massUnit}
+
+                    type="button"
+
+                    className={segmentBtn(allMatch)}
+
+                    onClick={() => setAllShoppingUnits(massUnit)}
+
+                  >
+
+                    {massUnitLabel(massUnit)}
+
+                  </button>
+
+                );
+
+              })}
+
+            </div>
+
+          </>
+
+        ) : (
+
+          <>
+
+            <div className={segmentTrack}>
+
+              {[1, 2, 3].map((n) => (
+
+                <button
+
+                  key={n}
+
+                  type="button"
+
+                  className={segmentBtn(mealsPerDay === n)}
+
+                  onClick={() => onMealsChange(n)}
+
+                >
+
+                  {n}
+
+                </button>
+
+              ))}
+
+            </div>
+
+            <div className={segmentTrack}>
+
+              {MASS_UNITS.map((massUnit) => {
+
+                const allMatch =
+
+                  portionEntries.length > 0 &&
+
+                  portionEntries.every(([name]) => portionUnitFor(name) === massUnit);
+
+                return (
+
+                  <button
+
+                    key={massUnit}
+
+                    type="button"
+
+                    className={segmentBtn(allMatch)}
+
+                    onClick={() => setAllPortionUnits(massUnit)}
+
+                  >
+
+                    {massUnitLabel(massUnit)}
+
+                  </button>
+
+                );
+
+              })}
+
+            </div>
+
+          </>
+
+        )}
+
+        </div>
+
+      </div>
+
+      {pane === 'shop' && (
+      <div className="flex shrink-0 items-center gap-2 pb-2 print:hidden">
+
+        {shopEntries.length > 0 ? (
+
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+
+            <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-surface-muted">
+
+              <div
+
+                className="h-full rounded-full bg-sage transition-all duration-300"
+
+                style={{ width: `${shopProgress}%` }}
+
+              />
+
+            </div>
+
+            <span className="shrink-0 text-[11px] font-semibold tabular-nums text-sage">
+
+              {Math.round(shopProgress)}%
+
+            </span>
+
+            <span className="hidden shrink-0 text-[11px] font-medium text-muted sm:inline">
+
+              {checkedCount}/{shopEntries.length}
+
+            </span>
+
+          </div>
+
+        ) : (
+
+          <div className="min-w-0 flex-1" />
+
+        )}
+
+        <div className="flex shrink-0 items-center gap-0.5">
 
           <button
 
@@ -293,13 +523,13 @@ export function HomePlan({
 
             onClick={onGoEdit}
 
-            className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-3.5 py-2 text-sm font-semibold text-white shadow-[var(--shadow-sm)] transition-all hover:bg-[var(--accent-hover)] active:scale-[0.98]"
+            className={iconBtn}
+
+            aria-label="Edit plan"
 
           >
 
-            <Pencil size={14} />
-
-            Edit
+            <Pencil size={16} />
 
           </button>
 
@@ -340,6 +570,7 @@ export function HomePlan({
         </div>
 
       </div>
+      )}
 
 
 
@@ -383,6 +614,10 @@ export function HomePlan({
 
             onDaysChange={onDaysChange}
 
+            showToolbar={false}
+
+            showProgress={false}
+
           />
 
         ) : (
@@ -400,6 +635,8 @@ export function HomePlan({
             onPortionUnitsChange={onPortionUnitsChange}
 
             onMealsChange={onMealsChange}
+
+            showToolbar={false}
 
           />
 

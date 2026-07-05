@@ -38,6 +38,10 @@ interface ShoppingListPanelProps {
 
   onDaysChange: (days: number) => void;
 
+  showToolbar?: boolean;
+
+  showProgress?: boolean;
+
 }
 
 
@@ -59,6 +63,10 @@ export function ShoppingListPanel({
   onCheckedItemsChange,
 
   onDaysChange,
+
+  showToolbar = true,
+
+  showProgress = true,
 
 }: ShoppingListPanelProps) {
 
@@ -85,6 +93,8 @@ export function ShoppingListPanel({
   return (
 
     <div className="flex h-full min-h-0 flex-col">
+
+      {showToolbar && (
 
       <div className="flex shrink-0 items-center justify-between gap-2 pb-3 print:hidden">
 
@@ -178,11 +188,13 @@ export function ShoppingListPanel({
 
       </div>
 
+      )}
 
 
-      {entries.length > 0 && (
 
-        <div className="mb-3 shrink-0 print:hidden">
+      {entries.length > 0 && showProgress && (
+
+        <div className={`shrink-0 print:hidden ${showToolbar ? 'mb-3' : ''}`}>
 
           <div className="mb-1 flex items-center justify-between text-[11px] font-semibold">
 

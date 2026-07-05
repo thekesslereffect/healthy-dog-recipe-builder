@@ -9,9 +9,9 @@ import {
 import type { Dog, Recipe, SupplementOptions } from '../utils/recipeCalculator';
 import { CategoryBar } from './CategoryBar';
 import { DailyRecipePanel } from './DailyRecipePanel';
-import { SupplementControlsPanel, enabledSupplementCount, enabledSupplementNames } from './SupplementControls';
+import { SupplementControlsPanel, enabledSupplementCount } from './SupplementControls';
 import { Sheet } from './Sheet';
-import { btnPrimary, btnSecondary, cardElevated, inputBase } from './ui';
+import { btnPrimary, btnSecondary, inputBase } from './ui';
 import { ChevronRight, Shuffle, Sparkles } from 'lucide-react';
 
 interface BuildScreenProps {
@@ -39,27 +39,6 @@ interface BuildScreenProps {
   onBalance?: () => void;
 }
 
-function BuildStep({ step, label, active, done }: { step: number; label: string; active: boolean; done: boolean }) {
-  return (
-    <div className="flex flex-1 flex-col items-center gap-1">
-      <div
-        className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
-          done
-            ? 'bg-sage text-white'
-            : active
-              ? 'bg-accent text-white shadow-[var(--shadow-sm)]'
-              : 'bg-surface-muted text-muted'
-        }`}
-      >
-        {done ? '✓' : step}
-      </div>
-      <span className={`text-[10px] font-semibold ${active || done ? 'text-foreground' : 'text-muted'}`}>
-        {label}
-      </span>
-    </div>
-  );
-}
-
 function ConfigChip({
   label,
   detail,
@@ -73,7 +52,7 @@ function ConfigChip({
     <button
       type="button"
       onClick={onClick}
-      className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-xl border border-border bg-surface px-3 py-2.5 text-left shadow-[var(--shadow-sm)] active:scale-[0.98]"
+      className="flex h-9 min-w-0 flex-1 items-center justify-between gap-2 rounded-xl border border-border bg-surface px-3 text-left shadow-[var(--shadow-sm)] active:scale-[0.98]"
     >
       <span className="truncate text-sm font-semibold text-foreground">{label}</span>
       <span className="inline-flex shrink-0 items-center gap-0.5 text-xs font-medium text-muted">
@@ -111,107 +90,21 @@ export function BuildScreen({
   const [mixOpen, setMixOpen] = useState(false);
   const [supplementsOpen, setSupplementsOpen] = useState(false);
   const sum = CATEGORIES.reduce((total, c) => total + ratios[c], 0);
-  const enabledSupplements = enabledSupplementNames(supplementOptions);
   const supplementCount = enabledSupplementCount(supplementOptions);
-  const activeStep: 2 | 3 = draftRecipe ? 3 : 2;
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-2 sm:gap-3 sm:px-0.5 sm:py-0.5">
-      {/* Desktop stepper */}
-      <div className="hidden shrink-0 items-center gap-2 rounded-2xl bg-surface px-4 py-3 shadow-[var(--shadow-sm)] sm:flex">
-        <BuildStep step={1} label="Configure" active={false} done />
-        <div className="h-0.5 flex-1 rounded-full bg-sage" />
-        <BuildStep step={2} label="Generate" active={activeStep === 2} done={activeStep > 2} />
-        <div className={`h-0.5 flex-1 rounded-full ${activeStep > 2 ? 'bg-sage' : 'bg-border'}`} />
-        <BuildStep step={3} label="Confirm" active={activeStep === 3} done={false} />
-      </div>
-
-      {/* Mobile: slim chips when reviewing a draft; full stacked cards when configuring */}
-      {draftRecipe ? (
-        <div className="flex shrink-0 gap-2 sm:hidden">
-          <ConfigChip
-            label="Mix"
-            detail={`${Math.round(sum * 100)}%`}
-            onClick={() => setMixOpen(true)}
-          />
-          <ConfigChip
-            label="Supplements"
-            detail={`${supplementCount} on`}
-            onClick={() => setSupplementsOpen(true)}
-          />
-        </div>
-      ) : (
-        <div className="grid shrink-0 grid-cols-1 gap-2 sm:hidden">
-          <button
-            type="button"
-            onClick={() => setMixOpen(true)}
-            className="flex min-w-0 flex-col rounded-2xl border border-border bg-surface p-3 text-left shadow-[var(--shadow-sm)] active:scale-[0.98]"
-          >
-            <div className="mb-2 flex items-center justify-between gap-1">
-              <span className="text-sm font-semibold text-foreground">Ingredient mix</span>
-              <span className="inline-flex items-center gap-0.5 text-xs font-medium text-muted">
-                {Math.round(sum * 100)}%
-                <ChevronRight size={12} />
-              </span>
-            </div>
-            <CategoryBar ratios={ratios} compact />
-          </button>
-          <button
-            type="button"
-            onClick={() => setSupplementsOpen(true)}
-            className="flex min-w-0 flex-col rounded-2xl border border-border bg-surface p-3 text-left shadow-[var(--shadow-sm)] active:scale-[0.98]"
-          >
-            <div className="flex items-center justify-between gap-1">
-              <span className="text-sm font-semibold text-foreground">Supplements</span>
-              <span className="inline-flex items-center gap-0.5 text-xs font-medium text-muted">
-                {supplementCount} on
-                <ChevronRight size={12} />
-              </span>
-            </div>
-            <p className="mt-1.5 line-clamp-1 text-xs text-muted">
-              {enabledSupplements.length > 0
-                ? enabledSupplements.join(', ')
-                : 'Tap to choose supplements'}
-            </p>
-          </button>
-        </div>
-      )}
-
-      {/* Desktop: always show full config cards */}
-      <div className="hidden shrink-0 grid-cols-2 gap-3 px-0.5 sm:grid">
-        <button
-          type="button"
+    <div className="flex h-full min-h-0 flex-col gap-2 sm:gap-2.5 sm:px-0.5 sm:py-0.5">
+      <div className="flex shrink-0 gap-2">
+        <ConfigChip
+          label="Mix"
+          detail={`${Math.round(sum * 100)}%`}
           onClick={() => setMixOpen(true)}
-          className={`${cardElevated} flex min-w-0 flex-col text-left active:scale-[0.98]`}
-        >
-          <div className="mb-2 flex items-center justify-between gap-1">
-            <span className="text-sm font-semibold text-foreground">Ingredient mix</span>
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-muted">
-              {Math.round(sum * 100)}%
-              <ChevronRight size={12} />
-            </span>
-          </div>
-          <CategoryBar ratios={ratios} />
-        </button>
-
-        <button
-          type="button"
+        />
+        <ConfigChip
+          label="Supplements"
+          detail={`${supplementCount} on`}
           onClick={() => setSupplementsOpen(true)}
-          className={`${cardElevated} flex min-w-0 flex-col text-left active:scale-[0.98]`}
-        >
-          <div className="mb-2 flex items-center justify-between gap-1">
-            <span className="text-sm font-semibold text-foreground">Supplements</span>
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-muted">
-              {supplementCount} on
-              <ChevronRight size={12} />
-            </span>
-          </div>
-          <p className="line-clamp-2 text-[11px] leading-snug text-muted sm:text-xs">
-            {enabledSupplements.length > 0
-              ? enabledSupplements.join(', ')
-              : 'Tap to choose supplements'}
-          </p>
-        </button>
+        />
       </div>
 
       {!draftRecipe ? (

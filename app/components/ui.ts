@@ -30,14 +30,23 @@ export const iconBtn =
   'inline-flex h-9 w-9 items-center justify-center rounded-xl text-muted transition-all hover:bg-surface-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 active:scale-95';
 
 export const segmentTrack =
-  'inline-flex rounded-xl bg-surface-muted p-1';
+  'inline-flex h-9 items-center rounded-xl bg-surface-muted p-0.5';
 
 export const segmentBtn = (active: boolean) =>
-  `rounded-[10px] px-3.5 py-1.5 text-sm font-semibold transition-all ${
+  `inline-flex h-8 items-center justify-center rounded-[10px] px-3 text-xs font-semibold transition-all sm:px-3.5 sm:text-sm ${
     active
       ? 'bg-surface text-foreground shadow-[var(--shadow-sm)]'
       : 'text-muted hover:text-foreground'
   }`;
+
+export const stepperBtn =
+  'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-sm font-semibold text-muted transition-all hover:text-foreground active:scale-95';
+
+export const stepperValue =
+  'flex h-8 min-w-[1.75rem] items-center justify-center px-0.5 text-sm font-bold tabular-nums text-foreground';
+
+export const toolbarEditBtn =
+  'inline-flex h-9 items-center gap-1.5 rounded-xl bg-accent px-3 text-sm font-semibold text-white shadow-[var(--shadow-sm)] transition-all hover:bg-[var(--accent-hover)] active:scale-[0.98]';
 
 export const pill =
   'inline-flex items-center gap-1 rounded-full bg-accent-soft px-2.5 py-0.5 text-[11px] font-semibold text-accent';
