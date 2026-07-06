@@ -253,60 +253,6 @@ export function HomePlan({
         </div>
       </div>
 
-      {pane === 'feed' && (
-        <div className="flex shrink-0 items-center gap-2.5 px-1 py-2 print:hidden">
-          <Flame
-            size={18}
-            className={`shrink-0 ${feedingStreak > 0 ? 'text-accent' : 'text-muted'}`}
-          />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-foreground">
-              {feedingStreak > 0
-                ? `${feedingStreak}-day feeding streak`
-                : 'Start a feeding streak'}
-            </p>
-            <div className="flex items-center gap-1.5">
-              <span className="flex items-center gap-1">
-                {Array.from({ length: mealsPerDay }, (_, i) => (
-                  <span
-                    key={i}
-                    className={`h-1.5 w-1.5 rounded-full ${
-                      i < mealsFedToday ? 'bg-sage' : 'bg-surface-muted ring-1 ring-inset ring-border'
-                    }`}
-                  />
-                ))}
-              </span>
-              <span className="truncate text-[11px] text-muted">
-                {allMealsFed
-                  ? 'All meals fed today. See you tomorrow!'
-                  : `${mealsFedToday} of ${mealsPerDay} meal${mealsPerDay > 1 ? 's' : ''} fed today`}
-              </span>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onLogMealFed}
-            aria-pressed={allMealsFed}
-            className={
-              allMealsFed
-                ? 'inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-sage-soft px-3.5 py-2 text-xs font-semibold text-sage transition-all active:scale-[0.98]'
-                : 'inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-accent px-3.5 py-2 text-xs font-semibold text-white shadow-[var(--shadow-sm)] transition-all hover:bg-[var(--accent-hover)] active:scale-[0.98]'
-            }
-          >
-            {allMealsFed ? (
-              <>
-                <Check size={14} />
-                Fed today
-              </>
-            ) : mealsPerDay > 1 ? (
-              `Feed meal ${mealsFedToday + 1}`
-            ) : (
-              'Mark as fed'
-            )}
-          </button>
-        </div>
-      )}
-
       {pane === 'shop' && (
         <div className="flex shrink-0 items-center gap-2 pb-2 print:hidden">
           {shopEntries.length > 0 ? (
@@ -387,6 +333,60 @@ export function HomePlan({
           />
         )}
       </div>
+
+      {pane === 'feed' && (
+        <div className="shrink-0 space-y-4 border-t border-border px-1 pt-5 pb-1 print:hidden sm:space-y-5 sm:pt-6">
+          <div className="flex flex-col items-center gap-2.5 text-center">
+            <div className="flex items-center gap-2">
+              <Flame
+                size={18}
+                className={feedingStreak > 0 ? 'text-accent' : 'text-muted'}
+              />
+              <p className="text-sm font-semibold text-foreground sm:text-base">
+                {feedingStreak > 0
+                  ? `${feedingStreak}-day feeding streak`
+                  : 'Start a feeding streak'}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5">
+                {Array.from({ length: mealsPerDay }, (_, i) => (
+                  <span
+                    key={i}
+                    className={`h-2 w-2 rounded-full ${
+                      i < mealsFedToday ? 'bg-sage' : 'bg-surface-muted ring-1 ring-inset ring-border'
+                    }`}
+                  />
+                ))}
+              </span>
+              <span className="text-xs text-muted sm:text-sm">
+                {allMealsFed
+                  ? 'All meals fed today'
+                  : `${mealsFedToday} of ${mealsPerDay} meal${mealsPerDay > 1 ? 's' : ''} fed today`}
+              </span>
+            </div>
+          </div>
+          <Button
+            onClick={onLogMealFed}
+            variant={allMealsFed ? 'secondary' : 'primary'}
+            aria-pressed={allMealsFed}
+            className={`inline-flex w-full items-center justify-center gap-2 py-3.5 sm:py-4 ${
+              allMealsFed ? 'bg-sage-soft text-sage hover:bg-sage-soft' : ''
+            }`}
+          >
+            {allMealsFed ? (
+              <>
+                <Check size={16} />
+                Fed today
+              </>
+            ) : mealsPerDay > 1 ? (
+              `Feed meal ${mealsFedToday + 1}`
+            ) : (
+              'Mark as fed'
+            )}
+          </Button>
+        </div>
+      )}
 
       <div className="hidden print:block print:space-y-4">
         <ShoppingListPanel
