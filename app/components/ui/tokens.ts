@@ -50,11 +50,11 @@ export const stepperReadoutValue = 'text-sm font-bold tabular-nums text-foregrou
 export const stepperReadoutLabel = 'text-xs font-semibold text-muted';
 
 export const massUnitSelect =
-  'rounded-lg border-0 bg-surface-muted py-1 pl-1.5 pr-1 text-[11px] font-medium text-muted print:hidden';
+  'rounded-lg border-0 bg-surface-muted py-1 pl-1.5 text-[11px] font-medium text-muted print:hidden';
 
 /** Same look as massUnitSelect, sized to match the plan header toolbar controls. */
 export const toolbarUnitSelect =
-  'h-9 rounded-xl border-0 bg-surface-muted px-3 text-xs font-medium text-muted focus:outline-none focus:ring-2 focus:ring-accent/20 sm:px-3.5 sm:text-sm print:hidden';
+  'h-9 rounded-xl border-0 bg-surface-muted pl-3 text-xs font-medium text-muted focus:outline-none focus:ring-2 focus:ring-accent/20 sm:pl-3.5 sm:text-sm print:hidden';
 
 export const toolbarEditBtn =
   'inline-flex h-9 items-center gap-1.5 rounded-xl bg-accent px-3 text-sm font-semibold text-white shadow-[var(--shadow-sm)] transition-all hover:bg-[var(--accent-hover)] active:scale-[0.98]';

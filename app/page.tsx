@@ -603,19 +603,12 @@ export default function Home() {
             : activePlanName || 'Select a plan';
   return (
     <div className="flex h-dvh flex-col bg-background text-foreground print:h-auto print:min-h-0 print:bg-white print:text-black">
-      <header className="flex shrink-0 items-center justify-between gap-3 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6 print:px-2 print:py-2">
+      <header className="mx-auto flex w-full max-w-lg shrink-0 items-center justify-between gap-3 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] sm:max-w-5xl sm:px-6 print:max-w-none print:px-2 print:py-2">
         <div className="min-w-0 flex-1">
           {activeScreen === 'profile' || activeScreen === 'setup' ? (
-            <div className="flex items-center gap-1">
-              {activeScreen === 'profile' && (
-                <Button variant="icon" onClick={closeProfile} aria-label="Back">
-                  <ArrowLeft size={18} />
-                </Button>
-              )}
-              <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl print:text-2xl print:text-black">
-                {activeScreen === 'setup' ? 'Get started' : 'Profile'}
-              </h1>
-            </div>
+            <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl print:text-2xl print:text-black">
+              {activeScreen === 'setup' ? 'Get started' : 'Profile'}
+            </h1>
           ) : (
             <div className="flex items-center gap-1 print:hidden">
               {activeScreen === 'build' && (
@@ -654,11 +647,9 @@ export default function Home() {
           <Button
             variant="icon"
             onClick={() => (activeScreen === 'profile' ? closeProfile() : openProfile())}
-            aria-label={activeScreen === 'profile' ? 'Close profile' : 'Profile'}
-            aria-current={activeScreen === 'profile' ? 'page' : undefined}
-            className={activeScreen === 'profile' ? 'bg-accent-soft text-accent' : undefined}
+            aria-label={activeScreen === 'profile' ? 'Back' : 'Profile'}
           >
-            <User size={18} />
+            {activeScreen === 'profile' ? <ArrowLeft size={18} /> : <User size={18} />}
           </Button>
         </div>
       </header>
@@ -710,7 +701,6 @@ export default function Home() {
               onCheckedItemsChange={setCheckedItems}
               onPortionUnitsChange={setPortionUnits}
               onCopy={copyRecipe}
-              onGoEdit={startEdit}
               onGoBuild={startNewPlan}
               onGoProfile={openProfile}
               onGoSetup={goToSetup}

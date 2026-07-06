@@ -99,24 +99,6 @@ export function MealPortionsPanel({
                   </span>
                 </div>
               </div>
-              <Select
-                variant="mass"
-                value={pu}
-                onChange={(e) =>
-                  onPortionUnitsChange({
-                    ...portionUnits,
-                    [dogName]: e.target.value as MassUnit,
-                  })
-                }
-                aria-label={`Units for ${dogName}`}
-                className="shrink-0"
-              >
-                {MASS_UNITS.map((option) => (
-                  <option key={option} value={option}>
-                    {massUnitLabel(option)}
-                  </option>
-                ))}
-              </Select>
             </div>
           );
         })}

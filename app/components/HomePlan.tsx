@@ -26,7 +26,6 @@ import {
   CookingPot,
   Copy,
   Flame,
-  Pencil,
   Printer,
   SlidersHorizontal,
   Sparkles,
@@ -66,7 +65,6 @@ interface HomePlanProps {
   onCheckedItemsChange: (next: Record<string, boolean>) => void;
   onPortionUnitsChange: (next: Record<string, MassUnit>) => void;
   onCopy: () => void;
-  onGoEdit: () => void;
   onGoBuild: () => void;
   onGoProfile: () => void;
   onGoSetup: () => void;
@@ -98,7 +96,6 @@ export function HomePlan({
   onCheckedItemsChange,
   onPortionUnitsChange,
   onCopy,
-  onGoEdit,
   onGoBuild,
   onGoProfile,
   onGoSetup,
@@ -334,10 +331,6 @@ export function HomePlan({
           )}
 
           <div className="flex shrink-0 items-center gap-0.5">
-            <Button variant="icon" onClick={onGoEdit} aria-label="Edit plan">
-              <Pencil size={16} />
-            </Button>
-
             <Button
               variant="icon"
               onClick={onCopy}

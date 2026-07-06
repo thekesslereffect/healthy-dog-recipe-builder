@@ -6,14 +6,12 @@ import {
   Button,
   CardButton,
   scrollShadowRoom,
-  Segment,
-  SegmentControl,
+  Select,
 } from './ui';
 import { ChevronRight, Plus } from 'lucide-react';
 import { DogCard } from './DogCard';
 import { DogAvatar } from './DogAvatar';
 import { Disclaimer } from './Disclaimer';
-import { Sheet } from './Sheet';
 import { Modal } from './Modal';
 
 interface ProfileScreenProps {
@@ -38,35 +36,32 @@ export function ProfileScreen({
   onUpdateDog,
 }: ProfileScreenProps) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [aboutOpen, setAboutOpen] = useState(false);
   const editingDog = editingIndex !== null ? dogs[editingIndex] : null;
   const editingName =
     editingDog?.name?.trim() || (editingIndex !== null ? `Dog ${editingIndex + 1}` : 'Dog');
   const closeEditor = () => setEditingIndex(null);
-  const totalCalories = dogs.reduce(
-    (sum, d) => sum + (d.weight > 0 ? calculateDailyCalories(d) : 0),
-    0,
-  );
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex shrink-0 items-center gap-2 pb-2">
-        <SegmentControl>
-          {(['lb', 'kg'] as const).map((u) => (
-            <Segment key={u} active={unit === u} onClick={() => onUnitChange(u)}>
-              {weightUnitLabel(u)}
-            </Segment>
-          ))}
-        </SegmentControl>
-        {dogs.length > 0 && totalCalories > 0 && (
-          <span className="inline-flex h-9 items-center rounded-xl bg-sage-soft px-2.5 text-xs font-semibold tabular-nums text-sage">
-            {Math.round(totalCalories)} cal/day
-          </span>
-        )}
-        <Button variant="toolbar" onClick={onAddDog} className="ml-auto">
-          <Plus size={14} />
-          <span className="hidden sm:inline">Add dog</span>
-          <span className="sm:hidden">Add</span>
-        </Button>
+      <div className="flex shrink-0 items-center pb-2">
+        <div className="ml-auto flex items-center gap-1.5">
+          <Select
+            variant="toolbar"
+            value={unit}
+            onChange={(e) => onUnitChange(e.target.value as WeightUnit)}
+            aria-label="Weight unit"
+          >
+            {(['lb', 'kg'] as const).map((u) => (
+              <option key={u} value={u}>
+                {weightUnitLabel(u)}
+              </option>
+            ))}
+          </Select>
+          <Button variant="toolbar" onClick={onAddDog}>
+            <Plus size={14} />
+            <span className="hidden sm:inline">Add dog</span>
+            <span className="sm:hidden">Add</span>
+          </Button>
+        </div>
       </div>
 
       <div className={`${scrollShadowRoom} min-h-0 flex-1`}>
@@ -94,15 +89,18 @@ export function ProfileScreen({
             );
           })}
         </div>
-
-        <CardButton
-          onClick={() => setAboutOpen(true)}
-          className="mt-3 flex w-full items-center justify-between px-4 py-3.5 text-left text-sm text-muted"
-        >
-          <span>About this tool</span>
-          <ChevronRight size={16} />
-        </CardButton>
       </div>
+
+      <footer className="shrink-0 border-t border-border px-1 pt-4 pb-1">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted">
+          About this tool
+        </p>
+        <Disclaimer />
+        <p className="mt-3 text-xs leading-relaxed text-muted">
+          Calories: RER = 70 × kg<sup>0.75</sup> × activity factor. Calcium: 1.25 mg/kcal (AAFCO
+          2016). Food values from USDA FoodData Central.
+        </p>
+      </footer>
 
       <Modal
         open={editingDog !== null && editingIndex !== null}
@@ -139,18 +137,6 @@ export function ProfileScreen({
           />
         )}
       </Modal>
-
-      <Sheet open={aboutOpen} title="About this tool" onClose={() => setAboutOpen(false)} size="md">
-        <Disclaimer />
-        <p className="mt-4 text-xs leading-relaxed text-muted">
-          Calories: RER = 70 × kg<sup>0.75</sup> × activity factor. Calcium: 1.25 mg/kcal (AAFCO
-          2016). Food values from USDA FoodData Central.
-        </p>
-        <p className="mt-2 text-sm text-muted">Created by — Your Husband</p>
-        <Button onClick={() => setAboutOpen(false)} className="mt-4 w-full">
-          Close
-        </Button>
-      </Sheet>
     </div>
   );
 }
