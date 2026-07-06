@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { formatSavedAt, type SavedRecipe } from '../utils/savedRecipes';
-import { Button, ButtonRow } from './ui';
-import { Check, ChevronDown, Plus, Trash2 } from 'lucide-react';
+import { Button, ButtonRow, Input } from './ui';
+import { Check, ChevronDown, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Sheet } from './Sheet';
 
 interface PlanPickerProps {
@@ -15,6 +15,7 @@ interface PlanPickerProps {
   onSelectPlan: (id: string) => void;
   onNewPlan: () => void;
   onDeletePlan: (id: string) => void;
+  onRenamePlan: (id: string, name: string) => void;
 }
 
 export function PlanPicker({
@@ -25,6 +26,7 @@ export function PlanPicker({
   onSelectPlan,
   onNewPlan,
   onDeletePlan,
+  onRenamePlan,
 }: PlanPickerProps) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -32,6 +34,8 @@ export function PlanPicker({
     null,
   );
   const [pendingDelete, setPendingDelete] = useState<SavedRecipe | null>(null);
+  const [pendingRename, setPendingRename] = useState<SavedRecipe | null>(null);
+  const [renameValue, setRenameValue] = useState('');
   const triggerRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     setMounted(true);
@@ -76,6 +80,17 @@ export function PlanPicker({
     if (!pendingDelete) return;
     onDeletePlan(pendingDelete.id);
     setPendingDelete(null);
+  };
+  const startRename = (item: SavedRecipe) => {
+    setPendingRename(item);
+    setRenameValue(item.name);
+  };
+  const confirmRename = () => {
+    if (!pendingRename) return;
+    if (renameValue.trim()) {
+      onRenamePlan(pendingRename.id, renameValue);
+    }
+    setPendingRename(null);
   };
   const menu =
     open && menuStyle && mounted
@@ -130,6 +145,14 @@ export function PlanPicker({
                       </button>
                       <button
                         type="button"
+                        onClick={() => startRename(item)}
+                        aria-label={`Rename ${item.name}`}
+                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-muted hover:text-foreground"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => setPendingDelete(item)}
                         aria-label={`Delete ${item.name}`}
                         className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30"
@@ -179,6 +202,33 @@ export function PlanPicker({
       </button>
 
       {menu}
+
+      <Sheet
+        open={!!pendingRename}
+        title="Rename plan"
+        onClose={() => setPendingRename(null)}
+        size="md"
+      >
+        <Input
+          type="text"
+          value={renameValue}
+          onChange={(e) => setRenameValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') confirmRename();
+          }}
+          placeholder="Plan name…"
+          aria-label="Plan name"
+          autoFocus
+        />
+        <ButtonRow className="mt-5">
+          <Button variant="secondary" onClick={() => setPendingRename(null)} className="flex-1">
+            Cancel
+          </Button>
+          <Button onClick={confirmRename} disabled={!renameValue.trim()} className="flex-1">
+            Save
+          </Button>
+        </ButtonRow>
+      </Sheet>
 
       <Sheet
         open={!!pendingDelete}

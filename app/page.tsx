@@ -26,6 +26,7 @@ import { removeNutritionBoost, hasNutritionBoostInCategory } from './utils/nutri
 import { type MassUnit, type WeightUnit } from './utils/format';
 import type { ShoppingMassUnitMode } from './utils/shoppingMassUnit';
 import { createId, resolveSupplementOptions, type SavedRecipe } from './utils/savedRecipes';
+import { computeStreak, localDateKey, mealsLogged, type FeedingLog } from './utils/feedingLog';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { HomePlan } from './components/HomePlan';
 import { BuildScreen } from './components/BuildScreen';
@@ -56,7 +57,10 @@ export default function Home() {
   );
   const [recipe, setRecipe] = useLocalStorage<Recipe | null>('hdrb.recipe', null);
   const [planName, setPlanName] = useLocalStorage<string>('hdrb.planName', '');
-  const [draftRecipe, setDraftRecipe] = useLocalStorage<Recipe | null>('hdrb.draft', null);
+  const [draftRecipe, setDraftRecipe, draftLoaded] = useLocalStorage<Recipe | null>(
+    'hdrb.draft',
+    null,
+  );
   const [saved, setSaved] = useLocalStorage<SavedRecipe[]>('hdrb.saved', []);
   const [shoppingUnits, setShoppingUnits] = useLocalStorage<Record<string, MassUnit>>(
     'hdrb.shoppingUnits',
@@ -75,13 +79,22 @@ export default function Home() {
     {},
   );
   const [theme, setTheme] = useLocalStorage<Theme>('hdrb.theme', 'light');
-  const [activeScreen, setActiveScreen] = useState<ScreenId>('plan');
+  // Persist the session's position so a refresh drops users right back where
+  // they were instead of on the Plan screen.
+  const [activeScreen, setActiveScreen, screenLoaded] = useLocalStorage<ScreenId>(
+    'hdrb.screen',
+    'plan',
+  );
   const [returnScreen, setReturnScreen] = useState<ScreenId>('plan');
   const [copied, setCopied] = useState(false);
-  const [draftName, setDraftName] = useState('');
+  const [draftName, setDraftName] = useLocalStorage<string>('hdrb.draftName', '');
   /** Working copy while on the Edit screen (never used by Build). */
-  const [editRecipe, setEditRecipe] = useState<Recipe | null>(null);
-  const [editPlanName, setEditPlanName] = useState('');
+  const [editRecipe, setEditRecipe, editLoaded] = useLocalStorage<Recipe | null>(
+    'hdrb.editRecipe',
+    null,
+  );
+  const [editPlanName, setEditPlanName] = useLocalStorage<string>('hdrb.editPlanName', '');
+  const [fedDays, setFedDays] = useLocalStorage<FeedingLog>('hdrb.fedDays', {});
   const [currentSavedId, setCurrentSavedId] = useLocalStorage<string | null>(
     'hdrb.currentSavedId',
     null,
@@ -138,7 +151,15 @@ export default function Home() {
     if (needsSetup && activeScreen !== 'setup' && activeScreen !== 'profile') {
       setActiveScreen('setup');
     }
-  }, [dogsLoaded, needsSetup, activeScreen]);
+  }, [dogsLoaded, needsSetup, activeScreen, setActiveScreen]);
+
+  // A restored Edit session needs its working copy; otherwise fall back home.
+  useEffect(() => {
+    if (!screenLoaded || !editLoaded) return;
+    if (activeScreen === 'edit' && !editRecipe) {
+      setActiveScreen('plan');
+    }
+  }, [screenLoaded, editLoaded, activeScreen, editRecipe, setActiveScreen]);
   const dogsWithMER = dogs.map((dog) => ({ ...dog, MER: calculateDailyCalories(dog) }));
   const allergyList = Array.from(new Set(dogs.flatMap((d) => d.allergies ?? [])));
   const computeRecipe = (
@@ -161,6 +182,15 @@ export default function Home() {
     if (!canGenerate) return;
     setDraftRecipe(computeRecipe(dogs, locked, ratios, counts, supplementOptions));
   };
+
+  // Landing on Build should show a ready-made draft, not an empty configurator.
+  useEffect(() => {
+    if (!dogsLoaded || !screenLoaded || !draftLoaded) return;
+    if (activeScreen === 'build' && !draftRecipe && canGenerate) {
+      setDraftRecipe(computeRecipe(dogs, locked, ratios, counts, supplementOptions));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dogsLoaded, screenLoaded, draftLoaded, activeScreen, draftRecipe, canGenerate]);
   const balanceDraft = () => {
     if (!draftRecipe) return;
     const result = balanceRecipeMix(draftRecipe, dogs, supplementOptions, allergyList);
@@ -472,6 +502,19 @@ export default function Home() {
       // no-op
     }
   };
+  const mealsFedToday = Math.min(mealsLogged(fedDays, localDateKey()), mealsPerDay);
+  const feedingStreak = computeStreak(fedDays);
+  /** Log the next meal of the day; cycles back to zero once all meals are fed. */
+  const logMealFed = () => {
+    const key = localDateKey();
+    setFedDays((prev) => {
+      const fed = Math.min(mealsLogged(prev, key), mealsPerDay);
+      const next = { ...prev };
+      if (fed >= mealsPerDay) delete next[key];
+      else next[key] = fed + 1;
+      return next;
+    });
+  };
   const currentSaved = currentSavedId ? saved.find((s) => s.id === currentSavedId) : undefined;
   const loadSavedRecipe = (id: string) => {
     const entry = saved.find((s) => s.id === id);
@@ -518,6 +561,15 @@ export default function Home() {
     }
     setActiveScreen(returnScreen === 'profile' ? 'plan' : returnScreen);
   };
+  const renameSavedRecipe = (id: string, name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setSaved((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, name: trimmed } : s)),
+    );
+    if (id === currentSavedId) setPlanName(trimmed);
+  };
+  const closeBuild = () => setActiveScreen('plan');
   const deleteSavedRecipe = (id: string) => {
     const next = saved.filter((s) => s.id !== id);
     setSaved(next);
@@ -560,7 +612,17 @@ export default function Home() {
               </h1>
             </div>
           ) : (
-            <div className="print:hidden">
+            <div className="flex items-center gap-1 print:hidden">
+              {activeScreen === 'build' && (
+                <Button variant="icon" onClick={closeBuild} aria-label="Back to plan">
+                  <ArrowLeft size={18} />
+                </Button>
+              )}
+              {activeScreen === 'edit' && (
+                <Button variant="icon" onClick={cancelEdit} aria-label="Cancel edit">
+                  <ArrowLeft size={18} />
+                </Button>
+              )}
               <PlanPicker
                 saved={saved}
                 currentSavedId={currentSavedId}
@@ -568,6 +630,7 @@ export default function Home() {
                 onSelectPlan={loadSavedRecipe}
                 onNewPlan={startNewPlan}
                 onDeletePlan={deleteSavedRecipe}
+                onRenamePlan={renameSavedRecipe}
               />
             </div>
           )}
@@ -629,6 +692,9 @@ export default function Home() {
               checkedItems={checkedItems}
               portionUnits={portionUnits}
               copied={copied}
+              mealsFedToday={mealsFedToday}
+              feedingStreak={feedingStreak}
+              onLogMealFed={logMealFed}
               canGenerate={canGenerate}
               needsSetup={needsSetup}
               hasInvalidDog={hasInvalidDog}
