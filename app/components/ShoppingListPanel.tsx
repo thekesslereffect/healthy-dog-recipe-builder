@@ -11,6 +11,7 @@ import {
 import { resolveShoppingMassUnit, type ShoppingMassUnitMode } from '../utils/shoppingMassUnit';
 
 import { scrollShadowRoom, Select, Stepper } from './ui';
+import { FoodTypeCheckbox } from './FoodTypeCheckbox';
 
 interface ShoppingListPanelProps {
   shoppingList: ShoppingList;
@@ -114,13 +115,7 @@ export function ShoppingListPanel({
                 index > 0 ? 'border-t border-border/50 print:border-0' : ''
               }`}
             >
-              <input
-                type="checkbox"
-                checked={checked}
-                onChange={() => toggleChecked(name)}
-                aria-label={`Got ${name}`}
-                className="h-4.5 w-4.5 shrink-0 rounded-md border-border accent-accent print:hidden"
-              />
+              <FoodTypeCheckbox name={name} checked={checked} onToggle={() => toggleChecked(name)} />
 
               <button
                 type="button"
