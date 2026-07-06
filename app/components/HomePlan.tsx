@@ -257,14 +257,11 @@ export function HomePlan({
       </div>
 
       {pane === 'feed' && (
-        <div className="mb-2 flex shrink-0 items-center gap-2 rounded-2xl border border-border bg-surface px-3 py-2 shadow-[var(--shadow-sm)] print:hidden">
-          <span
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
-              feedingStreak > 0 ? 'bg-accent-soft text-accent' : 'bg-surface-muted text-muted'
-            }`}
-          >
-            <Flame size={16} />
-          </span>
+        <div className="flex shrink-0 items-center gap-2.5 px-1 py-2 print:hidden">
+          <Flame
+            size={18}
+            className={`shrink-0 ${feedingStreak > 0 ? 'text-accent' : 'text-muted'}`}
+          />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-foreground">
               {feedingStreak > 0

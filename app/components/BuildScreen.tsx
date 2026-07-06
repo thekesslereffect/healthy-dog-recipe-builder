@@ -87,7 +87,7 @@ export function BuildScreen({
       </div>
 
       {!draftRecipe ? (
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface/60 px-4 py-5 text-center sm:px-6">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-4 py-5 text-center sm:px-6">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-soft text-accent sm:h-14 sm:w-14">
             <Sparkles size={24} className="sm:hidden" />
             <Sparkles size={26} className="hidden sm:block" />
@@ -145,7 +145,7 @@ export function BuildScreen({
             />
           </div>
 
-          <div className="shrink-0 space-y-2 rounded-2xl border border-border bg-surface p-3 shadow-[var(--shadow-md)] sm:space-y-2.5 sm:p-4">
+          <div className="shrink-0 space-y-2 px-0.5 pt-1 sm:space-y-2.5">
             <Input
               type="text"
               value={draftName}

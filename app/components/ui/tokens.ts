@@ -1,10 +1,10 @@
 // Design tokens — warm, premium pet wellness aesthetic
 
-export const card =
-  'rounded-2xl border border-border bg-surface p-4 shadow-[var(--shadow-sm)] sm:p-5 dark:shadow-none print:border-0 print:p-0 print:rounded-none print:shadow-none';
+// Flat "cards": no chrome, just rounded hover/tap targets on the page background.
+export const card = 'rounded-2xl p-4 sm:p-5 print:p-0 print:rounded-none';
 
 export const cardElevated =
-  'rounded-2xl border border-border bg-surface p-4 shadow-[var(--shadow-md)] transition-shadow hover:shadow-[var(--shadow-lg)] sm:p-5 dark:shadow-none print:border-0 print:p-0 print:rounded-none print:shadow-none';
+  'rounded-2xl p-4 transition-colors hover:bg-surface-muted sm:p-5 print:p-0 print:rounded-none';
 
 export const sectionTitle = 'text-base font-semibold tracking-tight text-foreground';
 

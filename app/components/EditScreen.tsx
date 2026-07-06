@@ -54,7 +54,7 @@ export function EditScreen({
         />
       </div>
 
-      <div className="shrink-0 space-y-2.5 rounded-2xl border border-border bg-surface p-4 shadow-[var(--shadow-md)]">
+      <div className="shrink-0 space-y-2.5 px-0.5 pt-1">
         <Input
           type="text"
           value={planName}

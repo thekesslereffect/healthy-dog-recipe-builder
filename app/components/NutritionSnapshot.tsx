@@ -174,7 +174,7 @@ export function NutritionSnapshot({
   );
   if (collapsible && !expanded) {
     return (
-      <div className={`${shellClass} ${embedded ? 'border-t border-border px-4 py-2.5' : ''}`}>
+      <div className={`${shellClass} ${embedded ? 'border-t border-border px-1 py-2.5' : ''}`}>
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -211,7 +211,7 @@ export function NutritionSnapshot({
   }
   if (collapsible && expanded) {
     return (
-      <div className={`${shellClass} ${embedded ? 'border-t border-border px-4 py-2.5' : ''}`}>
+      <div className={`${shellClass} ${embedded ? 'border-t border-border px-1 py-2.5' : ''}`}>
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"

@@ -263,8 +263,8 @@ export function DailyRecipePanel({
   if (compact) {
     return (
       <>
-        <div className="flex h-full min-h-0 flex-col rounded-2xl border border-border bg-surface shadow-[var(--shadow-sm)]">
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-2 sm:px-4">
+        <div className="flex h-full min-h-0 flex-col">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 py-2 sm:px-1.5">
             {body}
           </div>
           {dogsWithMER && (
@@ -284,9 +284,7 @@ export function DailyRecipePanel({
   }
   return (
     <>
-      <div className="rounded-2xl border border-border bg-surface p-4 shadow-[var(--shadow-sm)]">
-        {body}
-      </div>
+      <div className="px-1 py-2">{body}</div>
       {picker}
     </>
   );

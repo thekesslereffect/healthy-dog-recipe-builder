@@ -103,18 +103,16 @@ export function ShoppingListPanel({
         </div>
       )}
 
-      <div
-        className={`${scrollShadowRoom} min-h-0 flex-1 rounded-2xl border border-border bg-surface shadow-[var(--shadow-sm)] print:overflow-visible print:border-0 print:shadow-none`}
-      >
+      <div className={`${scrollShadowRoom} min-h-0 flex-1 print:overflow-visible`}>
         {entries.map(([name, amounts], index) => {
           const u = unitFor(name);
           const checked = !!checkedItems[name];
           return (
             <div
               key={name}
-              className={`flex items-center gap-3 px-4 py-3 transition-colors print:px-1 print:py-0.5 ${
-                checked ? 'bg-sage-soft/50' : index % 2 === 1 ? 'bg-surface-muted/50' : ''
-              } ${index > 0 ? 'border-t border-border/50 print:border-0' : ''}`}
+              className={`flex items-center gap-3 px-1 py-3 transition-colors print:px-1 print:py-0.5 ${
+                index > 0 ? 'border-t border-border/50 print:border-0' : ''
+              }`}
             >
               <input
                 type="checkbox"

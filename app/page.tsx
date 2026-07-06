@@ -516,9 +516,8 @@ export default function Home() {
     });
   };
   const currentSaved = currentSavedId ? saved.find((s) => s.id === currentSavedId) : undefined;
-  const loadSavedRecipe = (id: string) => {
-    const entry = saved.find((s) => s.id === id);
-    if (!entry) return;
+  /** Load a saved plan into the working state (no navigation). */
+  const applySavedRecipe = (entry: SavedRecipe) => {
     setDogs(entry.dogs.map((d) => (d.id ? d : { ...d, id: createId() })));
     setRatios(entry.ratios);
     setCounts(entry.counts);
@@ -531,10 +530,24 @@ export default function Home() {
     setCheckedItems({});
     setDraftRecipe(null);
     setDraftName('');
+    setCurrentSavedId(entry.id);
+  };
+  const loadSavedRecipe = (id: string) => {
+    const entry = saved.find((s) => s.id === id);
+    if (!entry) return;
+    applySavedRecipe(entry);
     setEditRecipe(null);
     setEditPlanName('');
-    setCurrentSavedId(entry.id);
     setActiveScreen('plan');
+  };
+  /** Load a saved plan and jump straight into editing it (rename lives there). */
+  const editSavedRecipe = (id: string) => {
+    const entry = saved.find((s) => s.id === id);
+    if (!entry) return;
+    applySavedRecipe(entry);
+    setEditRecipe(entry.recipe);
+    setEditPlanName(entry.name);
+    setActiveScreen('edit');
   };
   const startNewPlan = () => {
     if (needsSetup) {
@@ -560,14 +573,6 @@ export default function Home() {
       return;
     }
     setActiveScreen(returnScreen === 'profile' ? 'plan' : returnScreen);
-  };
-  const renameSavedRecipe = (id: string, name: string) => {
-    const trimmed = name.trim();
-    if (!trimmed) return;
-    setSaved((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, name: trimmed } : s)),
-    );
-    if (id === currentSavedId) setPlanName(trimmed);
   };
   const closeBuild = () => setActiveScreen('plan');
   const deleteSavedRecipe = (id: string) => {
@@ -630,7 +635,7 @@ export default function Home() {
                 onSelectPlan={loadSavedRecipe}
                 onNewPlan={startNewPlan}
                 onDeletePlan={deleteSavedRecipe}
-                onRenamePlan={renameSavedRecipe}
+                onEditPlan={editSavedRecipe}
               />
             </div>
           )}
